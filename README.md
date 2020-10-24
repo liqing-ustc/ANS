@@ -1,2 +1,2 @@
-# CLL-NeSy
-Closed-Loop Neural Symbolic Learning
+# Closed-Loop Neural Symbolic Learning
+
