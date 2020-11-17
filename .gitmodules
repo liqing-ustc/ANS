@@ -1,4 +1,1 @@
-[submodule "semantics/dreamcoder"]
-	path = semantics/dreamcoder
-	url = git@github.com:liqing-ustc/dreamcoder.git
-	branch = master
+
