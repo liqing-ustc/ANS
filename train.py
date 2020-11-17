@@ -14,6 +14,7 @@ np.random.seed(157)
 val_set = HINT('val')
 test_set = HINT('test')
 train_set = HINT('train')
+# train_set.filter_by_len(min_len=2)
 # train_set = val_set
 print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
@@ -62,7 +63,7 @@ def evaluate(model, dataloader):
     
     return perception_acc, syntax_acc, result_acc
 
-def train(model, num_epochs=100, n_epochs_per_eval = 1):
+def train(model, num_epochs=50, n_epochs_per_eval = 1):
     best_acc = 0.0
     reward_moving_average = None
     reward_decay = 0.99

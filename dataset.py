@@ -46,8 +46,10 @@ class HINT(Dataset):
     def __len__(self):
         return len(self.dataset)
 
-    def filter_by_len(self, max_len):
-        self.dataset = [x for x in self.dataset if x['len'] <= max_len]
+    def filter_by_len(self, min_len=None, max_len=None):
+        if min_len is None: min_len = -1
+        if max_len is None: max_len = 1e7
+        self.dataset = [x for x in self.dataset if x['len'] <= max_len and x['len'] >= min_len]
 
 
 def HINT_collate(batch):
