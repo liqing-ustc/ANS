@@ -3,6 +3,7 @@ import numpy as np
 from copy import deepcopy
 import sys
 from func_timeout import func_timeout, FunctionTimedOut
+from utils import SYMBOLS
 
 class Node:
     def __init__(self, symbol, sym2prog):
@@ -15,7 +16,7 @@ class Node:
         if self._res != None:
             return self._res
 
-        prog = self.sym2prog[self.symbol]
+        prog = self.sym2prog[self.symbol][0]
         self._res = int(prog(*[x.res() for x in self.children]))
         if self._res > sys.maxsize:
             self._res = None
@@ -44,7 +45,7 @@ class AST: # Abstract Syntax Tree
             # TODO: set a timeout for the execution
             # self._res = func_timeout(timeout=0.01, func=root_node.res)
             self._res = root_node.res()
-        except (TypeError, ZeroDivisionError, ValueError, FunctionTimedOut) as e:
+        except (TypeError, ZeroDivisionError, ValueError, RecursionError, FunctionTimedOut) as e:
             # if isinstance(e, FunctionTimedOut):
             #     print(e)
             pass
@@ -52,7 +53,7 @@ class AST: # Abstract Syntax Tree
     def res(self): return self._res
 
     def abduce(self, y):
-        if self.res() is not None and self.res() == y:
+        if self._res is not None and self._res == y:
             et = AST(self.sentence, self.dependencies, self.sym2prog)
             return et
         
@@ -100,6 +101,21 @@ class AST: # Abstract Syntax Tree
             if et.res() is not None and et.res() == y:
                 return et
 
+        # abduce over semantics
+        for s in list(set(self.sentence)): # a better rank?
+            # We cannot use 'deepcopy' here since it is very slow
+            # sym2prog = deepcopy(self.sym2prog)
+            sym2prog = []
+            for programs in self.sym2prog:
+                programs = [x for x in programs]
+                sym2prog.append(programs)
+            
+            while len(sym2prog[s]) > 1:
+                sym2prog[s].pop(0)
+                et = AST(self.sentence, self.dependencies, sym2prog)
+                if et.res() is not None and et.res() == y:
+                    return et
+
         return None
 
     
@@ -115,12 +131,12 @@ class Jointer:
     def train(self):
         self.perception.train()
         self.syntax.train()
-        self.semantics.train()
+        # self.semantics.train()
     
     def eval(self):
         self.perception.eval()
         self.syntax.eval()
-        self.semantics.eval()
+        # self.semantics.eval()
 
     def to(self, device):
         self.perception.to(device)
@@ -145,6 +161,7 @@ class Jointer:
         return sentences, dependencies, results
     
     def abduce(self, gt_values, batch_img_paths):
+        # abduce over perception (sentence) and syntax (parse)
         for et, y, img_paths in zip(self.ASTs, gt_values, batch_img_paths):
             new_et = et.abduce(y)
             if new_et: 
@@ -158,6 +175,18 @@ class Jointer:
         assert len(self.buffer) > 0
         self.train()
         print("Hit samples: ", len(self.buffer), ' Ave length: ', np.mean([len(x.sentence) for x in self.buffer]))
+        
+        # learn semantics
+        dataset = [[] for _ in range(len(SYMBOLS) - 1)]
+        for ast in self.buffer:
+            queue = [ast.root_node]
+            while len(queue) > 0:
+                node = queue.pop()
+                queue.extend(node.children)
+                xs = tuple([x.res() for x in node.children])
+                y = node.res()
+                dataset[node.symbol].append((xs, y))
+        self.semantics.learn(dataset)
 
         # learn perception
         dataset = [(x.img_paths, x.sentence) for x in self.buffer]
@@ -167,8 +196,6 @@ class Jointer:
         dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
         self.syntax.learn(dataset)
 
-        # learn semantics
-        pass
 
         self.clear_buffer()
 

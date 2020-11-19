@@ -39,8 +39,17 @@ class Perception(object):
 
         return preds, probs
 
+    def check_accuarcy(self, dataset):
+        from utils import ID2SYM
+        import numpy as np
+        symbols = [x[0].split('/')[0] for x in dataset]
+        labels = [ID2SYM[x[1]] for x in dataset]
+        acc = np.mean(np.array(symbols) == np.array(labels))
+        print(acc)
+
     def learn(self, dataset, n_epochs=1):
         dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
+        # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=512,
                          shuffle=True, num_workers=4)
