@@ -14,8 +14,8 @@ np.random.seed(157)
 val_set = HINT('val')
 test_set = HINT('test')
 train_set = HINT('train')
-# train_set.filter_by_len(min_len=2)
-# train_set = val_set
+# train_set = HINT('val')
+# train_set.filter_by_len(max_len=1)
 print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
 

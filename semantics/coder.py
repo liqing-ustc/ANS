@@ -126,7 +126,7 @@ class DreamCoder(object):
         self.grammar = result.grammars[-1]
 
         n_prog_sampling = 5
-        n_prog_enum = 5
+        n_prog_enum = 10
         sym2prog = self._sample_programs(self.grammar, n_prog_sampling)
         for frontier in result.taskSolutions.values():
             task_idx = int(frontier.task.name)

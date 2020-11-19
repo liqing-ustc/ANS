@@ -10,10 +10,10 @@ class Node:
         self.symbol = symbol
         self.sym2prog = sym2prog
         self.children = []
-        self._res= None
+        self._res = None
 
     def res(self):
-        if self._res != None:
+        if self._res is not None:
             return self._res
 
         prog = self.sym2prog[self.symbol][0]
@@ -21,6 +21,12 @@ class Node:
         if self._res > sys.maxsize:
             self._res = None
         return self._res
+
+    def children_res_valid(self):
+        for ch in self.children:
+            if ch._res is None: 
+                return False
+        return True
 
 class AST: # Abstract Syntax Tree
     def __init__(self, sentence, dependencies, sym2prog, transitions=None, sent_probs=None, transition_probs=None):
@@ -115,6 +121,11 @@ class AST: # Abstract Syntax Tree
                 et = AST(self.sentence, self.dependencies, sym2prog)
                 if et.res() is not None and et.res() == y:
                     return et
+        
+        if self._res is not None or self.root_node.children_res_valid():
+            self._res = y
+            self.root_node._res = y
+            return self
 
         return None
 
@@ -162,7 +173,7 @@ class Jointer:
     
     def abduce(self, gt_values, batch_img_paths):
         # abduce over perception (sentence) and syntax (parse)
-        for et, y, img_paths in zip(self.ASTs, gt_values, batch_img_paths):
+        for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
             new_et = et.abduce(y)
             if new_et: 
                 new_et.img_paths = img_paths
@@ -184,7 +195,7 @@ class Jointer:
                 node = queue.pop()
                 queue.extend(node.children)
                 xs = tuple([x.res() for x in node.children])
-                y = node.res()
+                y = int(node.res())
                 dataset[node.symbol].append((xs, y))
         self.semantics.learn(dataset)
 
