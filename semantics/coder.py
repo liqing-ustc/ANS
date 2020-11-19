@@ -132,4 +132,5 @@ class DreamCoder(object):
             task_idx = int(frontier.task.name)
             progs = [ProgramWrapper(x.program) for x in frontier.entries[:n_prog_enum]]
             sym2prog[task_idx] = progs + sym2prog[task_idx]
+        self.sym2prog = sym2prog
 
