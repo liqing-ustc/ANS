@@ -106,6 +106,14 @@ def train(model, num_epochs=500, n_epochs_per_eval = 1):
     eval_dataloader = torch.utils.data.DataLoader(val_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
+    max_len = float("inf")
+    curriculum_strategy = dict([
+        (0, 1),
+        (20, 3),
+        (50, 5),
+        (100, 1e9)
+    ])
+
     
     ###########evaluate init model###########
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
@@ -113,9 +121,15 @@ def train(model, num_epochs=500, n_epochs_per_eval = 1):
     #########################################
 
     for epoch in range(num_epochs):
+        if epoch in curriculum_strategy:
+            max_len = curriculum_strategy[epoch]
+            train_set.filter_by_len(max_len=max_len)
+            train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
+                                shuffle=True, num_workers=4, collate_fn=HINT_collate)
+
         since = time.time()
         print('-' * 30)
-        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('Epoch {}/{} (max_len={}, data={})'.format(epoch, num_epochs - 1, max_len, len(train_set)))
 
         # Explore
         with torch.no_grad():

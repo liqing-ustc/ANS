@@ -32,12 +32,13 @@ def make_tasks():
         tasks.append(Task("symbol-%d"%i, ))
 
 class ProgramWrapper(object):
-    def __init__(self, prog):
+    def __init__(self, prog, logPosterior=0.):
         try:
             self.fn = prog.uncurry().evaluate([])
         except RecursionError as e:
             self.fn = None
         self.prog = str(prog)
+        self.logPosterior = logPosterior
     
     def __call__(self, *inputs):
         fn = self.fn
@@ -53,7 +54,7 @@ class ProgramWrapper(object):
 class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
-            enumerationTimeout=50, activation='tanh', iterations=10, recognitionTimeout=3600,
+            enumerationTimeout=20, activation='tanh', iterations=10, recognitionTimeout=3600,
             a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=numberOfCPUs(),
@@ -86,7 +87,7 @@ class DreamCoder(object):
         args['iterations'] = 1
         
         self.grammar = baseGrammar
-        self.sym2prog = self._sample_programs(baseGrammar)
+        self.sym2prog = self._sample_programs(baseGrammar, n_prog_per_task=0)
         self.train_args = args
 
     def __call__(self):
@@ -101,7 +102,7 @@ class DreamCoder(object):
                 arity = random.randint(0,2)
                 task_type = arrow(*([tint]*(arity + 1)))
                 prog = grammar.sample(task_type, maximumDepth=3)
-                prog = ProgramWrapper(prog)
+                prog = ProgramWrapper(prog, -10.0)
                 if prog not in programs:
                     programs.append(prog)
             sym2prog.append(programs)
@@ -125,12 +126,33 @@ class DreamCoder(object):
         result = explorationCompression(self.grammar, tasks, **self.train_args)
         self.grammar = result.grammars[-1]
 
-        n_prog_sampling = 5
+        n_prog_sampling = 0
         n_prog_enum = 10
         sym2prog = self._sample_programs(self.grammar, n_prog_sampling)
         for frontier in result.taskSolutions.values():
             task_idx = int(frontier.task.name)
-            progs = [ProgramWrapper(x.program) for x in frontier.entries[:n_prog_enum]]
-            sym2prog[task_idx] = progs + sym2prog[task_idx]
+            progs = [ProgramWrapper(x.program, x.logPosterior) for x in frontier.entries[:n_prog_enum]]
+            progs = progs + sym2prog[task_idx]
+            sym2prog[task_idx] = progs
+        print(sym2prog)
+        sym2prog = self._removeEquivalentPrograms(sym2prog)
+        print(sym2prog)
+        input()
         self.sym2prog = sym2prog
 
+    def _removeEquivalentPrograms(self, sym2prog, dataset=None):
+        programs = [(p, i) for i, sym_progs in enumerate(sym2prog) for p in sym_progs]
+        programs = sorted(programs, key=lambda x: (-x[0].logPosterior, x[1]))
+        programs_keep = []
+        symbols_keep = []
+        for prog, sym in programs:
+            if prog not in programs_keep:
+                programs_keep.append(prog)
+                symbols_keep.append(sym)
+            if dataset is not None:
+                pass # TODO: implement the equivalence remove on a dataset
+        sym2prog = [[] for _ in range(len(sym2prog))]
+        for prog, sym in zip(programs_keep, symbols_keep):
+            sym2prog[sym].append(prog)
+
+        return sym2prog
