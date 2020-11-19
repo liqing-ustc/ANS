@@ -60,7 +60,39 @@ def evaluate(model, dataloader):
     dep_all = [y for x in dep_all for y in x]
     dep_pred_all = [y for x in dep_pred_all for y in x]
     syntax_acc = np.mean([x == y for x,y in zip(dep_pred_all, dep_all)])
+
+    print("result accuracy by length:")
+    for k in sorted(dataloader.dataset.len2ids.keys()):
+        ids = dataloader.dataset.len2ids[k]
+        res = res_all[ids]
+        res_pred = res_pred_all[ids]
+        res_acc = (res == res_pred).mean()
+        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
     
+    print("result accuracy by symbol:")
+    for k in sorted(dataloader.dataset.sym2ids.keys()):
+        ids = dataloader.dataset.sym2ids[k]
+        res = res_all[ids]
+        res_pred = res_pred_all[ids]
+        res_acc = (res == res_pred).mean()
+        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+
+    print("result accuracy by digit:")
+    for k in sorted(dataloader.dataset.digit2ids.keys()):
+        ids = dataloader.dataset.digit2ids[k]
+        res = res_all[ids]
+        res_pred = res_pred_all[ids]
+        res_acc = (res == res_pred).mean()
+        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+
+    print("result accuracy by res:")
+    for k in sorted(dataloader.dataset.res2ids.keys())[:10]:
+        ids = dataloader.dataset.res2ids[k]
+        res = res_all[ids]
+        res_pred = res_pred_all[ids]
+        res_acc = (res == res_pred).mean()
+        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+
     return perception_acc, syntax_acc, result_acc
 
 def train(model, num_epochs=50, n_epochs_per_eval = 1):
@@ -77,7 +109,7 @@ def train(model, num_epochs=50, n_epochs_per_eval = 1):
     
     ###########evaluate init model###########
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={2:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
     for epoch in range(num_epochs):
@@ -101,7 +133,7 @@ def train(model, num_epochs=50, n_epochs_per_eval = 1):
             
         if (epoch+1) % n_epochs_per_eval == 0:
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-            print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={2:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+            print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
             if result_acc > best_acc:
                 best_acc = result_acc
                 
@@ -111,7 +143,7 @@ def train(model, num_epochs=50, n_epochs_per_eval = 1):
 
     print('-' * 30)
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={2:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     if result_acc > best_acc:
         best_acc = result_acc
     print('Best val acc: {:.2f}'.format(100*best_acc))

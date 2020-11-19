@@ -174,8 +174,8 @@ class Jointer:
     def learn(self):
         assert len(self.buffer) > 0
         self.train()
-        print("Hit samples: ", len(self.buffer), ' Ave length: ', np.mean([len(x.sentence) for x in self.buffer]))
-        
+        print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.sentence) for x in self.buffer]), 2))
+
         # learn semantics
         dataset = [[] for _ in range(len(SYMBOLS) - 1)]
         for ast in self.buffer:

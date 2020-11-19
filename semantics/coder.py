@@ -1,4 +1,5 @@
 import sys
+sys.setrecursionlimit(int(1e4))
 sys.path.insert(0, "./semantics/dreamcoder")
 
 import random
@@ -72,7 +73,7 @@ class DreamCoder(object):
         extractor.H = args.pop("hidden")
 
         timestamp = datetime.datetime.now().isoformat()
-        outputDirectory = "experimentOutputs/list/%s"%timestamp
+        outputDirectory = "outputs/%s"%timestamp
         os.system("mkdir -p %s"%outputDirectory)
         
         args.update({
@@ -91,7 +92,7 @@ class DreamCoder(object):
     def __call__(self):
         return self.sym2prog
 
-    def _sample_programs(self, grammar, n_prog_per_task=1):
+    def _sample_programs(self, grammar, n_prog_per_task=5):
         sym2prog = []
         for _ in range(NUM_TASKS):
             programs = []
@@ -99,7 +100,7 @@ class DreamCoder(object):
             # for _ in range(n_prog_per_task):
                 arity = random.randint(0,2)
                 task_type = arrow(*([tint]*(arity + 1)))
-                prog = grammar.sample(task_type, maximumDepth=2)
+                prog = grammar.sample(task_type, maximumDepth=3)
                 prog = ProgramWrapper(prog)
                 if prog not in programs:
                     programs.append(prog)
@@ -120,11 +121,15 @@ class DreamCoder(object):
 
     def learn(self, dataset):
         tasks = self._make_tasks(dataset)
-        print(tasks)
+        # print(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
+        self.grammar = result.grammars[-1]
+
+        n_prog_sampling = 5
+        n_prog_enum = 5
+        sym2prog = self._sample_programs(self.grammar, n_prog_sampling)
         for frontier in result.taskSolutions.values():
             task_idx = int(frontier.task.name)
-            progs = [ProgramWrapper(x.program) for x in frontier.entries]
-            self.sym2prog[task_idx] = progs
+            progs = [ProgramWrapper(x.program) for x in frontier.entries[:n_prog_enum]]
+            sym2prog[task_idx] = progs + sym2prog[task_idx]
 
-        self.grammar = result.grammars[-1]

@@ -4,4 +4,5 @@ data/*.json
 .vscode/
 .ipynb_checkpoints/
 compressionMessages/
-experimentOutputs/
+outputs/
+log.txt

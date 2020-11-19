@@ -25,8 +25,45 @@ class HINT(Dataset):
             x['len'] = len(x['expr'])
         
         self.img_transform = IMG_TRANSFORM
+        self.valid_ids = list(range(len(self.dataset)))
+
+        # dataset statistics, used to filter samples
+        len2ids = {}
+        for i, x in enumerate(self.dataset):
+            l = len(x['img_paths'])
+            if l not in len2ids:
+                len2ids[l] = []
+            len2ids[l].append(i)
+        self.len2ids = len2ids
+
+        sym2ids = {}
+        for i, x in enumerate(self.dataset):
+            for s in list(set(x['expr'])):
+                if s not in sym2ids:
+                    sym2ids[s] = []
+                sym2ids[s].append(i)
+        self.sym2ids = sym2ids
+
+        res2ids = {}
+        for i, x in enumerate(self.dataset):
+            l = x['res']
+            if l not in res2ids:
+                res2ids[l] = []
+            res2ids[l].append(i)
+        self.res2ids = res2ids
+
+        digit2ids = {}
+        for i, x in enumerate(self.dataset):
+            if len(x['expr']) == 1:
+                s = x['expr'][0]
+                if s not in digit2ids:
+                    digit2ids[s] = []
+                digit2ids[s].append(i)
+        self.digit2ids = digit2ids
+
 
     def __getitem__(self, index):
+        index = self.valid_ids[index]
         sample = deepcopy(self.dataset[index])
         img_seq = []
         for img_path in sample['img_paths']:
@@ -44,13 +81,12 @@ class HINT(Dataset):
             
     
     def __len__(self):
-        return len(self.dataset)
+        return len(self.valid_ids)
 
     def filter_by_len(self, min_len=None, max_len=None):
         if min_len is None: min_len = -1
         if max_len is None: max_len = 1e7
-        self.dataset = [x for x in self.dataset if x['len'] <= max_len and x['len'] >= min_len]
-
+        self.valid_ids = [i for i, x in enumerate(self.dataset) if x['len'] <= max_len and x['len'] >= min_len]
 
 def HINT_collate(batch):
     max_len = np.max([x['len'] for x in batch])
