@@ -1,5 +1,4 @@
 data/symbol_images/
-data/*.json
 *__pycache__*
 .vscode/
 .ipynb_checkpoints/
