@@ -13,8 +13,8 @@ np.random.seed(157)
 #train_set = HINT('train', numSamples=500, randomSeed=777)
 val_set = HINT('val')
 test_set = HINT('test')
-train_set = HINT('train')
-# train_set = HINT('val')
+train_set = HINT('train', exclude_symbols=['!', '*', '/'])
+# train_set = HINT('val', exclude_symbols=['!', '*', '/'])
 # train_set.filter_by_len(max_len=1)
 print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
@@ -61,21 +61,21 @@ def evaluate(model, dataloader):
     dep_pred_all = [y for x in dep_pred_all for y in x]
     syntax_acc = np.mean([x == y for x,y in zip(dep_pred_all, dep_all)])
 
-    print("result accuracy by length:")
-    for k in sorted(dataloader.dataset.len2ids.keys()):
-        ids = dataloader.dataset.len2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+    # print("result accuracy by length:")
+    # for k in sorted(dataloader.dataset.len2ids.keys()):
+    #     ids = dataloader.dataset.len2ids[k]
+    #     res = res_all[ids]
+    #     res_pred = res_pred_all[ids]
+    #     res_acc = (res == res_pred).mean()
+    #     print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
     
-    print("result accuracy by symbol:")
-    for k in sorted(dataloader.dataset.sym2ids.keys()):
-        ids = dataloader.dataset.sym2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+    # print("result accuracy by symbol:")
+    # for k in sorted(dataloader.dataset.sym2ids.keys()):
+    #     ids = dataloader.dataset.sym2ids[k]
+    #     res = res_all[ids]
+    #     res_pred = res_pred_all[ids]
+    #     res_acc = (res == res_pred).mean()
+    #     print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
 
     print("result accuracy by digit:")
     for k in sorted(dataloader.dataset.digit2ids.keys()):
@@ -85,13 +85,13 @@ def evaluate(model, dataloader):
         res_acc = (res == res_pred).mean()
         print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
 
-    print("result accuracy by res:")
-    for k in sorted(dataloader.dataset.res2ids.keys())[:10]:
-        ids = dataloader.dataset.res2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+    # print("result accuracy by res:")
+    # for k in sorted(dataloader.dataset.res2ids.keys())[:10]:
+    #     ids = dataloader.dataset.res2ids[k]
+    #     res = res_all[ids]
+    #     res_pred = res_pred_all[ids]
+    #     res_acc = (res == res_pred).mean()
+    #     print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
 
     return perception_acc, syntax_acc, result_acc
 
@@ -109,7 +109,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 1):
     max_len = float("inf")
     curriculum_strategy = dict([
         (0, 1),
-        (20, 3),
+        (5, 3),
         (50, 5),
         (100, 1e9)
     ])

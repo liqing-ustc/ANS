@@ -10,7 +10,7 @@ class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
         self.model = SymbolNet()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         self.criterion = nn.CrossEntropyLoss(ignore_index=-1)
         self.device = torch.device('cpu')
     
@@ -47,21 +47,21 @@ class Perception(object):
         acc = np.mean(np.array(symbols) == np.array(labels))
         print(acc)
 
-    def learn(self, dataset, n_epochs=1):
+    def learn(self, dataset, n_iters=100):
         dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
         # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=512,
                          shuffle=True, num_workers=4)
-        for epoch in range(n_epochs):
-            for img, label in train_dataloader:
-                img = img.to(self.device)
-                label = label.to(self.device)
-                logit = self.model(img)
-                loss = self.criterion(logit, label)
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+        for _ in range(n_iters):
+            img, label = next(iter(train_dataloader))
+            img = img.to(self.device)
+            label = label.to(self.device)
+            logit = self.model(img)
+            loss = self.criterion(logit, label)
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
                 
 
 class SymbolNet(nn.Module):

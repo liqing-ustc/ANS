@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
 import numpy as np
+import math
 
 try:
     from utils import SYMBOLS, NULL
@@ -242,10 +243,11 @@ class Parser(object):
         UAS /= all_tokens
         return UAS
 
-    def learn(self, dataset, n_epochs=1):
+    def learn(self, dataset, n_iters=100):
         train_data = self.create_instances(dataset)
 
         batch_size = 1024
+        n_epochs = int(math.ceil(batch_size * n_iters // len(train_data)))
         self.model.train() # Places model in "train" mode, i.e. apply dropout layer
         for epoch in range(n_epochs):
             for i, (train_x, train_y) in enumerate(minibatches(train_data, batch_size)):

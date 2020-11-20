@@ -4,6 +4,7 @@ from copy import deepcopy
 import sys
 from func_timeout import func_timeout, FunctionTimedOut
 from utils import SYMBOLS
+from collections import Counter
 
 class Node:
     def __init__(self, symbol, sym2prog):
@@ -186,6 +187,8 @@ class Jointer:
         assert len(self.buffer) > 0
         self.train()
         print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.sentence) for x in self.buffer]), 2))
+        pred_symbols = sorted(list(Counter([y for x in self.buffer for y in x.sentence]).items()))
+        print(len(pred_symbols), pred_symbols)
 
         # learn semantics
         dataset = [[] for _ in range(len(SYMBOLS) - 1)]
@@ -201,17 +204,13 @@ class Jointer:
 
         # learn perception
         dataset = [(x.img_paths, x.sentence) for x in self.buffer]
-        self.perception.learn(dataset, n_epochs=5)
+        self.perception.learn(dataset, n_iters=300)
 
         # learn syntax
         dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
-        self.syntax.learn(dataset)
-
+        self.syntax.learn(dataset, n_iters=300)
 
         self.clear_buffer()
-
-
-
 
 
 
