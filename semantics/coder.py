@@ -70,7 +70,7 @@ class TaskWrapper(object):
     
     def check_solved(self):
         posterior = np.exp(self.programs[0].logPosterior)
-        if len(self.examples) * posterior > 10:
+        if len(self.examples) * posterior > 3:
             print("Solved Task-%d: %s"%(self.idx, self.programs[0]))
             self.solved = True
             self.best_program = self.programs[0]
@@ -178,7 +178,7 @@ class DreamCoder(object):
         self.sym2prog = sym2prog
         self._print_learned_progs(sym2prog)
         for task, progs in zip(self.tasks, sym2prog):
-            if len(progs) == 0:
+            if len(progs) == 0 or task.solved:
                 continue
             task.update_programs(progs)
 
