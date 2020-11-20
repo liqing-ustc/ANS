@@ -69,7 +69,7 @@ class Parser(object):
 
         self.model = ParserModel(n_tokens=self.n_tokens, n_features=self.n_features)
         self.device = torch.device('cpu')
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, amsgrad=True)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3, amsgrad=True)
         self.criterion = nn.CrossEntropyLoss()
     
     def train(self):

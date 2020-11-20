@@ -54,7 +54,7 @@ class TaskWrapper(object):
     def __init__(self, idx, max_examples=50, min_examples=5):
         self.idx = idx
         self.examples = []
-        self.programs_over_time = []
+        self.programs = []
         self.max_examples = max_examples
         self.min_examples = min_examples
         self.solved = False
@@ -65,24 +65,17 @@ class TaskWrapper(object):
         self.examples = examples
 
     def update_programs(self, programs):
-        self.programs_over_time.append(programs)
+        self.programs.append(programs)
         self.check_solved()
     
     def check_solved(self):
-        if len(self.examples) > 20 and np.exp(self.programs_over_time[-1][0].logPosterior) > 0.5:
-            print("Solved Task-%d: %s"%(self.idx, self.programs_over_time[-1][0]))
+        posterior = np.exp(self.programs[0].logPosterior)
+        if len(self.examples) * posterior > 10:
+            print("Solved Task-%d: %s"%(self.idx, self.programs[0]))
             self.solved = True
-            self.best_program = self.programs_over_time[-1][0]
+            self.best_program = self.programs[0]
             self.best_program.logPosterior = 0.0
-        # window_size = 2
-        # if len(self.programs_over_time) >= window_size:
-        #     ave_posterior = np.mean([np.exp(ps[0].logPosterior) for ps in self.programs_over_time[-window_size:]])
-        #     if ave_posterior > 0.5:
-        #         print("Solved Task-%d: %s"%(self.idx, self.programs_over_time[-1][0]))
-        #         self.solved = True
-        #         self.best_program = self.programs_over_time[-1][0]
-        #         self.best_program.logPosterior = 0.0
-    
+
     def make_task(self):
         examples = self.examples
         if self.solved or len(examples) == 0:
@@ -166,8 +159,7 @@ class DreamCoder(object):
             print("No found tasks to learn. %d/%d tasks solved."%(n_solved, len(self.tasks)))
             for task in self.tasks:
                 if task.solved:
-                    progs = task.programs_over_time[-1]
-                    print("Task-%d: %s"%(task.idx, progs[0]))
+                    print("Task-%d: %s"%(task.idx, task.best_program))
             self.set_sym2prog()
             return 
         print("Tasks: %d/%d/%d (total/solved/learn)."%(len(self.tasks), n_solved, len(tasks)))
