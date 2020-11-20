@@ -124,9 +124,11 @@ class AST: # Abstract Syntax Tree
                     return et
         
         if self._res is not None or self.root_node.children_res_valid():
-            self._res = y
-            self.root_node._res = y
-            return self
+            root_prog = self.sym2prog[self.root_node.symbol]
+            if len(root_prog) == 0 or root_prog[0].logPosterior < 0: # symbol unsolved
+                self._res = y
+                self.root_node._res = y
+                return self
 
         return None
 
