@@ -65,7 +65,7 @@ class TaskWrapper(object):
         self.examples = examples
 
     def update_programs(self, programs):
-        self.programs.append(programs)
+        self.programs = programs
         self.check_solved()
     
     def check_solved(self):
