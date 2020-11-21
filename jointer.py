@@ -122,7 +122,7 @@ class AST: # Abstract Syntax Tree
                 sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
                 self.root_node.symbol = sym
                 self.sentence[root_node_idx] = sym
-            self._res = y
+            self._res = None # we set the result of AST to None, and we will not use these data for learning perception and syntax
             self.root_node._res = y
             return self
 
@@ -188,6 +188,18 @@ class Jointer:
         pred_symbols = sorted(list(Counter([y for x in self.buffer for y in x.sentence]).items()))
         print("Symbols: ", len(pred_symbols), pred_symbols)
 
+        # learn perception
+        dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
+        if len(dataset) > 200:
+            print("Learn perception with %d samples."%(len(dataset)))
+            self.perception.learn(dataset, n_iters=100)
+
+        # learn syntax
+        dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
+        if len(dataset) > 200:
+            print("Learn syntax with %d samples."%(len(dataset)))
+            self.syntax.learn(dataset, n_iters=100)
+
         # learn semantics
         dataset = [[] for _ in range(len(SYMBOLS) - 1)]
         for ast in self.buffer:
@@ -199,14 +211,6 @@ class Jointer:
                 y = int(node.res())
                 dataset[node.symbol].append((xs, y))
         self.semantics.learn(dataset)
-
-        # learn perception
-        dataset = [(x.img_paths, x.sentence) for x in self.buffer]
-        self.perception.learn(dataset, n_iters=100)
-
-        # learn syntax
-        dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
-        self.syntax.learn(dataset, n_iters=100)
 
         self.clear_buffer()
 
