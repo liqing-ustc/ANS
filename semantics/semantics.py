@@ -54,7 +54,7 @@ class ProgramWrapper(object):
         return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=30):
+    def __init__(self, idx, min_examples=20):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -70,7 +70,7 @@ class Semantics(object):
     
     def check_solved(self):
         posterior = np.exp(self.program.logPosterior)
-        if len(self.examples) * posterior > 50: # more careful!
+        if len(self.examples) * posterior > 100: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
     
@@ -86,6 +86,7 @@ class Semantics(object):
         examples = [x for x in examples if len(x[0]) == arity]
         if len(examples) < self.min_examples:
             return None
+        self.examples = examples
         return Task(str(self.idx), task_type, examples)
 
 
