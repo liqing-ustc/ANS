@@ -83,7 +83,7 @@ class AST: # Abstract Syntax Tree
         # abduce over parse
         # if current trans is 'S', we try to swith it with the next token
         # if current trans is 'L' ('R'), we try to switch it to 'R' ('L')
-        epsilon = 1e-7
+        epsilon = 1e-12 # used to eniminate invalid actions
         trans_pos_list = np.argsort([self.transition_probs[i][t] for i, t in enumerate(self.transitions)])
         for trans_pos in trans_pos_list:
             t_prob = self.transition_probs[trans_pos]
@@ -113,7 +113,14 @@ class AST: # Abstract Syntax Tree
         # abduce over semantics
         # Currently, if the semantics of the root symbol is not solved and its children
         # are valid, we directly change the result to y
-        if not self.root_node.smt.solved and self.root_node.children_res_valid():
+        if self.root_node.children_res_valid():
+            # if self.root_node.smt.solved:
+            unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+            root_node_idx = self.dependencies.index(-1)
+            root_node_probs = self.sent_probs[root_node_idx]
+            sym = sorted([(root_node_probs[i], i) for i in unsolveds])[-1][1]
+            self.root_node.symbol = sym
+            self.sentence[root_node_idx] = sym
             self._res = y
             self.root_node._res = y
             return self

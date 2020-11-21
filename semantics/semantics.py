@@ -34,6 +34,7 @@ class ProgramWrapper(object):
         except RecursionError as e:
             self.fn = None
         self.prog = str(prog)
+        self.arity = len(prog.infer().functionArguments())
         self.logPosterior = logPosterior
     
     def __call__(self, *inputs):
@@ -53,7 +54,7 @@ class ProgramWrapper(object):
         return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
 
 class Semantics(object):
-    def __init__(self, idx, max_examples=50, min_examples=5):
+    def __init__(self, idx, max_examples=50, min_examples=20):
         self.idx = idx
         self.examples = []
         self.program = None
