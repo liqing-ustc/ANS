@@ -93,13 +93,13 @@ class Semantics(object):
 class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
-            enumerationTimeout=30, activation='tanh', iterations=1, recognitionTimeout=3600,
+            enumerationTimeout=30, activation='tanh', iterations=3, recognitionTimeout=3600,
             a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=numberOfCPUs(),
             extras=list_options)
 
-        args['noConsolidation'] = True
+        # args['noConsolidation'] = True
         random.seed(args.pop("random_seed"))
 
         baseGrammar = Grammar.uniform(McCarthyPrimitives())
@@ -178,6 +178,10 @@ class DreamCoder(object):
         for task in tasks:
             # print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:20])
             print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), Counter(task.examples))
+
+        with open('outputs/tasks.json', 'w') as f:
+            for task in tasks:
+                f.write(json.dumps(task.examples)+'\n')
 
     def _removeEquivalent(self, programs, dataset=None):
         programs = sorted(programs, key=lambda x: (-x[1].logPosterior, x[0]))

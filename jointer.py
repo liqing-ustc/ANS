@@ -186,7 +186,7 @@ class Jointer:
         self.train()
         print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.sentence) for x in self.buffer]), 2))
         pred_symbols = sorted(list(Counter([y for x in self.buffer for y in x.sentence]).items()))
-        print(len(pred_symbols), pred_symbols)
+        print("Symbols: ", len(pred_symbols), pred_symbols)
 
         # learn semantics
         dataset = [[] for _ in range(len(SYMBOLS) - 1)]
