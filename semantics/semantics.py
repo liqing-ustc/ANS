@@ -71,7 +71,7 @@ class Semantics(object):
     
     def check_solved(self):
         posterior = np.exp(self.program.logPosterior)
-        if len(self.examples) * posterior > 3: # more careful!
+        if len(self.examples) * posterior > 10: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
     
