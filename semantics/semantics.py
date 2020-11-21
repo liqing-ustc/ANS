@@ -103,7 +103,7 @@ class DreamCoder(object):
             CPUs=numberOfCPUs(),
             extras=list_options)
 
-        # args['noConsolidation'] = True
+        args['noConsolidation'] = True
         random.seed(args.pop("random_seed"))
         args['contextual'] = True
 
