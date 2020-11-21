@@ -206,7 +206,7 @@ class Jointer:
 
         # learn syntax
         dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
-        self.syntax.learn(dataset, n_iters=50)
+        self.syntax.learn(dataset, n_iters=100)
 
         self.clear_buffer()
 
