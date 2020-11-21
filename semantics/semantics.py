@@ -176,7 +176,8 @@ class DreamCoder(object):
 
     def _print_tasks(self, tasks):
         for task in tasks:
-            print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:20])
+            # print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:20])
+            print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), Counter(task.examples))
 
     def _removeEquivalent(self, programs, dataset=None):
         programs = sorted(programs, key=lambda x: (-x[1].logPosterior, x[0]))
