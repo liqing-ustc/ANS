@@ -119,7 +119,7 @@ class AST: # Abstract Syntax Tree
                 root_node_probs = self.sent_probs[root_node_idx]
                 sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
                 sampling_probs /= sampling_probs.sum()
-                sym = np.random.choice(unsolveds, size=1, p=sampling_probs)
+                sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
                 self.root_node.symbol = sym
                 self.sentence[root_node_idx] = sym
             self._res = y
