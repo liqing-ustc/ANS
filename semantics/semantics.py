@@ -54,7 +54,7 @@ class ProgramWrapper(object):
         return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
 
 class Semantics(object):
-    def __init__(self, idx, max_examples=50, min_examples=20):
+    def __init__(self, idx, min_examples=50):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -63,7 +63,6 @@ class Semantics(object):
         self.solved = False
 
     def update_examples(self, examples):
-        # self.examples = (self.examples + examples)[-self.max_examples:]
         self.examples = examples
 
     def update_program(self, program):
