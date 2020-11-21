@@ -158,6 +158,7 @@ class DreamCoder(object):
         self._print_tasks(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
         self.grammar = result.grammars[-1]
+        print(self.grammar)
 
         programs = [(smt.idx, smt.program) for smt in self.semantics if smt.solved]
         for frontier in result.taskSolutions.values():
