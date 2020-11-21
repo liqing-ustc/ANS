@@ -58,7 +58,6 @@ class Semantics(object):
         self.idx = idx
         self.examples = []
         self.program = None
-        self.max_examples = max_examples
         self.min_examples = min_examples
         self.solved = False
 
