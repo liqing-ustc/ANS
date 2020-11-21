@@ -202,11 +202,11 @@ class Jointer:
 
         # learn perception
         dataset = [(x.img_paths, x.sentence) for x in self.buffer]
-        self.perception.learn(dataset, n_iters=10)
+        self.perception.learn(dataset, n_iters=100)
 
         # learn syntax
         dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
-        self.syntax.learn(dataset, n_iters=5)
+        self.syntax.learn(dataset, n_iters=50)
 
         self.clear_buffer()
 

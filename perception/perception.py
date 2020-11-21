@@ -10,7 +10,7 @@ class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
         self.model = SymbolNet()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.criterion = nn.CrossEntropyLoss(ignore_index=-1)
         self.device = torch.device('cpu')
     

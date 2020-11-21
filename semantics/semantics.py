@@ -54,7 +54,7 @@ class ProgramWrapper(object):
         return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=50):
+    def __init__(self, idx, min_examples=30):
         self.idx = idx
         self.examples = []
         self.program = None
