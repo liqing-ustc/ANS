@@ -111,14 +111,15 @@ class AST: # Abstract Syntax Tree
                 return et
 
         # abduce over semantics
-        # Currently, if the semantics of the root symbol is not solved and its children
-        # are valid, we directly change the result to y
+        # Currently, if the root node's children are valid, we directly change the result to y
         if self.root_node.children_res_valid():
             if self.root_node.smt.solved:
                 unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
                 root_node_idx = self.dependencies.index(-1)
                 root_node_probs = self.sent_probs[root_node_idx]
-                sym = np.random.choice(unsolveds, size=1, p=[root_node_probs[i] for i in unsolveds])
+                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
+                sampling_probs /= sampling_probs.sum()
+                sym = np.random.choice(unsolveds, size=1, p=sampling_probs)
                 self.root_node.symbol = sym
                 self.sentence[root_node_idx] = sym
             self._res = y
