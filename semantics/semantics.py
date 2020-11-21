@@ -70,7 +70,11 @@ class Semantics(object):
     
     def check_solved(self):
         posterior = np.exp(self.program.logPosterior)
-        if len(self.examples) * posterior > 100: # more careful!
+        if self.program.arity == 0:
+            solved_threhold = 100
+        else:
+            solved_threhold = 300
+        if len(self.examples) * posterior > solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
     
