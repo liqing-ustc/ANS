@@ -71,9 +71,9 @@ class Semantics(object):
     def check_solved(self):
         posterior = np.exp(self.program.logPosterior)
         if self.program.arity == 0:
-            solved_threhold = 100
+            solved_threhold = 50
         else:
-            solved_threhold = 300
+            solved_threhold = float("inf")
         if len(self.examples) * posterior > solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
@@ -97,7 +97,7 @@ class Semantics(object):
 class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
-            enumerationTimeout=30, activation='tanh', iterations=3, recognitionTimeout=3600,
+            enumerationTimeout=30, activation='tanh', iterations=1, recognitionTimeout=3600,
             a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=numberOfCPUs(),
@@ -105,6 +105,7 @@ class DreamCoder(object):
 
         # args['noConsolidation'] = True
         random.seed(args.pop("random_seed"))
+        args['contextual'] = True
 
         baseGrammar = Grammar.uniform(McCarthyPrimitives())
 
@@ -161,7 +162,7 @@ class DreamCoder(object):
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         self._print_tasks(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
-        self.grammar = result.grammars[-1]
+        # self.grammar = result.grammars[-1]
         print(self.grammar)
 
         programs = [(smt.idx, smt.program) for smt in self.semantics if smt.solved]
