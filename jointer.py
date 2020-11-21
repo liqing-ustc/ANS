@@ -97,7 +97,8 @@ class AST: # Abstract Syntax Tree
                 new_transitions = deepcopy(self.transitions)
                 new_transitions[trans_pos] = 0
             elif t_ori == 2: # Shift
-                if self.transitions[trans_pos + 1] == 2: # both current trans and next trans are 'S', so skip
+                if trans_pos == len(self.transitions) - 1 or self.transitions[trans_pos + 1] == 2: 
+                    # both current trans and next trans are 'S', so skip
                     continue
                 else: # swith current trans and next trans
                     new_transitions = deepcopy(self.transitions)
