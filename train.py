@@ -1,6 +1,7 @@
 from utils import DEVICE, ID2SYM
 import time
 from tqdm import tqdm
+from collections import Counter
 
 from dataset import HINT, HINT_collate
 from jointer import Jointer
@@ -143,8 +144,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 1):
                 model.deduce(img_seq, seq_len)
                 model.abduce(res, sample['img_paths'])
         
-        print([x.idx for x in model.semantics() if not x.solved])
-        print(set([i for ast in model.ASTs for i in ast.sentence]))
+        print("Dep: ", Counter([tuple(ast.dependencies) for ast in model.buffer]))
         model.learn()
             
         if (epoch+1) % n_epochs_per_eval == 0:
