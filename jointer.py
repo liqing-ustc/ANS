@@ -83,6 +83,7 @@ class AST: # Abstract Syntax Tree
         # abduce over parse
         # if current trans is 'S', we try to swith it with the next token
         # if current trans is 'L' ('R'), we try to switch it to 'R' ('L')
+        epsilon = 1e-7
         trans_pos_list = np.argsort([self.transition_probs[i][t] for i, t in enumerate(self.transitions)])
         for trans_pos in trans_pos_list:
             t_prob = self.transition_probs[trans_pos]
@@ -97,8 +98,8 @@ class AST: # Abstract Syntax Tree
                 new_transitions = deepcopy(self.transitions)
                 new_transitions[trans_pos] = 0
             elif t_ori == 2: # Shift
+                # skip when both current trans and next trans are 'S'
                 if trans_pos == len(self.transitions) - 1 or self.transitions[trans_pos + 1] == 2: 
-                    # both current trans and next trans are 'S', so skip
                     continue
                 else: # swith current trans and next trans
                     new_transitions = deepcopy(self.transitions)
@@ -193,11 +194,11 @@ class Jointer:
 
         # learn perception
         dataset = [(x.img_paths, x.sentence) for x in self.buffer]
-        self.perception.learn(dataset, n_iters=100)
+        self.perception.learn(dataset, n_iters=10)
 
         # learn syntax
         dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
-        self.syntax.learn(dataset, n_iters=50)
+        self.syntax.learn(dataset, n_iters=5)
 
         self.clear_buffer()
 
