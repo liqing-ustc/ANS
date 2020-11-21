@@ -31,7 +31,7 @@ class Perception(object):
         logits = self.model(images)
         logits = logits.reshape((batch_size, seq_len, -1))
         probs = nn.functional.softmax(logits, dim=-1)
-        epsilon = 0.05
+        epsilon = 0.
         probs = probs * (1 - epsilon) + epsilon / (len(SYMBOLS) - 1) 
         if self.model.training:
             m = Categorical(probs=probs)

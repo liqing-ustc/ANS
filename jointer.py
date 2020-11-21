@@ -63,7 +63,8 @@ class AST: # Abstract Syntax Tree
             et = AST(self.sentence, self.dependencies, self.semantics)
             return et
         
-        epsilon = 1e-5
+        # epsilon = 1e-5
+        epsilon = 0
         # abduce over sentence
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
         for sent_pos in sent_pos_list:
