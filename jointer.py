@@ -7,9 +7,9 @@ from utils import SYMBOLS
 from collections import Counter
 
 class Node:
-    def __init__(self, symbol, sym2prog):
+    def __init__(self, symbol, smt):
         self.symbol = symbol
-        self.sym2prog = sym2prog
+        self.smt = smt
         self.children = []
         self._res = None
 
@@ -17,8 +17,7 @@ class Node:
         if self._res is not None:
             return self._res
 
-        prog = self.sym2prog[self.symbol][0]
-        self._res = int(prog(*[x.res() for x in self.children]))
+        self._res = self.smt(*[x.res() for x in self.children])
         if self._res > sys.maxsize:
             self._res = None
         return self._res
@@ -30,15 +29,15 @@ class Node:
         return True
 
 class AST: # Abstract Syntax Tree
-    def __init__(self, sentence, dependencies, sym2prog, transitions=None, sent_probs=None, transition_probs=None):
+    def __init__(self, sentence, dependencies, semantics, transitions=None, sent_probs=None, transition_probs=None):
         self.sentence = sentence
         self.dependencies = dependencies
         self.transitions = transitions
         self.sent_probs = sent_probs
         self.transition_probs = transition_probs
-        self.sym2prog = sym2prog
+        self.semantics = semantics
 
-        nodes = [Node(s, sym2prog) for s in sentence]
+        nodes = [Node(s, semantics[s]) for s in sentence]
         for node, h in zip(nodes, dependencies):
             if h == -1:
                 root_node = node
@@ -61,7 +60,7 @@ class AST: # Abstract Syntax Tree
 
     def abduce(self, y):
         if self._res is not None and self._res == y:
-            et = AST(self.sentence, self.dependencies, self.sym2prog)
+            et = AST(self.sentence, self.dependencies, self.semantics)
             return et
         
         epsilon = 1e-5
@@ -76,7 +75,7 @@ class AST: # Abstract Syntax Tree
                     break
                 new_sentence = deepcopy(self.sentence)
                 new_sentence[sent_pos] = sym_pos
-                et = AST(new_sentence, self.dependencies, self.sym2prog)
+                et = AST(new_sentence, self.dependencies, self.semantics)
                 if et.res() is not None and et.res() == y:
                     return et
 
@@ -104,31 +103,17 @@ class AST: # Abstract Syntax Tree
                     new_transitions[trans_pos] = new_transitions[trans_pos+1]
                     new_transitions[trans_pos+1] = t_ori
             dependencies = syntax.convert_trans2dep(new_transitions)
-            et = AST(self.sentence, dependencies, self.sym2prog)
+            et = AST(self.sentence, dependencies, self.semantics)
             if et.res() is not None and et.res() == y:
                 return et
 
         # abduce over semantics
-        for s in list(set(self.sentence)): # a better rank?
-            # We cannot use 'deepcopy' here since it is very slow
-            # sym2prog = deepcopy(self.sym2prog)
-            sym2prog = []
-            for programs in self.sym2prog:
-                programs = [x for x in programs]
-                sym2prog.append(programs)
-            
-            while len(sym2prog[s]) > 1:
-                sym2prog[s].pop(0)
-                et = AST(self.sentence, self.dependencies, sym2prog)
-                if et.res() is not None and et.res() == y:
-                    return et
-        
-        if self._res is not None or self.root_node.children_res_valid():
-            root_prog = self.sym2prog[self.root_node.symbol]
-            if len(root_prog) == 0 or root_prog[0].logPosterior < 0: # symbol unsolved
-                self._res = y
-                self.root_node._res = y
-                return self
+        # Currently, if the semantics of the root symbol is not solved and its children
+        # are valid, we directly change the result to y
+        if not self.root_node.smt.solved and self.root_node.children_res_valid():
+            self._res = y
+            self.root_node._res = y
+            return self
 
         return None
 
@@ -163,11 +148,11 @@ class Jointer:
         sentences = [x[:l] for x, l in zip(sentences, lengths)]
         sent_probs = [x[:l] for x, l in zip(sent_probs, lengths)]
         parses = self.syntax(sentences)
-        sym2prog = self.semantics()
+        semantics = self.semantics()
         
         self.ASTs = []
         for s_prob, pt in zip(sent_probs, parses):
-            et = AST(pt.sentence.cpu().numpy(), pt.dependencies, sym2prog, pt.transitions, s_prob.cpu().numpy(), pt.probs)
+            et = AST(pt.sentence.cpu().numpy(), pt.dependencies, semantics, pt.transitions, s_prob.cpu().numpy(), pt.probs)
             self.ASTs.append(et)
         results = [x.res() for x in self.ASTs]
 
@@ -217,11 +202,11 @@ class Jointer:
 
 
 if __name__ == '__main__':
-    # from utils import SYM2PROG
+    # from utils import SEMANTICS
     # sentences = ['5!-7-4', '1+5!*8', '8*9!+5+1/9/3!*9*5']
     # dependencies = [[1, 2, 4, 2, -1, 4], [1, -1, 3, 4, 1, 4], [1, 4, 3, 1, 6, 4, -1, 8, 10, 8, 13, 12, 10, 15, 13, 6, 15]]
     # for s, dep in zip(sentences, dependencies):
-    #     et = AST(s, dep, SYM2PROG)
+    #     et = AST(s, dep, SEMANTICS)
     #     print(et.res())
 
     model = Jointer(None)

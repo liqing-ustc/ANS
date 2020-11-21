@@ -1,12 +1,12 @@
 from utils import PROGRAMS
-from .coder import DreamCoder
+from .semantics import DreamCoder
 
 class SemanticsGT():
     def __init__(self):
-        self.sym2prog = [[x] for x in PROGRAMS]
+        self.semantics = PROGRAMS
 
     def __call__(self):
-        return self.sym2prog
+        return self.semantics
 
     def train(self):
         pass

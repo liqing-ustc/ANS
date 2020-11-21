@@ -40,6 +40,8 @@ class ProgramWrapper(object):
         fn = self.fn
         for x in inputs:
             fn = fn(x)
+        if not isinstance(fn, int):
+            raise ValueError
         return fn
 
     def __eq__(self, prog):
@@ -50,31 +52,31 @@ class ProgramWrapper(object):
     def __str__(self):
         return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
 
-class TaskWrapper(object):
+class Semantics(object):
     def __init__(self, idx, max_examples=50, min_examples=5):
         self.idx = idx
         self.examples = []
-        self.programs = []
+        self.program = None
         self.max_examples = max_examples
         self.min_examples = min_examples
         self.solved = False
-        self.best_program = None
 
     def update_examples(self, examples):
         # self.examples = (self.examples + examples)[-self.max_examples:]
         self.examples = examples
 
-    def update_programs(self, programs):
-        self.programs = programs
+    def update_program(self, program):
+        self.program = program
         self.check_solved()
     
     def check_solved(self):
-        posterior = np.exp(self.programs[0].logPosterior)
-        if len(self.examples) * posterior > 3:
-            print("Solved Task-%d: %s"%(self.idx, self.programs[0]))
+        posterior = np.exp(self.program.logPosterior)
+        if len(self.examples) * posterior > 3: # more careful!
             self.solved = True
-            self.best_program = self.programs[0]
-            self.best_program.logPosterior = 0.0
+            self.program.logPosterior = 0.0 
+    
+    def __call__(self, *inputs):
+        return self.program(*inputs)
 
     def make_task(self):
         examples = self.examples
@@ -120,91 +122,71 @@ class DreamCoder(object):
         args.pop("split")
         
         self.grammar = baseGrammar
-        # self.sym2prog = self._sample_programs(baseGrammar, n_prog_per_task=0)
-        self.sym2prog = [[] for _ in range(NUM_TASKS)]
         self.train_args = args
-        self.tasks = [TaskWrapper(i) for i in range(NUM_TASKS)]
+        self.semantics = [Semantics(i) for i in range(NUM_TASKS)]
 
     def __call__(self):
-        return self.sym2prog
+        return self.semantics
 
-    def _sample_programs(self, grammar, n_prog_per_task=5):
-        sym2prog = []
-        for _ in range(NUM_TASKS):
-            programs = []
-            while len(programs) < n_prog_per_task:
-                arity = random.randint(0,2)
-                task_type = arrow(*([tint]*(arity + 1)))
-                prog = grammar.sample(task_type, maximumDepth=3)
-                prog = ProgramWrapper(prog, -10.0)
-                if prog not in programs:
-                    programs.append(prog)
-            sym2prog.append(programs)
-        return sym2prog
-
-    def set_sym2prog(self):
-        sym2prog = [[] for _ in range(NUM_TASKS)]
-        for i, task in enumerate(self.tasks):
-            if task.solved:
-                sym2prog[i] = [task.best_program]
-        self.sym2prog = sym2prog
+    # def _sample_programs(self, grammar, n_prog_per_task=5):
+    #     sym2prog = []
+    #     for _ in range(NUM_TASKS):
+    #         programs = []
+    #         while len(programs) < n_prog_per_task:
+    #             arity = random.randint(0,2)
+    #             task_type = arrow(*([tint]*(arity + 1)))
+    #             prog = grammar.sample(task_type, maximumDepth=3)
+    #             prog = ProgramWrapper(prog, -10.0)
+    #             if prog not in programs:
+    #                 programs.append(prog)
+    #         sym2prog.append(programs)
+    #     return sym2prog
 
     def learn(self, dataset):
-        for task, exps in zip(self.tasks, dataset):
-            task.update_examples(exps)
-        tasks = [t.make_task() for t in self.tasks]
+        for smt, exps in zip(self.semantics, dataset):
+            smt.update_examples(exps)
+        tasks = [t.make_task() for t in self.semantics]
         tasks = [t for t in tasks if t is not None]
-        n_solved = len(['' for t in self.tasks if t.solved])
+        n_solved = len(['' for t in self.semantics if t.solved])
         if len(tasks) == 0:
-            print("No found tasks to learn. %d/%d tasks solved."%(n_solved, len(self.tasks)))
-            for task in self.tasks:
-                if task.solved:
-                    print("Task-%d: %s"%(task.idx, task.best_program))
-            self.set_sym2prog()
+            print("No found semantics to learn. %d/%d semantics solved."%(n_solved, len(self.semantics)))
+            for smt in self.semantics:
+                if smt.solved:
+                    print("Symbol-%d: %s"%(smt.idx, smt.program))
             return 
-        print("Tasks: %d/%d/%d (total/solved/learn)."%(len(self.tasks), n_solved, len(tasks)))
+        print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         self._print_tasks(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
         self.grammar = result.grammars[-1]
 
-        self.set_sym2prog()
-        sym2prog = self.sym2prog
-        n_prog_enum = 10
+        programs = [(smt.idx, smt.program) for smt in self.semantics if smt.solved]
         for frontier in result.taskSolutions.values():
-            task_idx = int(frontier.task.name)
-            progs = [ProgramWrapper(x.program, x.logPosterior) for x in frontier.entries[:n_prog_enum]]
-            sym2prog[task_idx] = progs
-        sym2prog = self._removeEquivalentPrograms(sym2prog)
-        self.sym2prog = sym2prog
-        self._print_learned_progs(sym2prog)
-        for task, progs in zip(self.tasks, sym2prog):
-            if len(progs) == 0 or task.solved:
+            symbol_idx = int(frontier.task.name)
+            best_entry = frontier.bestPosterior
+            prog = ProgramWrapper(best_entry.program, best_entry.logPosterior)
+            programs.append((symbol_idx, prog))
+        programs = self._removeEquivalent(programs)
+        for idx, p in programs:
+            smt = self.semantics[idx]
+            if smt.solved:
                 continue
-            task.update_programs(progs)
-
+            print("Symbol-%d: %s "%(idx, p), end="")
+            smt.update_program(p)
+            print("Solved!" if smt.solved else "")
 
     def _print_tasks(self, tasks):
         for task in tasks:
-            print("Task-%s (%s), Samples: %3d"%(task.name, task.request, len(task.examples)))
-    
-    def _print_learned_progs(self, sym2prog, topk=1):
-        for i, progs in enumerate(sym2prog):
-            if len(progs) == 0: continue
-            print("Task-%d: %s"%(i, progs[0]))
+            print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:3])
 
-    def _removeEquivalentPrograms(self, sym2prog, dataset=None):
-        programs = [(p, i) for i, sym_progs in enumerate(sym2prog) for p in sym_progs]
-        programs = sorted(programs, key=lambda x: (-x[0].logPosterior, x[1]))
+    def _removeEquivalent(self, programs, dataset=None):
+        programs = sorted(programs, key=lambda x: (-x[1].logPosterior, x[0]))
         programs_keep = []
         symbols_keep = []
-        for prog, sym in programs:
-            if prog not in programs_keep:
-                programs_keep.append(prog)
-                symbols_keep.append(sym)
+        for i, p in programs:
+            if p not in programs_keep:
+                programs_keep.append(p)
+                symbols_keep.append(i)
             if dataset is not None:
                 pass # TODO: implement the equivalence remove on a dataset
-        sym2prog = [[] for _ in range(len(sym2prog))]
-        for prog, sym in zip(programs_keep, symbols_keep):
-            sym2prog[sym].append(prog)
-
-        return sym2prog
+        programs = list(zip(symbols_keep, programs_keep))
+        return programs
