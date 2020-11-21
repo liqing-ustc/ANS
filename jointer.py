@@ -114,13 +114,13 @@ class AST: # Abstract Syntax Tree
         # Currently, if the semantics of the root symbol is not solved and its children
         # are valid, we directly change the result to y
         if self.root_node.children_res_valid():
-            # if self.root_node.smt.solved:
-            unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-            root_node_idx = self.dependencies.index(-1)
-            root_node_probs = self.sent_probs[root_node_idx]
-            sym = sorted([(root_node_probs[i], i) for i in unsolveds])[-1][1]
-            self.root_node.symbol = sym
-            self.sentence[root_node_idx] = sym
+            if self.root_node.smt.solved:
+                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+                root_node_idx = self.dependencies.index(-1)
+                root_node_probs = self.sent_probs[root_node_idx]
+                sym = np.random.choice(unsolveds, size=1, p=[root_node_probs[i] for i in unsolveds])
+                self.root_node.symbol = sym
+                self.sentence[root_node_idx] = sym
             self._res = y
             self.root_node._res = y
             return self
