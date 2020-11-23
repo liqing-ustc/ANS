@@ -53,6 +53,7 @@ class AST: # Abstract Syntax Tree
             # self._res = func_timeout(timeout=0.01, func=root_node.res)
             self._res = root_node.res()
         except (IndexError, TypeError, ZeroDivisionError, ValueError, RecursionError, FunctionTimedOut) as e:
+            # Must be extremely careful about these errors
             # if isinstance(e, FunctionTimedOut):
             #     print(e)
             pass
