@@ -185,7 +185,7 @@ class DreamCoder(object):
             # print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:20])
             print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), Counter(task.examples))
 
-        json.dump([t.examples for t in tasks], open('outputs/task.json', 'w'))
+        json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
 
     def _removeEquivalent(self, programs, dataset=None):
         programs = sorted(programs, key=lambda x: (-x[1].logPosterior, x[0]))
