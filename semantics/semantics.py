@@ -172,10 +172,13 @@ class DreamCoder(object):
             prog = ProgramWrapper(best_entry.program, best_entry.logPosterior)
             programs.append((symbol_idx, prog))
         programs = self._removeEquivalent(programs)
+
+        # clear all past programs
+        for smt in self.semantics:
+            smt.program = None
+
         for idx, p in programs:
             smt = self.semantics[idx]
-            if smt.solved:
-                continue
             print("Symbol-%d: %s "%(idx, p), end="")
             smt.update_program(p)
             print("Solved!" if smt.solved else "")
