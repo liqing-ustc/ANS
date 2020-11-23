@@ -5,6 +5,7 @@ import sys
 from func_timeout import func_timeout, FunctionTimedOut
 from utils import SYMBOLS
 from collections import Counter
+from time import time
 
 class Node:
     def __init__(self, symbol, smt):
@@ -191,14 +192,18 @@ class Jointer:
         # learn perception
         dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
         if len(dataset) > 200:
-            print("Learn perception with %d samples."%(len(dataset)))
+            print("Learn perception with %d samples, "%(len(dataset)), end='')
+            st = time()
             self.perception.learn(dataset, n_iters=100)
+            print("take %d sec."%(time()-st))
 
         # learn syntax
         dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
         if len(dataset) > 200:
-            print("Learn syntax with %d samples."%(len(dataset)))
+            print("Learn syntax with %d samples, "%(len(dataset)), end='')
+            st = time()
             self.syntax.learn(dataset, n_iters=100)
+            print("take %d sec."%(time()-st))
 
         # learn semantics
         dataset = [[] for _ in range(len(SYMBOLS) - 1)]
