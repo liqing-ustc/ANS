@@ -30,7 +30,7 @@ NUM_TASKS = len(SYMBOLS) - 1
 class ProgramWrapper(object):
     def __init__(self, prog, logPosterior=0.):
         try:
-            self.fn = prog.uncurry().evaluate([])
+            self.fn = prog.evaluate([])
         except RecursionError as e:
             self.fn = None
         self.prog = str(prog)
@@ -153,13 +153,10 @@ class DreamCoder(object):
         tasks = [t.make_task() for t in self.semantics]
         tasks = [t for t in tasks if t is not None]
         n_solved = len(['' for t in self.semantics if t.solved])
-        if len(tasks) == 0:
-            print("No found semantics to learn. %d/%d semantics solved."%(n_solved, len(self.semantics)))
-            for smt in self.semantics:
-                if smt.solved:
-                    print("Symbol-%d: %s"%(smt.idx, smt.program))
-            return 
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
+        if len(tasks) == 0:
+            self._print_semantics()
+            return 
         self._print_tasks(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
         # self.grammar = result.grammars[-1]
@@ -179,9 +176,15 @@ class DreamCoder(object):
 
         for idx, p in programs:
             smt = self.semantics[idx]
-            print("Symbol-%d: %s "%(idx, p), end="")
             smt.update_program(p)
-            print("Solved!" if smt.solved else "")
+
+        self._print_semantics()
+
+    def _print_semantics(self):
+        for smt in self.semantics:
+            print("Symbol-%d: %s"%(smt.idx, smt.program))
+            # print("Solved!" if smt.solved else "")
+
 
     def _print_tasks(self, tasks):
         for task in tasks:
@@ -202,3 +205,12 @@ class DreamCoder(object):
                 pass # TODO: implement the equivalence remove on a dataset
         programs = list(zip(symbols_keep, programs_keep))
         return programs
+
+if __name__ == "__main__":
+    from dreamcoder.program import Program
+    pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 ($2 (incr $1) (decr0 $0)))))))))")
+    print(pg.runWithArguments([1,2]))
+    pg = ProgramWrapper(pg)
+    print(pg(3, 4))
+    pass
+
