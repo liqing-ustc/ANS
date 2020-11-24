@@ -29,6 +29,19 @@ class Node:
                 return False
         return True
 
+def joint_prob(sentence, transitions, semantics, sent_probs, trans_probs):
+    probs = [sent_probs[i,w] for i, w in enumerate(sentence)] + \
+            [trans_probs[i][t] for i, t in enumerate(transitions)]
+    for w in sentence:
+        pg = semantics[w].program
+        if pg is not None:
+            prob = np.exp(pg.logPosterior)
+        else:
+            prob = 1e-12
+        probs.append(prob)
+    log_prob = np.log(probs).sum()
+    return log_prob
+
 class AST: # Abstract Syntax Tree
     def __init__(self, sentence, dependencies, semantics, transitions=None, sent_probs=None, transition_probs=None):
         self.sentence = sentence
@@ -37,6 +50,7 @@ class AST: # Abstract Syntax Tree
         self.sent_probs = sent_probs
         self.transition_probs = transition_probs
         self.semantics = semantics
+        self.joint_prob = None
 
         nodes = [Node(s, semantics[s]) for s in sentence]
         for node, h in zip(nodes, dependencies):
@@ -62,8 +76,8 @@ class AST: # Abstract Syntax Tree
 
     def abduce(self, y):
         if self._res is not None and self._res == y:
-            et = AST(self.sentence, self.dependencies, self.semantics)
-            return et
+            self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
+            return self
         
         # epsilon = 1e-5
         epsilon = 0
@@ -80,6 +94,7 @@ class AST: # Abstract Syntax Tree
                 new_sentence[sent_pos] = sym_pos
                 et = AST(new_sentence, self.dependencies, self.semantics)
                 if et.res() is not None and et.res() == y:
+                    et.joint_prob = joint_prob(new_sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
                     return et
 
         # abduce over parse
@@ -110,6 +125,7 @@ class AST: # Abstract Syntax Tree
             dependencies = syntax.convert_trans2dep(new_transitions)
             et = AST(self.sentence, dependencies, self.semantics)
             if et.res() is not None and et.res() == y:
+                et.joint_prob = joint_prob(self.sentence, new_transitions, self.semantics, self.sent_probs, self.transition_probs)
                 return et
 
         # abduce over semantics
@@ -131,6 +147,7 @@ class AST: # Abstract Syntax Tree
                 self.sentence[root_node_idx] = sym
             self._res = None # we set the result of AST to None, and we will not use these data for learning perception and syntax
             self.root_node._res = y
+            self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
             return self
 
         return None
@@ -195,6 +212,20 @@ class Jointer:
         pred_symbols = sorted(list(Counter([y for x in self.buffer for y in x.sentence]).items()))
         print("Symbols: ", len(pred_symbols), pred_symbols)
 
+        import json
+        self.buffer = sorted(self.buffer, key=lambda x: -x.joint_prob)
+        dataset = []
+        for ast in self.buffer:
+            sent = [int(x) for x in ast.sentence]
+            imgs = [x.split('/')[0] for x in ast.img_paths]
+            dep = ast.dependencies
+            root_res = int(ast.root_node.res())
+            ast_res = ast.res()
+            ast_res = ast_res if ast_res is None else int(ast_res)
+            prob = round(ast.joint_prob, 1)
+            dataset.append((sent, imgs, dep, root_res, ast_res, prob))
+        json.dump(dataset, open('outputs/dataset.json', 'w'))
+
         # learn perception
         dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
         if len(dataset) > 200:
@@ -220,7 +251,7 @@ class Jointer:
                 queue.extend(node.children)
                 xs = tuple([x.res() for x in node.children])
                 y = int(node.res())
-                dataset[node.symbol].append((xs, y))
+                dataset[node.symbol].append((xs, y, ast.joint_prob))
         self.semantics.learn(dataset)
 
         self.clear_buffer()

@@ -72,7 +72,7 @@ class ProgramWrapper(object):
         self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=20):
+    def __init__(self, idx, min_examples=10):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -104,11 +104,29 @@ class Semantics(object):
         examples = self.examples
         if self.solved or len(examples) == 0:
             return None
-        arity = Counter([len(xs) for xs, _ in examples]).most_common(1)[0][0]
+        arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
         task_type = arrow(*([tint]*(arity + 1)))
         examples = [x for x in examples if len(x[0]) == arity]
         if len(examples) < self.min_examples:
             return None
+
+        if arity > 0:
+            examples = sorted(examples, key=lambda x: -x[2])
+            print(examples[:5])
+            print(examples[-5:])
+
+        counts = {}
+        for e in examples:
+            p = np.exp(e[2])
+            e = e[:2]
+            if e not in counts:
+                counts[e] = 0.
+            counts[e] += p
+        n_examples = len(examples)
+        Z = sum(list(counts.values()))
+        examples = []
+        for e, p in sorted(counts.items(), key=lambda x: -x[1]):
+            examples.extend([e] * int(p / Z * n_examples))
         self.examples = examples
         return Task(str(self.idx), task_type, examples)
 
