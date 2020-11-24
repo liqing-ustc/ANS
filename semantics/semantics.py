@@ -36,22 +36,28 @@ class ProgramWrapper(object):
         self.prog = str(prog)
         self.arity = len(prog.infer().functionArguments())
         self.logPosterior = logPosterior
+        self.y = None # used for equivalence check
     
     def __call__(self, *inputs):
+        if len(inputs) != self.arity:
+            return None
         fn = self.fn
         for x in inputs:
             fn = fn(x)
-        if not isinstance(fn, int):
-            raise ValueError
         return fn
 
     def __eq__(self, prog):
         if isinstance(self.fn, int) and isinstance(prog.fn, int):
             return self.fn == prog.fn
+        if self.y is not None and prog.y is not None:
+            return np.all(self.y == prog.y)
         return self.prog == prog.prog
 
     def __str__(self):
         return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
+
+    def evaluate(self, examples): # used for equivalence check on a dataset
+        self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
     def __init__(self, idx, min_examples=20):
@@ -169,7 +175,8 @@ class DreamCoder(object):
             best_entry = frontier.bestPosterior
             prog = ProgramWrapper(best_entry.program, best_entry.logPosterior)
             programs.append((symbol_idx, prog))
-        programs = self._removeEquivalent(programs)
+        examples = [xs for t in tasks for xs, y in t.examples]
+        programs = self._removeEquivalent(programs, examples)
 
         # clear all past programs
         for smt in self.semantics:
@@ -194,15 +201,17 @@ class DreamCoder(object):
 
         json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
 
-    def _removeEquivalent(self, programs, dataset=None):
+    def _removeEquivalent(self, programs, examples=None):
         programs = sorted(programs, key=lambda x: (-x[1].logPosterior, x[0]))
+        if examples is not None:
+            examples = list(set(examples))
+            for _, p in programs:
+                p.evaluate(examples)
         programs_keep = []
         symbols_keep = []
         for i, p in programs:
             if p not in programs_keep:
                 programs_keep.append(p)
                 symbols_keep.append(i)
-            if dataset is not None:
-                pass # TODO: implement the equivalence remove on a dataset
         programs = list(zip(symbols_keep, programs_keep))
         return programs
