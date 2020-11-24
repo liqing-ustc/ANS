@@ -112,12 +112,13 @@ class Semantics(object):
 
 
         counts = {}
+        T = 1 / 5
         for e in examples:
             p = np.exp(e[2])
             e = e[:2]
             if e not in counts:
                 counts[e] = 0.
-            counts[e] += p
+            counts[e] += p ** T
 
         if arity > 0:
             tmp = sorted(counts.items(), key=lambda x: -x[1])
