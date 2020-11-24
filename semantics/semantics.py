@@ -112,8 +112,8 @@ class Semantics(object):
 
         if arity > 0:
             examples = sorted(examples, key=lambda x: -x[2])
-            print(examples[:5])
-            print(examples[-5:])
+            print(examples[:10])
+            print(examples[-10:])
 
         counts = {}
         for e in examples:
