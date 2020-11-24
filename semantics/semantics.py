@@ -110,10 +110,6 @@ class Semantics(object):
         if len(examples) < self.min_examples:
             return None
 
-        if arity > 0:
-            examples = sorted(examples, key=lambda x: -x[2])
-            print(examples[:10])
-            print(examples[-10:])
 
         counts = {}
         for e in examples:
@@ -122,6 +118,14 @@ class Semantics(object):
             if e not in counts:
                 counts[e] = 0.
             counts[e] += p
+
+        if arity > 0:
+            tmp = sorted(counts.items(), key=lambda x: -x[1])
+            print()
+            print(tmp[:10])
+            print(tmp[-10:])
+            print()
+
         n_examples = len(examples)
         Z = sum(list(counts.values()))
         examples = []
