@@ -17,7 +17,7 @@ from dreamcoder.task import Task
 from dreamcoder.type import Context, arrow, tbool, tlist, tint, t0, UnificationFailure
 from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.recognition import RecurrentFeatureExtractor
-from dreamcoder.domains.hint.makeTasks import make_list_bootstrap_tasks
+from dreamcoder.program import Invented
 
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
 from dreamcoder.dreamcoder import commandlineArguments
@@ -33,6 +33,7 @@ class ProgramWrapper(object):
             self.fn = prog.evaluate([])
         except RecursionError as e:
             self.fn = None
+        self.prog_ori = prog
         self.prog = str(prog)
         self.arity = len(prog.infer().functionArguments())
         self.logPosterior = logPosterior
@@ -93,7 +94,7 @@ class Semantics(object):
         else:
             # solved_threhold = float("inf")
             solved_threhold = 200
-        if posterior > 0.95 and len(self.examples) > solved_threhold: # more careful!
+        if posterior >= 0.9 and len(self.examples) > solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
     
@@ -110,7 +111,6 @@ class Semantics(object):
         if len(examples) < self.min_examples:
             return None
 
-
         counts = {}
         T = 1 / 5
         for e in examples:
@@ -120,12 +120,12 @@ class Semantics(object):
                 counts[e] = 0.
             counts[e] += p ** T
 
-        if arity > 0:
-            tmp = sorted(counts.items(), key=lambda x: -x[1])
-            print()
-            print(tmp[:10])
-            print(tmp[-10:])
-            print()
+        # if arity > 0:
+        #     tmp = sorted(counts.items(), key=lambda x: -x[1])
+        #     print()
+        #     print(tmp[:10])
+        #     print(tmp[-10:])
+        #     print()
 
         n_examples = len(examples)
         Z = sum(list(counts.values()))
@@ -201,8 +201,6 @@ class DreamCoder(object):
             return 
         self._print_tasks(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
-        # self.grammar = result.grammars[-1]
-        print(self.grammar)
 
         programs = [(smt.idx, smt.program) for smt in self.semantics if smt.solved]
         for frontier in result.taskSolutions.values():
@@ -223,6 +221,21 @@ class DreamCoder(object):
             smt.update_program(p)
 
         self._print_semantics()
+
+        self.update_grammar()
+        # self.grammar = result.grammars[-1]
+        print(self.grammar)
+
+    def update_grammar(self):
+        g = self.grammar
+        existingInventions = {p.uncurry()
+                        for p in g.primitives}
+        programs = {smt.program for smt in self.semantics if smt.solved and smt.program.arity > 0}
+        newInventions = programs - existingInventions
+        if newInventions:
+            self.grammar = Grammar.uniform([p for p in g.primitives] + \
+                                        [Invented(ni) for ni in newInventions])
+        
 
     def _print_semantics(self):
         for smt in sorted(self.semantics, key=lambda x: str(x.program)):
