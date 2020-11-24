@@ -122,7 +122,7 @@ class AST: # Abstract Syntax Tree
             #     sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
             #     sampling_probs /= sampling_probs.sum()
             #     sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
-            if self.root_node.smt.program is not None:
+            if self.root_node.smt.solved:
                 unsolveds = [smt.idx for smt in self.semantics if smt.program is None]
                 root_node_idx = self.dependencies.index(-1)
                 if not unsolveds: return None
