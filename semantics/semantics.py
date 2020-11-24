@@ -206,12 +206,3 @@ class DreamCoder(object):
                 pass # TODO: implement the equivalence remove on a dataset
         programs = list(zip(symbols_keep, programs_keep))
         return programs
-
-if __name__ == "__main__":
-    from dreamcoder.program import Program
-    pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 ($2 (incr $1) (decr0 $0)))))))))")
-    print(pg.runWithArguments([1,2]))
-    pg = ProgramWrapper(pg)
-    print(pg(3, 4))
-    pass
-
