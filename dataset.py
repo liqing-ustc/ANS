@@ -26,9 +26,9 @@ class HINT(Dataset):
             self.dataset = [x for x in self.dataset if len(set(x['expr']) & exclude_symbols) == 0]
 
         if n_sample_zero_res is not None:
-            samples_non_zero = [x for x in self.dataset if len(x['expr']) == 1 or x['res'] != 0]
-            samples_zero = [x for x in self.dataset if len(x['expr']) > 1 and x['res'] == 0]
-            samples_zero = random.sample(samples_zero, n_sample_zero_res)
+            samples_non_zero = [x for x in self.dataset if len(x['expr']) == 1 or (x['res'] != 0 and '0' not in x['expr'])]
+            samples_zero = [x for x in self.dataset if len(x['expr']) > 1 and (x['res'] == 0 or '0' in x['expr'])]
+            samples_zero = random.sample(samples_zero, int(len(samples_zero) * n_sample_zero_res))
             self.dataset = samples_non_zero + samples_zero
             
         for x in self.dataset:
