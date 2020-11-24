@@ -36,6 +36,7 @@ class ProgramWrapper(object):
         self.prog = str(prog)
         self.arity = len(prog.infer().functionArguments())
         self.logPosterior = logPosterior
+        self._name = None
         self.y = None # used for equivalence check
     
     def __call__(self, *inputs):
@@ -54,7 +55,18 @@ class ProgramWrapper(object):
         return self.prog == prog.prog
 
     def __str__(self):
-        return "%s %s %.2f"%(str(self.fn) if isinstance(self.fn, int) else "fn", self.prog, math.exp(self.logPosterior))
+        return "%s %s %.2f"%(self.name, self.prog, math.exp(self.logPosterior))
+
+    @property
+    def name(self):
+        if self._name is not None: return self._name
+        if isinstance(self.fn, int):
+            self._name = str(self.fn)
+        else:
+            self._name = "fn"
+            pass # TODO: assign name based on the function
+        return self._name
+
 
     def evaluate(self, examples): # used for equivalence check on a dataset
         self.y = np.array([self(*xs) for xs in examples])
@@ -81,7 +93,7 @@ class Semantics(object):
         else:
             solved_threhold = float("inf")
             # solved_threhold = 300
-        if len(self.examples) * posterior > solved_threhold: # more careful!
+        if posterior > 0.95 and len(self.examples) * posterior > solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
     
@@ -171,6 +183,7 @@ class DreamCoder(object):
 
         programs = [(smt.idx, smt.program) for smt in self.semantics if smt.solved]
         for frontier in result.taskSolutions.values():
+            if not frontier.entries: continue
             symbol_idx = int(frontier.task.name)
             best_entry = frontier.bestPosterior
             prog = ProgramWrapper(best_entry.program, best_entry.logPosterior)
@@ -192,7 +205,6 @@ class DreamCoder(object):
         for smt in sorted(self.semantics, key=lambda x: str(x.program)):
             print("Symbol-%02d: %s"%(smt.idx, smt.program))
             # print("Solved!" if smt.solved else "")
-
 
     def _print_tasks(self, tasks):
         for task in tasks:
