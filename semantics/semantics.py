@@ -79,8 +79,8 @@ class Semantics(object):
         if self.program.arity == 0:
             solved_threhold = 50
         else:
-            # solved_threhold = float("inf")
-            solved_threhold = 300
+            solved_threhold = float("inf")
+            # solved_threhold = 300
         if len(self.examples) * posterior > solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
