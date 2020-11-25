@@ -13,7 +13,9 @@ np.random.seed(157)
 
 #train_set = HINT('train', numSamples=500, randomSeed=777)
 val_set = HINT('val')
-test_set = HINT('test')
+val_set.filter_by_len(max_len=7)
+# test_set = HINT('test')
+test_set = HINT('val')
 train_set = HINT('train', exclude_symbols=['!', '/'])
 # train_set = HINT('train', exclude_symbols=['!', '/'], n_sample_zero_res=0.2)
 # train_set = HINT('val', exclude_symbols=['!', '*', '/'])
@@ -32,7 +34,7 @@ def evaluate(model, dataloader):
     dep_all = []
     dep_pred_all = []
 
-    for sample in dataloader:
+    for sample in tqdm(dataloader):
         img_seq = sample['img_seq']
         res = sample['res']
         seq_len = sample['len']
@@ -105,7 +107,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
     batch_size = 256
     train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
                          shuffle=True, num_workers=4, collate_fn=HINT_collate)
-    eval_dataloader = torch.utils.data.DataLoader(val_set, batch_size=batch_size,
+    eval_dataloader = torch.utils.data.DataLoader(val_set, batch_size=128,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     max_len = float("inf")
@@ -118,8 +120,8 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
 
     
     ###########evaluate init model###########
-    perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    # perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
+    # print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
     for epoch in range(num_epochs):
