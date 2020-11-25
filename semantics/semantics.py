@@ -44,9 +44,12 @@ class ProgramWrapper(object):
         if len(inputs) != self.arity:
             return None
         fn = self.fn
-        for x in inputs:
-            fn = fn(x)
-        return fn
+        try:
+            for x in inputs:
+                fn = fn(x)
+            return fn
+        except RecursionError as e:
+            return None
 
     def __eq__(self, prog):
         if isinstance(self.fn, int) and isinstance(prog.fn, int):
