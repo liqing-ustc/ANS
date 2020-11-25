@@ -230,7 +230,7 @@ class DreamCoder(object):
         g = self.grammar
         existingInventions = {p.uncurry()
                         for p in g.primitives}
-        programs = {smt.program for smt in self.semantics if smt.solved and smt.program.arity > 0}
+        programs = {smt.program.prog_ori for smt in self.semantics if smt.solved and smt.program.arity > 0}
         newInventions = programs - existingInventions
         if newInventions:
             self.grammar = Grammar.uniform([p for p in g.primitives] + \
