@@ -97,7 +97,7 @@ def evaluate(model, dataloader):
 
     return perception_acc, syntax_acc, result_acc
 
-def train(model, num_epochs=500, n_epochs_per_eval = 1):
+def train(model, num_epochs=500, n_epochs_per_eval = 5):
     best_acc = 0.0
     reward_moving_average = None
     reward_decay = 0.99
