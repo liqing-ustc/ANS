@@ -142,7 +142,7 @@ class Semantics(object):
 class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
-            enumerationTimeout=50, activation='tanh', iterations=3, recognitionTimeout=3600,
+            enumerationTimeout=20, activation='tanh', iterations=1, recognitionTimeout=3600,
             a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=numberOfCPUs(),
@@ -177,20 +177,6 @@ class DreamCoder(object):
 
     def __call__(self):
         return self.semantics
-
-    # def _sample_programs(self, grammar, n_prog_per_task=5):
-    #     sym2prog = []
-    #     for _ in range(NUM_TASKS):
-    #         programs = []
-    #         while len(programs) < n_prog_per_task:
-    #             arity = random.randint(0,2)
-    #             task_type = arrow(*([tint]*(arity + 1)))
-    #             prog = grammar.sample(task_type, maximumDepth=3)
-    #             prog = ProgramWrapper(prog, -10.0)
-    #             if prog not in programs:
-    #                 programs.append(prog)
-    #         sym2prog.append(programs)
-    #     return sym2prog
 
     def learn(self, dataset):
         for smt, exps in zip(self.semantics, dataset):
