@@ -231,10 +231,12 @@ class DreamCoder(object):
         existingInventions = {p.uncurry()
                         for p in g.primitives}
         programs = {smt.program.prog_ori for smt in self.semantics if smt.solved and smt.program.arity > 0}
-        newInventions = programs - existingInventions
-        if newInventions:
-            self.grammar = Grammar.uniform([p for p in g.primitives] + \
-                                        [Invented(ni) for ni in newInventions])
+        # programs = {smt.program.prog_ori for smt in self.semantics if smt.program is not None}
+        programs = programs - existingInventions
+        programs = {Invented(x) for x in programs}
+        programs = programs - existingInventions
+        if programs:
+            self.grammar = Grammar.uniform(g.primitives + list(programs))
         
 
     def _print_semantics(self):
