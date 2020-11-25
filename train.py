@@ -138,14 +138,20 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
         # Explore
         with torch.no_grad():
             model.train()
+            train_acc = []
             for sample in tqdm(train_dataloader):
                 img_seq = sample['img_seq']
                 res = sample['res']
                 seq_len = sample['len']
                 img_seq = img_seq.to(DEVICE)
 
-                model.deduce(img_seq, seq_len)
+                _, _, res_pred = model.deduce(img_seq, seq_len)
                 model.abduce(res, sample['img_paths'])
+                acc = np.mean(np.array(res_pred) == res.numpy())
+                train_acc.append(acc)
+            train_acc = np.mean(train_acc)
+            abduce_acc = len(model.buffer) / len(train_set)
+            print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
         
         print("Dep: ", Counter([tuple(ast.dependencies) for ast in model.buffer]))
         model.learn()
