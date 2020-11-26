@@ -134,9 +134,10 @@ class Semantics(object):
             print(len(examples), self.max_examples, end=' ')
 
         n_examples = min(len(examples), self.max_examples)
-        Z = sum(list(counts.values()))
+        counts = sorted(counts.items(), key=lambda x: -x[1])[:self.max_examples]
+        Z = sum([x[1] for x in counts])
         examples = []
-        for e, p in sorted(counts.items(), key=lambda x: -x[1]):
+        for e, p in counts:
             examples.extend([e] * int(p / Z * n_examples))
         self.examples = examples
 
