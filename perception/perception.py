@@ -55,7 +55,7 @@ class Perception(object):
         # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                         shuffle=True, num_workers=4)
+                         shuffle=True, num_workers=8)
         for _ in range(n_iters):
             img, label = next(iter(train_dataloader))
             img = img.to(self.device)

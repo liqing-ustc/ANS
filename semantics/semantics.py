@@ -96,8 +96,8 @@ class Semantics(object):
         if self.program.arity == 0:
             solved_threhold = 50
         else:
-            solved_threhold = float("inf")
-            # solved_threhold = 200
+            # solved_threhold = float("inf")
+            solved_threhold = 200
         if posterior >= 0.9 and len(self.examples) > solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
@@ -130,8 +130,6 @@ class Semantics(object):
         #     print(tmp[:10])
         #     print(tmp[-10:])
         #     print()
-        if arity > 0:
-            print(len(examples), self.max_examples, end=' ')
 
         n_examples = min(len(examples), self.max_examples)
         counts = sorted(counts.items(), key=lambda x: -x[1])[:self.max_examples]
@@ -141,8 +139,6 @@ class Semantics(object):
             examples.extend([e] * int(p / Z * n_examples))
         self.examples = examples
 
-        if arity > 0:
-            print(len(examples))
         return Task(str(self.idx), task_type, examples)
 
 
