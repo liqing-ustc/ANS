@@ -233,7 +233,7 @@ class Jointer:
             if len(dataset) > 200:
                 print("Learn perception with %d samples, "%(len(dataset)), end='')
                 st = time()
-                self.perception.learn(dataset, n_iters=1000)
+                self.perception.learn(dataset, n_iters=500)
                 print("take %d sec."%(time()-st))
 
             # learn syntax
@@ -241,7 +241,7 @@ class Jointer:
             if len(dataset) > 200:
                 print("Learn syntax with %d samples, "%(len(dataset)), end='')
                 st = time()
-                self.syntax.learn(dataset, n_iters=1000)
+                self.syntax.learn(dataset, n_iters=500)
                 print("take %d sec."%(time()-st))
         else:
             # learn semantics
