@@ -231,7 +231,7 @@ class Jointer:
             # learn perception
             dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
-                print("Learn perception with %d samples, "%(len(dataset)), end='')
+                print("Learn perception with %d samples, "%(len(dataset)), end='', flush=True)
                 st = time()
                 self.perception.learn(dataset, n_iters=500)
                 print("take %d sec."%(time()-st))
