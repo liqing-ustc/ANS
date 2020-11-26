@@ -227,7 +227,7 @@ class Jointer:
             dataset.append((sent, imgs, dep, root_res, ast_res, prob))
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
-        if self.learn_cycle % 5 == 0:
+        if (self.learn_cycle + 1) % 5 == 0:
             # learn perception
             dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
@@ -243,18 +243,18 @@ class Jointer:
                 st = time()
                 self.syntax.learn(dataset, n_iters=1000)
                 print("take %d sec."%(time()-st))
-
-        # learn semantics
-        dataset = [[] for _ in range(len(SYMBOLS) - 1)]
-        for ast in self.buffer:
-            queue = [ast.root_node]
-            while len(queue) > 0:
-                node = queue.pop()
-                queue.extend(node.children)
-                xs = tuple([x.res() for x in node.children])
-                y = int(node.res())
-                dataset[node.symbol].append((xs, y, ast.joint_prob))
-        self.semantics.learn(dataset)
+        else:
+            # learn semantics
+            dataset = [[] for _ in range(len(SYMBOLS) - 1)]
+            for ast in self.buffer:
+                queue = [ast.root_node]
+                while len(queue) > 0:
+                    node = queue.pop()
+                    queue.extend(node.children)
+                    xs = tuple([x.res() for x in node.children])
+                    y = int(node.res())
+                    dataset[node.symbol].append((xs, y, ast.joint_prob))
+            self.semantics.learn(dataset)
 
         self.clear_buffer()
         self.learn_cycle += 1
