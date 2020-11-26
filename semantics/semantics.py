@@ -76,7 +76,7 @@ class ProgramWrapper(object):
         self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=10, max_examples=200):
+    def __init__(self, idx, min_examples=10, max_examples=500):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -130,6 +130,8 @@ class Semantics(object):
         #     print(tmp[:10])
         #     print(tmp[-10:])
         #     print()
+        if arity > 0:
+            print(len(examples))
 
         n_examples = min(len(examples), self.max_examples)
         Z = sum(list(counts.values()))
