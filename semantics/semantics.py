@@ -76,11 +76,12 @@ class ProgramWrapper(object):
         self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=10):
+    def __init__(self, idx, min_examples=10, max_examples=200):
         self.idx = idx
         self.examples = []
         self.program = None
         self.min_examples = min_examples
+        self.max_examples = max_examples
         self.solved = False
 
     def update_examples(self, examples):
@@ -130,7 +131,7 @@ class Semantics(object):
         #     print(tmp[-10:])
         #     print()
 
-        n_examples = len(examples)
+        n_examples = min(len(examples), self.max_examples)
         Z = sum(list(counts.values()))
         examples = []
         for e, p in sorted(counts.items(), key=lambda x: -x[1]):
