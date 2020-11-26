@@ -19,7 +19,6 @@ test_set = HINT('val')
 train_set = HINT('train', exclude_symbols=['!', '*' '/', '-'])
 # train_set = HINT('train', exclude_symbols=['!', '/'], n_sample_zero_res=0.2)
 # train_set = HINT('val', exclude_symbols=['!', '*', '/'])
-# train_set.filter_by_len(max_len=1)
 print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
 
