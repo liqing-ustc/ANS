@@ -131,7 +131,7 @@ class Semantics(object):
         #     print(tmp[-10:])
         #     print()
         if arity > 0:
-            print(len(examples))
+            print(len(examples), self.max_examples, end=' ')
 
         n_examples = min(len(examples), self.max_examples)
         Z = sum(list(counts.values()))
@@ -139,6 +139,9 @@ class Semantics(object):
         for e, p in sorted(counts.items(), key=lambda x: -x[1]):
             examples.extend([e] * int(p / Z * n_examples))
         self.examples = examples
+
+        if arity > 0:
+            print(len(examples))
         return Task(str(self.idx), task_type, examples)
 
 
