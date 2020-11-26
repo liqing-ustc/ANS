@@ -76,7 +76,7 @@ class ProgramWrapper(object):
         self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=10, max_examples=500):
+    def __init__(self, idx, min_examples=10, max_examples=300):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -119,10 +119,22 @@ class Semantics(object):
         T = 1 / 5
         for e in examples:
             p = np.exp(e[2])
-            e = e[:2]
-            if e not in counts:
-                counts[e] = 0.
-            counts[e] += p ** T
+            xs, y = e[:2]
+            if xs not in counts:
+                counts[xs] = {}
+            if y not in counts[xs]:
+                counts[xs][y] = np.array([0., 0.])
+            counts[xs][y] += np.array([p ** T, 1])
+        new_counts = []
+        for xs, y2p in counts.items():
+            y2p = sorted(y2p.items(), key=lambda x: -x[1][0])
+            y, p = y2p[0]
+            new_counts.append(((xs, y), p))
+        n_examples = sum([p[1] for e, p in new_counts])
+        n_examples = min(n_examples, self.max_examples)
+        counts = [(e, p[0]) for e, p in new_counts]
+        counts = sorted(counts, key=lambda x: -x[1])
+        counts = counts[:self.max_examples]
 
         # if arity > 0:
         #     tmp = sorted(counts.items(), key=lambda x: -x[1])
@@ -131,8 +143,6 @@ class Semantics(object):
         #     print(tmp[-10:])
         #     print()
 
-        n_examples = min(len(examples), self.max_examples)
-        counts = sorted(counts.items(), key=lambda x: -x[1])[:self.max_examples]
         Z = sum([x[1] for x in counts])
         examples = []
         for e, p in counts:
