@@ -156,7 +156,7 @@ class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
             enumerationTimeout=50, activation='tanh', iterations=3, recognitionTimeout=3600,
-            a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
+            a=3, maximumFrontier=5, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=numberOfCPUs(),
             extras=list_options)
@@ -164,8 +164,9 @@ class DreamCoder(object):
         args['noConsolidation'] = True
         random.seed(args.pop("random_seed"))
         args['contextual'] = True
+        args['biasOptimal'] = True
+        args['auxiliaryLoss'] = True
 
-        baseGrammar = Grammar.uniform(McCarthyPrimitives())
 
         extractor = {
             "learned": LearnedFeatureExtractor,
@@ -178,12 +179,13 @@ class DreamCoder(object):
         
         args.update({
             "featureExtractor": extractor,
-            "outputPrefix": "%s/list"%outputDirectory,
+            "outputPrefix": "%s/hint"%outputDirectory,
             "evaluationTimeout": 0.0005,
         })
         args.pop("maxTasks")
         args.pop("split")
         
+        baseGrammar = Grammar.uniform(McCarthyPrimitives())
         self.grammar = baseGrammar
         self.train_args = args
         self.semantics = [Semantics(i) for i in range(NUM_TASKS)]
