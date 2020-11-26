@@ -161,6 +161,7 @@ class Jointer:
         self.semantics = semantics.build(config)
         self.ASTs = []
         self.buffer = []
+        self.learn_cycle = 0
 
     def train(self):
         self.perception.train()
@@ -226,21 +227,22 @@ class Jointer:
             dataset.append((sent, imgs, dep, root_res, ast_res, prob))
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
-        # learn perception
-        dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
-        if len(dataset) > 200:
-            print("Learn perception with %d samples, "%(len(dataset)), end='')
-            st = time()
-            self.perception.learn(dataset, n_iters=100)
-            print("take %d sec."%(time()-st))
+        if self.learn_cycle % 5 == 0:
+            # learn perception
+            dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
+            if len(dataset) > 200:
+                print("Learn perception with %d samples, "%(len(dataset)), end='')
+                st = time()
+                self.perception.learn(dataset, n_iters=1000)
+                print("take %d sec."%(time()-st))
 
-        # learn syntax
-        dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
-        if len(dataset) > 200:
-            print("Learn syntax with %d samples, "%(len(dataset)), end='')
-            st = time()
-            self.syntax.learn(dataset, n_iters=100)
-            print("take %d sec."%(time()-st))
+            # learn syntax
+            dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
+            if len(dataset) > 200:
+                print("Learn syntax with %d samples, "%(len(dataset)), end='')
+                st = time()
+                self.syntax.learn(dataset, n_iters=1000)
+                print("take %d sec."%(time()-st))
 
         # learn semantics
         dataset = [[] for _ in range(len(SYMBOLS) - 1)]
@@ -255,6 +257,7 @@ class Jointer:
         self.semantics.learn(dataset)
 
         self.clear_buffer()
+        self.learn_cycle += 1
 
 
 

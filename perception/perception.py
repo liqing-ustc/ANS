@@ -50,10 +50,11 @@ class Perception(object):
         print(acc)
 
     def learn(self, dataset, n_iters=100):
+        batch_size = 512
         dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
         # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
-        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=512,
+        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=4)
         for _ in range(n_iters):
             img, label = next(iter(train_dataloader))
