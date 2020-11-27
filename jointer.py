@@ -138,11 +138,17 @@ class AST: # Abstract Syntax Tree
             #     sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
             #     sampling_probs /= sampling_probs.sum()
             #     sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
+            # if self.root_node.smt.solved:
+            #     unsolveds = [smt.idx for smt in self.semantics if smt.program is None]
+            #     root_node_idx = self.dependencies.index(-1)
+            #     if not unsolveds: return None
+            #     sym = unsolveds[0]
             if self.root_node.smt.solved:
-                unsolveds = [smt.idx for smt in self.semantics if smt.program is None]
+                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
                 root_node_idx = self.dependencies.index(-1)
-                if not unsolveds: return None
-                sym = unsolveds[0]
+                root_node_probs = self.sent_probs[root_node_idx]
+                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
+                sym = unsolveds[np.argmax(sampling_probs)]
                 self.root_node.symbol = sym
                 self.sentence[root_node_idx] = sym
             self._res = None # we set the result of AST to None, and we will not use these data for learning perception and syntax

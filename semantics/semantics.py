@@ -76,7 +76,7 @@ class ProgramWrapper(object):
         self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=10, max_examples=100):
+    def __init__(self, idx, min_examples=10, max_examples=300):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -146,7 +146,7 @@ class Semantics(object):
         Z = sum([x[1] for x in counts])
         examples = []
         for e, p in counts:
-            examples.extend([e] * int(math.ceil(p / Z * n_examples)))
+            examples.extend([e] * int(round(p / Z * n_examples)))
         examples = examples[:n_examples]
         self.examples = examples
         return Task(str(self.idx), task_type, examples)
