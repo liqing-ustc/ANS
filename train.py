@@ -8,6 +8,7 @@ from jointer import Jointer
 
 import torch
 import numpy as np
+import pickle
 np.random.seed(157)
 
 
@@ -98,7 +99,7 @@ def evaluate(model, dataloader):
 
     return perception_acc, syntax_acc, result_acc
 
-def train(model, num_epochs=500, n_epochs_per_eval = 5):
+def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
     best_acc = 0.0
     reward_moving_average = None
     reward_decay = 0.99
@@ -123,7 +124,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
     # print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
-    for epoch in range(num_epochs):
+    for epoch in range(st_epoch, num_epochs):
         if epoch in curriculum_strategy:
             max_len = curriculum_strategy[epoch]
             train_set.filter_by_len(max_len=max_len)
@@ -160,6 +161,9 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
             print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
             if result_acc > best_acc:
                 best_acc = result_acc
+
+            model_path = "outputs/model_%03d.p"%(epoch + 1)
+            pickle.dump(model, open(model_path, 'wb'))
                 
         time_elapsed = time.time() - since
         print('Epoch time: {:.0f}m {:.0f}s'.format(
@@ -185,6 +189,11 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
 
 
 model = Jointer()
+resume = None
+# resume = "outputs/model.p"
+if resume:
+    model = pickle.load(open(resume, 'rb'))
+
 model.to(DEVICE)
 train(model)
 
