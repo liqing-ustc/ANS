@@ -79,7 +79,8 @@ class AST: # Abstract Syntax Tree
         # abduce over sentence
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
         for sent_pos in sent_pos_list:
-            s_prob = self.sent_probs[sent_pos] * np.array([smt.priority for smt in self.semantics])
+            # s_prob = self.sent_probs[sent_pos] * np.array([smt.priority for smt in self.semantics])
+            s_prob = self.sent_probs[sent_pos] * np.array([smt.likelihood for smt in self.semantics])
             for sym_pos in np.argsort(s_prob)[::-1]:
                 if s_prob[sym_pos] <= epsilon:
                     break
