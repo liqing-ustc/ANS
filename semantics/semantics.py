@@ -130,7 +130,7 @@ class Semantics(object):
             y2p = sorted(y2p.items(), key=lambda x: -x[1][0])
             y, p = y2p[0]
             new_counts.append(((xs, y), p))
-        n_examples = sum([p[1] for e, p in new_counts])
+        n_examples = int(sum([p[1] for e, p in new_counts]))
         n_examples = min(n_examples, self.max_examples)
         counts = [(e, p[0]) for e, p in new_counts]
         counts = sorted(counts, key=lambda x: -x[1])
