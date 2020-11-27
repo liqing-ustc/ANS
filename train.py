@@ -136,7 +136,8 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
 
         # Explore
         with torch.no_grad():
-            model.eval()
+            if max_len == 1: model.train()
+            else: model.eval()
             train_acc = []
             for sample in tqdm(train_dataloader):
                 img_seq = sample['img_seq']
