@@ -5,7 +5,8 @@ import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
-from tqdm import trange
+from tqdm import trange, tqdm
+import math
 
 class Perception(object):
     def __init__(self):
@@ -53,19 +54,21 @@ class Perception(object):
     def learn(self, dataset, n_iters=100):
         batch_size = 512
         dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
+        n_epochs = int(math.ceil(batch_size * n_iters // len(dataset)))
+        n_epochs = max(n_epochs, 5) # run at least 5 epochs
         # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
-        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, pin_memory=True,
+        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)
-        for _ in trange(n_iters):
-            img, label = next(iter(train_dataloader))
-            img = img.to(self.device)
-            label = label.to(self.device)
-            logit = self.model(img)
-            loss = self.criterion(logit, label)
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+        for epoch in trange(n_epochs):
+            for img, label in train_dataloader:
+                img = img.to(self.device)
+                label = label.to(self.device)
+                logit = self.model(img)
+                loss = self.criterion(logit, label)
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
                 
 
 class SymbolNet(nn.Module):

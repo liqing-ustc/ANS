@@ -218,12 +218,15 @@ class DreamCoder(object):
 
     def learn(self, dataset):
         tasks = []
+        max_arity = 0
         for smt, exps in zip(self.semantics, dataset):
             if smt.solved: continue
             smt.update_examples(exps)
             t = smt.make_task()
             if t is not None:
                 tasks.append(t)
+                max_arity = max(smt.arity, max_arity)
+        self.train_args['enumerationTimeout'] = 10 if max_arity == 0 else 200
         n_solved = len(['' for t in self.semantics if t.solved])
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         if len(tasks) == 0:

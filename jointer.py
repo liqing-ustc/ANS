@@ -239,7 +239,7 @@ class Jointer:
             # learn perception
             dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
-                n_iters = 5000
+                n_iters = int(1e3)
                 print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
                 st = time()
                 self.perception.learn(dataset, n_iters=n_iters)
