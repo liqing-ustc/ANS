@@ -79,11 +79,11 @@ class AST: # Abstract Syntax Tree
         # abduce over sentence
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
         for sent_pos in sent_pos_list:
-            s_prob = self.sent_probs[sent_pos]
-            if s_prob[self.sentence[sent_pos]] > 1 - epsilon:
+            s_prob = self.sent_probs[sent_pos] * np.array([smt.likelihood for smt in self.semantics])
+            if s_prob[self.sentence[sent_pos]] >= 1 - epsilon:
                 break
             for sym_pos in np.argsort(s_prob)[::-1]:
-                if s_prob[sym_pos] < epsilon:
+                if s_prob[sym_pos] <= epsilon:
                     break
                 new_sentence = deepcopy(self.sentence)
                 new_sentence[sent_pos] = sym_pos
@@ -165,7 +165,7 @@ class Jointer:
         self.learn_cycle = 0
 
     def save(self, model_path):
-        
+
         pass
 
     def resume(self, model_path):

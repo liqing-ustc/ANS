@@ -90,7 +90,7 @@ class Semantics(object):
         examples = [x for x in examples if len(x[0]) == arity]
 
         counts = {}
-        T = 1
+        T = 1 / 5
         for e in examples:
             p = np.exp(e[2])
             xs, y = e[:2]
@@ -117,6 +117,7 @@ class Semantics(object):
             self.arity = arity
             self.examples = counts
             self.check_solved()
+            # print(self.examples)
 
     def update_program(self, entry):
         if math.exp(entry.logLikelihood) < self.likelihood:
@@ -153,10 +154,10 @@ class Semantics(object):
 
         examples = []
         n_examples = min(self.total_examples, 100)
-        examples = random.choices([e for e, _ in self.examples], weights=[p for _, p in self.examples], k=n_examples)
-        # for e, p in self.examples:
-        #     examples.extend([e] * int(round(p * n_examples)))
-        # examples = examples[:n_examples]
+        # examples = random.choices([e for e, _ in self.examples], weights=[p for _, p in self.examples], k=n_examples)
+        for e, p in self.examples:
+            examples.extend([e] * int(round(p * n_examples)))
+        examples = examples[:n_examples]
         return Task(str(self.idx), task_type, examples)
 
     def clear(self):
