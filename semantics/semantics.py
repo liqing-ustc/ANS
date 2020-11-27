@@ -146,8 +146,8 @@ class Semantics(object):
         Z = sum([x[1] for x in counts])
         examples = []
         for e, p in counts:
-            examples.extend([e] * int(p / Z * n_examples))
-        self.examples = examples
+            examples.extend([e] * int(math.ceil(p / Z * n_examples)))
+        self.examples = examples[:n_examples]
 
         return Task(str(self.idx), task_type, examples)
 
@@ -166,6 +166,8 @@ class DreamCoder(object):
         args['contextual'] = True
         args['biasOptimal'] = True
         args['auxiliaryLoss'] = True
+        args['activation'] = "relu"
+        args['useDSL'] = False
 
 
         extractor = {
