@@ -13,9 +13,10 @@ import numpy as np
 def minibatches(data, batch_size):
     x = np.array([d[0] for d in data])
     y = np.array([d[2] for d in data])
+    p = np.array([d[3] for d in data])
     one_hot = np.zeros((y.size, 3))
     one_hot[np.arange(y.size), y] = 1
-    return get_minibatches([x, one_hot], batch_size)
+    return get_minibatches([x, one_hot, p], batch_size)
 
 def get_minibatches(data, minibatch_size, shuffle=True):
     """

@@ -115,7 +115,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
         (0, 1),
         (5, 3),
         (20, 5),
-        (1000, 1e9)
+        (100, 1e9)
     ])
 
     

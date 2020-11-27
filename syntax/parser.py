@@ -69,8 +69,8 @@ class Parser(object):
 
         self.model = ParserModel(n_tokens=self.n_tokens, n_features=self.n_features)
         self.device = torch.device('cpu')
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, amsgrad=True)
-        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3, amsgrad=True)
+        self.criterion = nn.CrossEntropyLoss(reduction="none")
     
     def train(self):
         self.model.train()
@@ -148,6 +148,10 @@ class Parser(object):
         succ = 0
         for id, ex in enumerate(examples):
             n_words = len(ex['word'])
+            if 'prob' in ex:
+                prob = ex['prob']
+            else:
+                prob = 1.
 
             # arcs = {(h, t, label)}
             stack = []
@@ -161,7 +165,7 @@ class Parser(object):
                 legal_labels = self.legal_labels(stack, buf)
                 assert legal_labels[gold_t] == 1
                 instances.append((self.extract_features(stack, buf, arcs, ex['word']),
-                                  legal_labels, gold_t))
+                                  legal_labels, gold_t, prob))
                 if gold_t == self.n_trans - 1:
                     stack.append(buf.pop(0))
                 elif gold_t == 0:
@@ -250,14 +254,16 @@ class Parser(object):
         n_epochs = int(math.ceil(batch_size * n_iters // len(train_data)))
         self.model.train() # Places model in "train" mode, i.e. apply dropout layer
         for epoch in range(n_epochs):
-            for i, (train_x, train_y) in enumerate(minibatches(train_data, batch_size)):
+            for i, (train_x, train_y, prob) in enumerate(minibatches(train_data, batch_size)):
                 train_x = torch.from_numpy(train_x).long()
                 train_y = torch.from_numpy(train_y.nonzero()[1]).long()
+                prob = torch.from_numpy(prob)
                 train_x = train_x.to(self.device)
                 train_y = train_y.to(self.device)
+                prob = prob.to(self.device)
                 output_y = self.model(train_x)
-                loss = self.criterion(output_y, train_y)
-
+                loss = self.criterion(output_y, train_y) * prob.to(torch.float32)
+                loss = loss.sum()
                 self.optimizer.zero_grad()   # remove any baggage in the optimizer
                 loss.backward()
                 self.optimizer.step()

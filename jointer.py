@@ -80,8 +80,6 @@ class AST: # Abstract Syntax Tree
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
         for sent_pos in sent_pos_list:
             s_prob = self.sent_probs[sent_pos] * np.array([smt.priority for smt in self.semantics])
-            if s_prob[self.sentence[sent_pos]] >= 1 - epsilon:
-                break
             for sym_pos in np.argsort(s_prob)[::-1]:
                 if s_prob[sym_pos] <= epsilon:
                     break
@@ -236,22 +234,22 @@ class Jointer:
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
         if (self.learn_cycle + 1) % 5 == 0:
-            # learn perception
-            dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
-            if len(dataset) > 200:
-                n_iters = int(500)
-                print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                st = time()
-                self.perception.learn(dataset, n_iters=n_iters)
-                print("take %d sec."%(time()-st))
-
             # learn syntax
-            dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
+            dataset = [{'word': x.sentence, 'head': x.dependencies, 'prob': np.exp(x.joint_prob)} for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
                 n_iters = int(1000)
                 print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
                 st = time()
                 self.syntax.learn(dataset, n_iters=n_iters)
+                print("take %d sec."%(time()-st))
+
+            # learn perception
+            dataset = [(x.img_paths, x.sentence, np.exp(x.joint_prob)) for x in self.buffer if x.res() is not None]
+            if len(dataset) > 200:
+                n_iters = int(500)
+                print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+                st = time()
+                self.perception.learn(dataset, n_iters=n_iters)
                 print("take %d sec."%(time()-st))
         else:
             # learn semantics

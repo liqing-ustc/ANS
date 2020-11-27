@@ -12,8 +12,8 @@ class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
         self.model = SymbolNet()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
-        self.criterion = nn.CrossEntropyLoss(ignore_index=-1)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        self.criterion = nn.CrossEntropyLoss(ignore_index=-1, reduction="none")
         self.device = torch.device('cpu')
     
     def train(self):
@@ -53,7 +53,7 @@ class Perception(object):
 
     def learn(self, dataset, n_iters=100):
         batch_size = 512
-        dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
+        dataset = [(img, label, prob) for img_seq, label_seq, prob in dataset for img, label in zip(img_seq, label_seq)]
         n_epochs = int(math.ceil(batch_size * n_iters // len(dataset)))
         n_epochs = max(n_epochs, 5) # run at least 5 epochs
         # self.check_accuarcy(dataset)
@@ -61,11 +61,13 @@ class Perception(object):
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)
         for epoch in range(n_epochs):
-            for img, label in train_dataloader:
+            for img, label, prob in train_dataloader:
                 img = img.to(self.device)
                 label = label.to(self.device)
+                prob = prob.to(self.device)
                 logit = self.model(img)
-                loss = self.criterion(logit, label)
+                loss = self.criterion(logit, label) * prob.to(torch.float32)
+                loss = loss.sum()
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
@@ -102,11 +104,11 @@ class ImageSet(Dataset):
 
     def __getitem__(self, index):
         sample = self.dataset[index]
-        img_path, label = sample
+        img_path, label, prob = sample
         img = Image.open(IMG_DIR+img_path).convert('L')
         img = self.img_transform(img)
 
-        return img, label
+        return img, label, prob
 
     def __len__(self):
         return len(self.dataset)
