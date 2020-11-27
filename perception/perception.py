@@ -59,7 +59,7 @@ class Perception(object):
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)
-        for epoch in trange(n_epochs):
+        for epoch in range(n_epochs):
             for img, label, prob in train_dataloader:
                 img = img.to(self.device)
                 label = label.to(self.device)
