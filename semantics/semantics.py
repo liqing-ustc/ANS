@@ -155,7 +155,7 @@ class Semantics(object):
 class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
-            enumerationTimeout=50, activation='tanh', iterations=3, recognitionTimeout=3600,
+            enumerationTimeout=200, activation='tanh', iterations=1, recognitionTimeout=3600,
             a=3, maximumFrontier=5, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=numberOfCPUs(),
