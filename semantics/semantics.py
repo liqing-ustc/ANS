@@ -28,7 +28,7 @@ from utils import SYMBOLS
 NUM_TASKS = len(SYMBOLS) - 1
 
 class ProgramWrapper(object):
-    def __init__(self, prog, logPosterior=0.):
+    def __init__(self, prog):
         try:
             self.fn = prog.evaluate([])
         except RecursionError as e:
@@ -36,7 +36,6 @@ class ProgramWrapper(object):
         self.prog_ori = prog
         self.prog = str(prog)
         self.arity = len(prog.infer().functionArguments())
-        self.logPosterior = logPosterior
         self._name = None
         self.y = None # used for equivalence check
     
@@ -59,7 +58,7 @@ class ProgramWrapper(object):
         return self.prog == prog.prog
 
     def __str__(self):
-        return "%s %s %.2f"%(self.name, self.prog, math.exp(self.logPosterior))
+        return "%s %s"%(self.name, self.prog)
 
     @property
     def name(self):
@@ -71,52 +70,27 @@ class ProgramWrapper(object):
             pass # TODO: assign name based on the function
         return self._name
 
-
     def evaluate(self, examples): # used for equivalence check on a dataset
         self.y = np.array([self(*xs) for xs in examples])
+        return self.y
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=10, max_examples=300):
+    def __init__(self, idx):
         self.idx = idx
-        self.examples = []
+        self.examples = None
         self.program = None
-        self.min_examples = min_examples
-        self.max_examples = max_examples
         self.solved = False
+        self.likelihood = 0.
+        self.total_examples = 0
 
     def update_examples(self, examples):
-        self.examples = examples
-
-    def update_program(self, program):
-        self.program = program
-        self.check_solved()
-    
-    def check_solved(self):
-        posterior = np.exp(self.program.logPosterior)
-        if self.program.arity == 0:
-            solved_threhold = 50
-        else:
-            # solved_threhold = float("inf")
-            solved_threhold = self.max_examples * 0.9
-        if posterior >= 0.9 and len(self.examples) >= solved_threhold: # more careful!
-            self.solved = True
-            self.program.logPosterior = 0.0 
-    
-    def __call__(self, *inputs):
-        return self.program(*inputs)
-
-    def make_task(self):
-        examples = self.examples
-        if self.solved or len(examples) == 0:
-            return None
+        if not examples:
+            return
         arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
-        task_type = arrow(*([tint]*(arity + 1)))
         examples = [x for x in examples if len(x[0]) == arity]
-        if len(examples) < self.min_examples:
-            return None
 
         counts = {}
-        T = 1 / 5
+        T = 1
         for e in examples:
             p = np.exp(e[2])
             xs, y = e[:2]
@@ -130,26 +104,67 @@ class Semantics(object):
             y2p = sorted(y2p.items(), key=lambda x: -x[1][0])
             y, p = y2p[0]
             new_counts.append(((xs, y), p))
-        n_examples = int(sum([p[1] for e, p in new_counts]))
-        n_examples = min(n_examples, self.max_examples)
+        total_examples = int(sum([p[1] for e, p in new_counts]))
         counts = [(e, p[0]) for e, p in new_counts]
+        Z = sum([p for e, p in counts])
+        counts = [(e, p/Z) for e, p in counts]
         counts = sorted(counts, key=lambda x: -x[1])
-        counts = counts[:self.max_examples]
 
-        # if arity > 0:
-        #     tmp = sorted(counts.items(), key=lambda x: -x[1])
-        #     print()
-        #     print(tmp[:10])
-        #     print(tmp[-10:])
-        #     print()
+        if total_examples < 10:
+            self.clear() # clear the semantics
+        else:
+            self.total_examples = total_examples
+            self.arity = arity
+            self.examples = counts
+            self.check_solved()
 
-        Z = sum([x[1] for x in counts])
+    def update_program(self, entry):
+        if math.exp(entry.logLikelihood) < self.likelihood:
+            return
+        self.program = ProgramWrapper(entry.program)
+        self.check_solved()
+    
+    def check_solved(self):
+        self.update_likelihood()
+        if self.arity == 0:
+            solved_threhold = 50
+        else:
+            # solved_threhold = float("inf")
+            solved_threhold = 200
+        if self.likelihood >= 0.9 and self.total_examples >= solved_threhold: # more careful!
+            self.solved = True
+            self.likelihood = 1.0
+    
+    def update_likelihood(self):
+        if self.program is None:
+            self.likelihood = 0.
+        else:
+            pred = self.program.evaluate([e[0] for e, p in self.examples])
+            gt = [e[1] for e, p in self.examples]
+            self.likelihood = np.sum(np.array(pred == gt) * np.array([p for e, p in self.examples]))
+    
+    def __call__(self, *inputs):
+        return self.program(*inputs)
+
+    def make_task(self):
+        if self.solved or self.total_examples == 0:
+            return None
+        task_type = arrow(*([tint]*(self.arity + 1)))
+
         examples = []
-        for e, p in counts:
-            examples.extend([e] * int(round(p / Z * n_examples)))
-        examples = examples[:n_examples]
-        self.examples = examples
+        n_examples = min(self.total_examples, 100)
+        examples = random.choices([e for e, _ in self.examples], weights=[p for _, p in self.examples], k=n_examples)
+        # for e, p in self.examples:
+        #     examples.extend([e] * int(round(p * n_examples)))
+        # examples = examples[:n_examples]
         return Task(str(self.idx), task_type, examples)
+
+    def clear(self):
+        self.examples = None
+        self.program = None
+        self.solved = False
+        self.likelihood = 0.
+        self.total_examples = 0
 
 
 class DreamCoder(object):
@@ -208,26 +223,13 @@ class DreamCoder(object):
         self._print_tasks(tasks)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
 
-        programs = [(smt.idx, smt.program) for smt in self.semantics if smt.solved]
         for frontier in result.taskSolutions.values():
             if not frontier.entries: continue
             symbol_idx = int(frontier.task.name)
-            best_entry = frontier.bestPosterior
-            prog = ProgramWrapper(best_entry.program, best_entry.logPosterior)
-            programs.append((symbol_idx, prog))
+            self.semantics[symbol_idx].update_program(frontier.bestPosterior)
         examples = [xs for t in tasks for xs, y in t.examples]
-        programs = self._removeEquivalent(programs, examples)
-
-        # clear all past programs
-        for smt in self.semantics:
-            smt.program = None
-
-        for idx, p in programs:
-            smt = self.semantics[idx]
-            smt.update_program(p)
-
+        self._removeEquivalentSemantics(examples)
         self._print_semantics()
-
         self.update_grammar()
         # self.grammar = result.grammars[-1]
         print(self.grammar)
@@ -240,7 +242,7 @@ class DreamCoder(object):
 
     def _print_semantics(self):
         for smt in sorted(self.semantics, key=lambda x: str(x.program)):
-            print("Symbol-%02d: %s"%(smt.idx, smt.program))
+            print("Symbol-%02d: %s %.2f"%(smt.idx, smt.program, smt.likelihood))
             # print("Solved!" if smt.solved else "")
 
     def _print_tasks(self, tasks):
@@ -250,17 +252,24 @@ class DreamCoder(object):
 
         json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
 
-    def _removeEquivalent(self, programs, examples=None):
-        programs = sorted(programs, key=lambda x: (-x[1].logPosterior, x[0]))
+    def _removeEquivalentSemantics(self, examples=None):
         if examples is not None:
             examples = list(set(examples))
-            for _, p in programs:
-                p.evaluate(examples)
-        programs_keep = []
-        symbols_keep = []
-        for i, p in programs:
-            if p not in programs_keep:
-                programs_keep.append(p)
-                symbols_keep.append(i)
-        programs = list(zip(symbols_keep, programs_keep))
-        return programs
+            for smt in self.semantics:
+                if smt.program is not None:
+                    smt.program.evaluate(examples)
+        
+        for i in range(len(self.semantics) - 1):
+            smt_i = self.semantics[i]
+            if smt_i.program is None:
+                continue
+            for j in range(i+1, len(self.semantics)):
+                smt_j = self.semantics[j]
+                if smt_j.program is None:
+                    continue
+                if smt_i.program == smt_j.program:
+                    if smt_i.likelihood >= smt_j.likelihood:
+                        smt_j.clear()
+                    else:
+                        smt_i.clear()
+                        break

@@ -163,7 +163,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
                 best_acc = result_acc
 
             model_path = "outputs/model_%03d.p"%(epoch + 1)
-            pickle.dump(model, open(model_path, 'wb'))
+            model.save(model_path)
                 
         time_elapsed = time.time() - since
         print('Epoch time: {:.0f}m {:.0f}s'.format(
@@ -189,10 +189,10 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
 
 
 model = Jointer()
-resume = None
+resume_path = None
 # resume = "outputs/model.p"
-if resume:
-    model = pickle.load(open(resume, 'rb'))
+if resume_path:
+    model.resume(resume_path)
 
 model.to(DEVICE)
 train(model)

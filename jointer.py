@@ -31,14 +31,9 @@ class Node:
 
 def joint_prob(sentence, transitions, semantics, sent_probs, trans_probs):
     probs = [sent_probs[i,w] for i, w in enumerate(sentence)] + \
-            [trans_probs[i][t] for i, t in enumerate(transitions)]
-    for w in sentence:
-        pg = semantics[w].program
-        if pg is not None:
-            prob = np.exp(pg.logPosterior)
-        else:
-            prob = 1e-12
-        probs.append(prob)
+            [trans_probs[i][t] for i, t in enumerate(transitions)] + \
+            [semantics[w].likelihood for w in sentence]
+    probs = np.array(probs) + 1e-12
     log_prob = np.log(probs).sum()
     return log_prob
 
@@ -168,6 +163,13 @@ class Jointer:
         self.ASTs = []
         self.buffer = []
         self.learn_cycle = 0
+
+    def save(self, model_path):
+        
+        pass
+
+    def resume(self, model_path):
+        pass
 
     def train(self):
         self.perception.train()
