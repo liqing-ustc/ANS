@@ -112,7 +112,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5):
     max_len = float("inf")
     curriculum_strategy = dict([
         (0, 1),
-        (5, 3),
+        (10, 3),
         (100, 5),
         (1000, 1e9)
     ])
