@@ -1,1 +1,1 @@
-python train.py >log.txt
+python train.py >outputs/main.log 2>outputs/dreamcoder.log

@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
+from tqdm import trange
 
 class Perception(object):
     def __init__(self):
@@ -54,9 +55,9 @@ class Perception(object):
         dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
         # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
-        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
+        train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, pin_memory=True,
                          shuffle=True, num_workers=8)
-        for _ in range(n_iters):
+        for _ in trange(n_iters):
             img, label = next(iter(train_dataloader))
             img = img.to(self.device)
             label = label.to(self.device)

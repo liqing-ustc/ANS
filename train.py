@@ -34,7 +34,7 @@ def evaluate(model, dataloader):
     dep_all = []
     dep_pred_all = []
 
-    for sample in tqdm(dataloader):
+    for sample in dataloader:
         img_seq = sample['img_seq']
         res = sample['res']
         seq_len = sample['len']
@@ -139,7 +139,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
         with torch.no_grad():
             model.train()
             train_acc = []
-            for sample in tqdm(train_dataloader):
+            for sample in train_dataloader:
                 img_seq = sample['img_seq']
                 res = sample['res']
                 seq_len = sample['len']

@@ -79,7 +79,7 @@ class AST: # Abstract Syntax Tree
         # abduce over sentence
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
         for sent_pos in sent_pos_list:
-            s_prob = self.sent_probs[sent_pos] * np.array([smt.likelihood for smt in self.semantics])
+            s_prob = self.sent_probs[sent_pos] * np.array([smt.priority for smt in self.semantics])
             if s_prob[self.sentence[sent_pos]] >= 1 - epsilon:
                 break
             for sym_pos in np.argsort(s_prob)[::-1]:
@@ -239,17 +239,19 @@ class Jointer:
             # learn perception
             dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
-                print("Learn perception with %d samples, "%(len(dataset)), end='', flush=True)
+                n_iters = 5000
+                print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
                 st = time()
-                self.perception.learn(dataset, n_iters=500)
+                self.perception.learn(dataset, n_iters=n_iters)
                 print("take %d sec."%(time()-st))
 
             # learn syntax
             dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
-                print("Learn syntax with %d samples, "%(len(dataset)), end='')
+                n_iters = int(1e4)
+                print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
                 st = time()
-                self.syntax.learn(dataset, n_iters=500)
+                self.syntax.learn(dataset, n_iters=n_iters)
                 print("take %d sec."%(time()-st))
         else:
             # learn semantics

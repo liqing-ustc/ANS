@@ -128,7 +128,7 @@ class Semantics(object):
     def check_solved(self):
         self.update_likelihood()
         if self.arity == 0:
-            solved_threhold = 50
+            solved_threhold = 5
         else:
             # solved_threhold = float("inf")
             solved_threhold = 200
@@ -143,6 +143,11 @@ class Semantics(object):
             pred = self.program.evaluate([e[0] for e, p in self.examples])
             gt = [e[1] for e, p in self.examples]
             self.likelihood = np.sum(np.array(pred == gt) * np.array([p for e, p in self.examples]))
+
+    @property
+    def priority(self):
+        # used for abduction, favor the solved semantics a little more
+        return self.likelihood + 1.0 if self.solved else 0.
     
     def __call__(self, *inputs):
         return self.program(*inputs)
@@ -212,10 +217,13 @@ class DreamCoder(object):
         return self.semantics
 
     def learn(self, dataset):
+        tasks = []
         for smt, exps in zip(self.semantics, dataset):
+            if smt.solved: continue
             smt.update_examples(exps)
-        tasks = [t.make_task() for t in self.semantics]
-        tasks = [t for t in tasks if t is not None]
+            t = smt.make_task()
+            if t is not None:
+                tasks.append(t)
         n_solved = len(['' for t in self.semantics if t.solved])
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         if len(tasks) == 0:
