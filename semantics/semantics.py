@@ -55,7 +55,7 @@ class ProgramWrapper(object):
         if isinstance(self.fn, int) and isinstance(prog.fn, int):
             return self.fn == prog.fn
         if self.y is not None and prog.y is not None:
-            return np.all(self.y == prog.y)
+            return np.mean(self.y == prog.y) > 0.5
         return self.prog == prog.prog
 
     def __str__(self):
@@ -76,7 +76,7 @@ class ProgramWrapper(object):
         self.y = np.array([self(*xs) for xs in examples])
 
 class Semantics(object):
-    def __init__(self, idx, min_examples=10, max_examples=300):
+    def __init__(self, idx, min_examples=10, max_examples=100):
         self.idx = idx
         self.examples = []
         self.program = None
@@ -97,8 +97,8 @@ class Semantics(object):
             solved_threhold = 50
         else:
             # solved_threhold = float("inf")
-            solved_threhold = 200
-        if posterior >= 0.9 and len(self.examples) > solved_threhold: # more careful!
+            solved_threhold = self.max_examples * 0.9
+        if posterior >= 0.9 and len(self.examples) >= solved_threhold: # more careful!
             self.solved = True
             self.program.logPosterior = 0.0 
     
