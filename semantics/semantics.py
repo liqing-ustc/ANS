@@ -147,8 +147,8 @@ class Semantics(object):
         examples = []
         for e, p in counts:
             examples.extend([e] * int(math.ceil(p / Z * n_examples)))
-        self.examples = examples[:n_examples]
-
+        examples = examples[:n_examples]
+        self.examples = examples
         return Task(str(self.idx), task_type, examples)
 
 
