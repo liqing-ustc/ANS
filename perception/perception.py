@@ -56,11 +56,10 @@ class Perception(object):
         dataset = [(img, label, prob) for img_seq, label_seq, prob in dataset for img, label in zip(img_seq, label_seq)]
         n_epochs = int(math.ceil(batch_size * n_iters // len(dataset)))
         n_epochs = max(n_epochs, 5) # run at least 5 epochs
-        # self.check_accuarcy(dataset)
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)
-        for epoch in range(n_epochs):
+        for epoch in trange(n_epochs):
             for img, label, prob in train_dataloader:
                 img = img.to(self.device)
                 label = label.to(self.device)
