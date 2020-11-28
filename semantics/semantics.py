@@ -147,7 +147,7 @@ class Semantics(object):
     @property
     def priority(self):
         # used for abduction, favor the solved semantics a little more
-        return self.likelihood + 1.0 if self.solved else 0.
+        return self.likelihood + (1.0 if self.solved else 0.)
     
     def __call__(self, *inputs):
         return self.program(*inputs)
