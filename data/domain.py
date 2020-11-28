@@ -21,7 +21,8 @@ class Program():
 
 functions = [
     lambda: 0, lambda: 1, lambda: 2, lambda: 3, lambda: 4, lambda: 5, lambda: 6, lambda: 7, lambda: 8, lambda: 9,
-    lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: x//y, lambda x: math.factorial(x) if x <=20 else None,
+    lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: math.ceil(x/y) if y != 0 else None, 
+    lambda x: math.factorial(x) if x <=20 else None,
     lambda: None
 ]
 
