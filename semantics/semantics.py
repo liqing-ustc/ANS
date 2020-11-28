@@ -233,6 +233,8 @@ class DreamCoder(object):
             self._print_semantics()
             return 
         self._print_tasks(tasks)
+        self.update_grammar()
+        print(self.grammar)
         result = explorationCompression(self.grammar, tasks, **self.train_args)
 
         for frontier in result.taskSolutions.values():
@@ -242,9 +244,7 @@ class DreamCoder(object):
         examples = [xs for t in tasks for xs, y in t.examples]
         self._removeEquivalentSemantics(examples)
         self._print_semantics()
-        self.update_grammar()
         # self.grammar = result.grammars[-1]
-        print(self.grammar)
 
     def update_grammar(self):
         programs = [Invented(smt.program.prog_ori) for smt in self.semantics if smt.solved and smt.program.arity > 0]

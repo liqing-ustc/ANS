@@ -235,7 +235,7 @@ class Jointer:
 
         if (self.learn_cycle + 1) % 5 == 0:
             # learn syntax
-            dataset = [{'word': x.sentence, 'head': x.dependencies, 'prob': 1} 
+            dataset = [{'word': x.sentence, 'head': x.dependencies} 
                         for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
                 n_iters = int(500)
@@ -245,7 +245,7 @@ class Jointer:
                 print("take %d sec."%(time()-st))
 
             # learn perception
-            dataset = [(x.img_paths, x.sentence, 1) for x in self.buffer if x.res() is not None]
+            dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
             if len(dataset) > 200:
                 n_iters = int(500)
                 print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
