@@ -191,7 +191,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
 model = Jointer()
 st_epoch = 0
 resume = None
-resume = "outputs/model_005.p"
+# resume = "outputs/model_005.p"
 if resume:
     st_epoch = model.load(resume)
     if st_epoch is None:
