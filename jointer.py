@@ -235,7 +235,9 @@ class Jointer:
 
         if (self.learn_cycle + 1) % 5 == 0:
             # learn syntax
-            dataset = [{'word': x.sentence, 'head': x.dependencies, 'prob': np.exp(x.joint_prob)} for x in self.buffer if x.res() is not None]
+            # we don't learn syntax using examples of length 1
+            dataset = [{'word': x.sentence, 'head': x.dependencies, 'prob': np.exp(x.joint_prob)} 
+                        for x in self.buffer if x.res() is not None and len(x.sentence) > 1]
             if len(dataset) > 200:
                 n_iters = int(1000)
                 print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
