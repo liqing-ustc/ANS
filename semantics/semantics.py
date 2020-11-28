@@ -50,10 +50,13 @@ class ProgramWrapper(object):
         except RecursionError as e:
             return None
 
-    def __eq__(self, prog):
+    def __eq__(self, prog): # only used for removing equivalent semantics
+        if self.arity != prog.arity:
+            return False
         if isinstance(self.fn, int) and isinstance(prog.fn, int):
             return self.fn == prog.fn
         if self.y is not None and prog.y is not None:
+            assert len(self.y) == len(prog.y) # the program should be evaluated on same examples
             return np.mean(self.y == prog.y) > 0.5
         return self.prog == prog.prog
 
@@ -71,6 +74,7 @@ class ProgramWrapper(object):
         return self._name
 
     def evaluate(self, examples): # used for equivalence check on a dataset
+        examples = [xs for xs in examples if len(xs) == self.arity]
         self.y = np.array([self(*xs) for xs in examples])
         return self.y
 
@@ -248,8 +252,7 @@ class DreamCoder(object):
 
     def update_grammar(self):
         programs = [Invented(smt.program.prog_ori) for smt in self.semantics if smt.solved and smt.program.arity > 0]
-        if programs:
-            self.grammar = Grammar.uniform(McCarthyPrimitives() + programs)
+        self.grammar = Grammar.uniform(McCarthyPrimitives() + programs)
         
 
     def _print_semantics(self):
