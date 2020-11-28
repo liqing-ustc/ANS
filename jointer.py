@@ -6,6 +6,7 @@ from func_timeout import func_timeout, FunctionTimedOut
 from utils import SYMBOLS
 from collections import Counter
 from time import time
+import torch
 
 class Node:
     def __init__(self, symbol, smt):
@@ -162,12 +163,19 @@ class Jointer:
         self.buffer = []
         self.learn_cycle = 0
 
-    def save(self, model_path):
+    def save(self, save_path, epoch=None):
+        model = {'epoch': epoch}
+        model['perception'] = self.perception.save()
+        model['syntax'] = self.syntax.save()
+        model['semantics'] = self.semantics.save()
+        torch.save(model, save_path)
 
-        pass
-
-    def resume(self, model_path):
-        pass
+    def load(self, load_path):
+        model = torch.load(load_path)
+        self.perception.load(model['perception'])
+        self.syntax.load(model['syntax'])
+        self.semantics.load(model['semantics'])
+        return model['epoch']
 
     def train(self):
         self.perception.train()

@@ -17,7 +17,7 @@ from dreamcoder.task import Task
 from dreamcoder.type import Context, arrow, tbool, tlist, tint, t0, UnificationFailure
 from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.recognition import RecurrentFeatureExtractor
-from dreamcoder.program import Invented
+from dreamcoder.program import Program, Invented
 
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
 from dreamcoder.dreamcoder import commandlineArguments
@@ -83,6 +83,7 @@ class Semantics(object):
         self.idx = idx
         self.examples = None
         self.program = None
+        self.arity = None
         self.solved = False
         self.likelihood = 0.
         self.total_examples = 0
@@ -172,10 +173,24 @@ class Semantics(object):
     def clear(self):
         self.examples = None
         self.program = None
+        self.arity = None
         self.solved = False
         self.likelihood = 0.
         self.total_examples = 0
+    
+    def save(self):
+        model = {'idx': self.idx, 'solved': self.solved, 'likelihood': self.likelihood, 
+                'total_examples': self.total_examples, 'arity': self.arity}
+        model['program'] = None if self.program is None else self.program.prog
+        return model
 
+    def load(self, model):
+        self.idx = model['idx']
+        self.solved = model['solved']
+        self.likelihood = model['likelihood']
+        self.total_examples = model['total_examples']
+        self.arity = model['arity']
+        self.program = None if model['program'] is None else ProgramWrapper(Program.parse(model['program']))
 
 class DreamCoder(object):
     def __init__(self):
@@ -219,6 +234,15 @@ class DreamCoder(object):
 
     def __call__(self):
         return self.semantics
+
+    def save(self):
+        model = [smt.save() for smt in self.semantics]
+        return model
+
+    def load(self, model):
+        assert len(self.semantics) == len(model)
+        for i in range(len(self.semantics)):
+            self.semantics[i].load(model[i])
 
     def learn(self, dataset):
         tasks = []

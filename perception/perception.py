@@ -25,6 +25,18 @@ class Perception(object):
     def to(self, device):
         self.model.to(device)
         self.device = device
+
+    def save(self, save_optimizer=True):
+        saved = {'model': self.model.state_dict()}
+        if save_optimizer:
+            saved['optimizer'] = self.optimizer.state_dict()
+        return saved
+    
+    def load(self, loaded):
+        self.model.load_state_dict(loaded['model'])
+        if 'optimizer' in loaded:
+            self.optimizer.load_state_dict(loaded['optimizer'])
+
     
     def __call__(self, img_seq):
         batch_size = img_seq.shape[0]

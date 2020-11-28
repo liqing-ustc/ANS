@@ -163,7 +163,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
                 best_acc = result_acc
 
             model_path = "outputs/model_%03d.p"%(epoch + 1)
-            model.save(model_path)
+            model.save(model_path, epoch=epoch+1)
                 
         time_elapsed = time.time() - since
         print('Epoch time: {:.0f}m {:.0f}s'.format(
@@ -189,11 +189,14 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
 
 
 model = Jointer()
-resume_path = None
-# resume = "outputs/model.p"
-if resume_path:
-    model.resume(resume_path)
+st_epoch = 0
+resume = None
+resume = "outputs/model_005.p"
+if resume:
+    st_epoch = model.load(resume)
+    if st_epoch is None:
+        st_epoch = 0
 
 model.to(DEVICE)
-train(model)
+train(model, st_epoch=st_epoch)
 
