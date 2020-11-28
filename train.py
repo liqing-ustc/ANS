@@ -12,12 +12,13 @@ import pickle
 np.random.seed(157)
 
 
+excludes = ['!']
 #train_set = HINT('train', numSamples=500, randomSeed=777)
-val_set = HINT('val')
+val_set = HINT('val', exclude_symbols=excludes)
 val_set.filter_by_len(max_len=7)
 # test_set = HINT('test')
-test_set = HINT('val')
-train_set = HINT('train', exclude_symbols=['!', '/', '-'])
+test_set = HINT('val', exclude_symbols=excludes)
+train_set = HINT('train', exclude_symbols=excludes)
 # train_set = HINT('train', exclude_symbols=['!', '/'], n_sample_zero_res=0.2)
 # train_set = HINT('val', exclude_symbols=['!', '*', '/'])
 print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
