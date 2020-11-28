@@ -263,7 +263,7 @@ class Parser(object):
                 prob = prob.to(self.device)
                 output_y = self.model(train_x)
                 loss = self.criterion(output_y, train_y) * prob.to(torch.float32)
-                loss = loss.sum()
+                loss = loss.mean()
                 self.optimizer.zero_grad()   # remove any baggage in the optimizer
                 loss.backward()
                 self.optimizer.step()

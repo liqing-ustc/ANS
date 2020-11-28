@@ -66,7 +66,7 @@ class Perception(object):
                 prob = prob.to(self.device)
                 logit = self.model(img)
                 loss = self.criterion(logit, label) * prob.to(torch.float32)
-                loss = loss.sum()
+                loss = loss.mean()
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
