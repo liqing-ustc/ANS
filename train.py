@@ -14,8 +14,7 @@ np.random.seed(157)
 
 excludes = ['!']
 #train_set = HINT('train', numSamples=500, randomSeed=777)
-val_set = HINT('val', exclude_symbols=excludes)
-val_set.filter_by_len(max_len=7)
+val_set = HINT('val', exclude_symbols=excludes, max_len=7)
 # test_set = HINT('test')
 test_set = HINT('val', exclude_symbols=excludes)
 train_set = HINT('train', exclude_symbols=excludes)

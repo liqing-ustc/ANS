@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 
 class HINT(Dataset):
-    def __init__(self, split='train', exclude_symbols=None, n_sample_zero_res=None, numSamples=None, randomSeed=None):
+    def __init__(self, split='train', exclude_symbols=None, max_len=None, n_sample_zero_res=None, numSamples=None, randomSeed=None):
         super(HINT, self).__init__()
         
         assert split in ['train', 'val', 'test']
@@ -30,6 +30,9 @@ class HINT(Dataset):
             samples_zero = [x for x in self.dataset if len(x['expr']) > 1 and (x['res'] == 0 or '0' in x['expr'])]
             samples_zero = random.sample(samples_zero, int(len(samples_zero) * n_sample_zero_res))
             self.dataset = samples_non_zero + samples_zero
+        
+        if max_len is not None:
+            self.dataset = [x for x in self.dataset if len(x['expr']) <= max_len]
             
         for x in self.dataset:
             x['len'] = len(x['expr'])
