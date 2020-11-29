@@ -128,7 +128,7 @@ class Semantics(object):
         if math.exp(entry.logLikelihood) > self.likelihood:
             self.program = ProgramWrapper(entry.program)
             self.check_solved()
-        if self.arity > 0 and not self.program.prog.startswith("(lambda (lambda (fix"):
+        if self.arity > 0 and not self.program.prog.startswith("(lambda " * self.arity + "(fix"):
             self.clear()
     
     def check_solved(self):
@@ -139,7 +139,7 @@ class Semantics(object):
                 solved = True
             else:
                 # check the number of distinct examples
-                if self.program.prog.startswith("(lambda (lambda (fix"):
+                if self.program.prog.startswith("(lambda " * self.arity + "(fix"):
                     if self.arity == 1 and len(self.examples) >= 5:
                         solved = True
                     elif self.arity == 2 and len(self.examples) >= 100:
