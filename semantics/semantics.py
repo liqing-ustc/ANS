@@ -134,14 +134,18 @@ class Semantics(object):
     
     def check_solved(self):
         self.update_likelihood()
-        if self.arity == 0:
-            solved_threhold = 1
-        else:
-            # solved_threhold = float("inf")
-            solved_threhold = 95
-        # if self.likelihood >= 0.9 and self.total_examples >= solved_threhold: # more careful!
-        # check the number of distinct examples
-        if self.likelihood >= 0.9 and len(self.examples) >= solved_threhold: # more careful!
+        solved = False
+        if self.likelihood >= 0.9:
+            if self.arity == 0:
+                solved = True
+            else:
+                # check the number of distinct examples
+                if self.program.prog.startswith("(lambda (lambda (fix"):
+                    if self.arity == 1 and len(self.examples) >= 5:
+                        solved = True
+                    elif self.arity == 2 and len(self.examples) >= 100:
+                        solved = True 
+        if solved:
             self.solved = True
             self.likelihood = 1.0
             if self.arity > 0:
