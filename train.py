@@ -195,7 +195,7 @@ model = Jointer()
 model.to(DEVICE)
 st_epoch = 0
 resume = None
-resume = "outputs/model_005.p"
+resume = "outputs/model_015.p"
 if resume:
     st_epoch = model.load(resume)
     if st_epoch is None:
