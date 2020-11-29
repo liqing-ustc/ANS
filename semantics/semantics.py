@@ -125,12 +125,11 @@ class Semantics(object):
             # print(self.examples)
 
     def update_program(self, entry):
-        if math.exp(entry.logLikelihood) < self.likelihood:
-            return
-        self.program = ProgramWrapper(entry.program)
+        if math.exp(entry.logLikelihood) > self.likelihood:
+            self.program = ProgramWrapper(entry.program)
+            self.check_solved()
         if self.arity > 0 and not self.program.prog.startswith("(lambda (lambda (fix"):
             self.clear()
-        self.check_solved()
     
     def check_solved(self):
         self.update_likelihood()
