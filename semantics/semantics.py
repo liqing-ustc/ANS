@@ -143,7 +143,7 @@ class Semantics(object):
             self.solved = True
             self.likelihood = 1.0
             if self.arity > 0:
-                print(len(self.examples), self.examples)
+                print(len(self.examples), sorted([x for x, p in self.examples]))
     
     def update_likelihood(self):
         if self.program is None:
