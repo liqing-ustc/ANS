@@ -117,8 +117,8 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
         (50, 5),
         (100, float("inf"))
     ])
-    for e, l in curriculum_strategy.items():
-        if st_epoch <= e:
+    for e, l in sorted(curriculum_strategy.items(), reverse=True):
+        if st_epoch >= e:
             max_len = l
             break
     
