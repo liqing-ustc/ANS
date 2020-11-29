@@ -121,6 +121,9 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
         if st_epoch >= e:
             max_len = l
             break
+    train_set.filter_by_len(max_len=max_len)
+    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
+                        shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
