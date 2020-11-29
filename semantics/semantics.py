@@ -128,6 +128,8 @@ class Semantics(object):
         if math.exp(entry.logLikelihood) < self.likelihood:
             return
         self.program = ProgramWrapper(entry.program)
+        if self.arity > 0 and not self.program.prog.startswith("(lambda (lambda (fix"):
+            self.clear()
         self.check_solved()
     
     def check_solved(self):
@@ -136,10 +138,10 @@ class Semantics(object):
             solved_threhold = 1
         else:
             # solved_threhold = float("inf")
-            solved_threhold = 50
+            solved_threhold = 95
         # if self.likelihood >= 0.9 and self.total_examples >= solved_threhold: # more careful!
         # check the number of distinct examples
-        if self.likelihood >= 0.9 and len(self.examples) >= solved_threhold and "fix" in self.program.prog: # more careful!
+        if self.likelihood >= 0.9 and len(self.examples) >= solved_threhold: # more careful!
             self.solved = True
             self.likelihood = 1.0
             if self.arity > 0:

@@ -139,6 +139,8 @@ class AST: # Abstract Syntax Tree
             #     sym = unsolveds[0]
             if self.root_node.smt.solved:
                 unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+                if not unsolveds:
+                    return None
                 root_node_idx = self.dependencies.index(-1)
                 root_node_probs = self.sent_probs[root_node_idx]
                 sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
