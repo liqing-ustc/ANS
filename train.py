@@ -198,7 +198,7 @@ model = Jointer()
 model.to(DEVICE)
 st_epoch = 0
 resume = None
-resume = "outputs/model_015.p"
+resume = "outputs/model_010.p"
 if resume:
     st_epoch = model.load(resume)
     model.semantics._print_semantics()
