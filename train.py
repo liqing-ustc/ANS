@@ -201,7 +201,7 @@ resume = None
 resume = "outputs/model_015.p"
 if resume:
     st_epoch = model.load(resume)
-    mode.semantics._print_semantics()
+    model.semantics._print_semantics()
     if st_epoch is None:
         st_epoch = 0
 
