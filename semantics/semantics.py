@@ -136,12 +136,14 @@ class Semantics(object):
             solved_threhold = 1
         else:
             # solved_threhold = float("inf")
-            solved_threhold = 50
+            solved_threhold = 80
         # if self.likelihood >= 0.9 and self.total_examples >= solved_threhold: # more careful!
         # check the number of distinct examples
         if self.likelihood >= 0.9 and len(self.examples) >= solved_threhold: # more careful!
             self.solved = True
             self.likelihood = 1.0
+            if self.arity > 0:
+                print(len(self.examples), self.examples)
     
     def update_likelihood(self):
         if self.program is None:

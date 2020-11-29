@@ -114,7 +114,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
     curriculum_strategy = dict([
         (0, 1),
         (5, 3),
-        (20, 5),
+        (50, 5),
         (100, float("inf"))
     ])
     for e, l in curriculum_strategy.items():
