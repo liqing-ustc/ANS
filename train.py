@@ -115,9 +115,12 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
         (0, 1),
         (5, 3),
         (20, 5),
-        (100, 1e9)
+        (100, float("inf"))
     ])
-
+    for e, l in curriculum_strategy.items():
+        if st_epoch <= e:
+            max_len = l
+            break
     
     ###########evaluate init model###########
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
@@ -189,6 +192,7 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
 
 
 model = Jointer()
+model.to(DEVICE)
 st_epoch = 0
 resume = None
 resume = "outputs/model_005.p"
@@ -197,6 +201,5 @@ if resume:
     if st_epoch is None:
         st_epoch = 0
 
-model.to(DEVICE)
 train(model, st_epoch=st_epoch)
 
