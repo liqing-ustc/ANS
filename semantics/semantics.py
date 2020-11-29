@@ -264,6 +264,7 @@ class DreamCoder(object):
                 tasks.append(t)
                 max_arity = max(smt.arity, max_arity)
         self.train_args['enumerationTimeout'] = 10 if max_arity == 0 else 200
+        self.train_args['iterations'] = 1 if max_arity == 0 else 3
         n_solved = len(['' for t in self.semantics if t.solved])
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         if len(tasks) == 0:
