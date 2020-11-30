@@ -59,7 +59,7 @@ class Perception(object):
         from utils import ID2SYM
         import numpy as np
         symbols = [x[0].split('/')[0] for x in dataset]
-        labels = [ID2SYM[x[1]] for x in dataset]
+        labels = [ID2SYM(x[1]) for x in dataset]
         acc = np.mean(np.array(symbols) == np.array(labels))
         print(acc)
 

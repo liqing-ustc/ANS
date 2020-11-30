@@ -9,16 +9,14 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 
 class HINT(Dataset):
-    def __init__(self, split='train', exclude_symbols=None, max_len=None, n_sample_zero_res=None, numSamples=None, randomSeed=None):
+    def __init__(self, split='train', exclude_symbols=None, max_len=None, n_sample_zero_res=None, numSamples=None):
         super(HINT, self).__init__()
         
         assert split in ['train', 'val', 'test']
         self.split = split
         self.dataset = json.load(open(ROOT_DIR + 'expr_%s.json'%split))
         if numSamples:
-            if randomSeed:
-                random.seed(randomSeed)
-                random.shuffle(self.dataset)
+            random.shuffle(self.dataset)
             self.dataset = self.dataset[:numSamples]
         
         if exclude_symbols is not None:
@@ -87,7 +85,7 @@ class HINT(Dataset):
         # del sample['img_paths']
         sample['expr'] = ''.join(sample['expr'])
         
-        label_seq = [SYM2ID[sym] for sym in sample['expr']]
+        label_seq = [SYM2ID(sym) for sym in sample['expr']]
         sample['img_seq'] = img_seq
         sample['label_seq'] = label_seq
         return sample
@@ -110,7 +108,7 @@ def HINT_collate(batch):
         sample['img_seq'] += [zero_img] * (max_len - sample['len'])
         sample['img_seq'] = torch.stack(sample['img_seq'])
         
-        sample['label_seq'] += [SYM2ID[NULL]] * (max_len - sample['len'])
+        sample['label_seq'] += [SYM2ID(NULL)] * (max_len - sample['len'])
         sample['label_seq'] = torch.tensor(sample['label_seq'])
 
         # sample['head'] += [-2] * (max_len - sample['len'])

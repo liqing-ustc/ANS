@@ -25,8 +25,6 @@ from dreamcoder.utilities import numberOfCPUs
 
 from utils import SYMBOLS
 
-NUM_TASKS = len(SYMBOLS) - 1
-
 class ProgramWrapper(object):
     def __init__(self, prog):
         try:
@@ -239,7 +237,7 @@ class DreamCoder(object):
         baseGrammar = Grammar.uniform(McCarthyPrimitives())
         self.grammar = baseGrammar
         self.train_args = args
-        self.semantics = [Semantics(i) for i in range(NUM_TASKS)]
+        self.semantics = [Semantics(i) for i in range(len(SYMBOLS) - 1)] # one symbol is NULL
 
     def __call__(self):
         return self.semantics

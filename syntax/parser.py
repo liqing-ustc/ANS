@@ -21,9 +21,6 @@ except ImportError:
     NULL = '<NULL>'
     TOKENS = list('0123456789+-*/!') + [NULL]
 
-ID2TOK = TOKENS
-TOK2ID = {v: k for (k, v) in enumerate(TOKENS)}
-
 TRANSITIONS = ['L', 'R', 'S'] # Left-Arc, Right-Arc, Shift 
 TRAN2ID = {t: i for (i, t) in enumerate(TRANSITIONS)}
 ID2TRAN = {i: t for (i, t) in enumerate(TRANSITIONS)}
@@ -60,12 +57,12 @@ class ParserModel(nn.Module):
 
 class Parser(object):
     """Contains everything needed for transition-based dependency parsing except for the model"""
-
     def __init__(self):
 
         self.n_trans = len(TRANSITIONS)
         self.n_features = 18
         self.n_tokens = len(TOKENS)
+        self.tok2id = {v: k for (k, v) in enumerate(TOKENS)}
 
         self.model = ParserModel(n_tokens=self.n_tokens, n_features=self.n_features)
         self.device = torch.device('cpu')
@@ -99,7 +96,7 @@ class Parser(object):
     def vectorize(self, examples):
         vec_examples = []
         for ex in examples:
-            word = [TOK2ID[w] for w in ex['expr']]
+            word = [self.tok2id[w] for w in ex['expr']]
             head = ex['head']
             vec_examples.append({'word': word, 'head': head})
         return vec_examples
@@ -115,8 +112,9 @@ class Parser(object):
             return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k],
                           reverse=True)
 
-        features = [TOK2ID[NULL]] * (3 - len(stack)) + [sent[x] for x in stack[-3:]]
-        features += [sent[x] for x in buf[:3]] + [TOK2ID[NULL]] * (3 - len(buf))
+        null_idx = self.tok2id[NULL]
+        features = [null_idx] * (3 - len(stack)) + [sent[x] for x in stack[-3:]]
+        features += [sent[x] for x in buf[:3]] + [null_idx] * (3 - len(buf))
         for i in range(2):
             if i < len(stack):
                 k = stack[-i-1]
@@ -125,14 +123,14 @@ class Parser(object):
                 llc = get_lc(lc[0]) if len(lc) > 0 else []
                 rrc = get_rc(rc[0]) if len(rc) > 0 else []
 
-                features.append(sent[lc[0]] if len(lc) > 0 else TOK2ID[NULL])
-                features.append(sent[rc[0]] if len(rc) > 0 else TOK2ID[NULL])
-                features.append(sent[lc[1]] if len(lc) > 1 else TOK2ID[NULL])
-                features.append(sent[rc[1]] if len(rc) > 1 else TOK2ID[NULL])
-                features.append(sent[llc[0]] if len(llc) > 0 else TOK2ID[NULL])
-                features.append(sent[rrc[0]] if len(rrc) > 0 else TOK2ID[NULL])
+                features.append(sent[lc[0]] if len(lc) > 0 else null_idx)
+                features.append(sent[rc[0]] if len(rc) > 0 else null_idx)
+                features.append(sent[lc[1]] if len(lc) > 1 else null_idx)
+                features.append(sent[rc[1]] if len(rc) > 1 else null_idx)
+                features.append(sent[llc[0]] if len(llc) > 0 else null_idx)
+                features.append(sent[rrc[0]] if len(rrc) > 0 else null_idx)
             else:
-                features += [TOK2ID[NULL]] * 6
+                features += [null_idx] * 6
 
         assert len(features) == self.n_features
         return features

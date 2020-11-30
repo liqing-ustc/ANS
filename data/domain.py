@@ -2,8 +2,10 @@ DIGITS= [str(i) for i in range(0, 10)]
 OPERATORS = list('+-*/!')
 NULL = '<NULL>'
 SYMBOLS = DIGITS + OPERATORS + [NULL]
-SYM2ID = {v:i for i, v in enumerate(SYMBOLS)}
-ID2SYM = {i:v for i, v in enumerate(SYMBOLS)}
+# SYM2ID = {v:i for i, v in enumerate(SYMBOLS)}
+# ID2SYM = {i:v for i, v in enumerate(SYMBOLS)}
+SYM2ID = lambda x: SYMBOLS.index(x)
+ID2SYM = lambda x: SYMBOLS[x]
 MAX_RES = 1e3
 
 import math
@@ -12,8 +14,12 @@ class Program():
     def __init__(self, fn):
         self.fn = fn
         self.arity = len(signature(fn).parameters)
+        self.likelihood = 1.0
+        self.priority = 1.0
 
     def __call__(self, *inputs):
+        if len(inputs) != self.arity:
+            return None
         res = self.fn(*inputs)
         if res is not None and res <= MAX_RES:
             return res

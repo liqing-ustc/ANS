@@ -1,4 +1,4 @@
-from utils import DEVICE, ID2SYM
+from utils import DEVICE, SYMBOLS, ID2SYM
 import time
 from tqdm import tqdm
 from collections import Counter
@@ -8,20 +8,27 @@ from jointer import Jointer
 
 import torch
 import numpy as np
-import pickle
-np.random.seed(157)
+import random
 
+import argparse
+import sys
 
-excludes = ['!']
-#train_set = HINT('train', numSamples=500, randomSeed=777)
-val_set = HINT('val', exclude_symbols=excludes, max_len=7)
-# test_set = HINT('test')
-test_set = HINT('val', exclude_symbols=excludes)
-train_set = HINT('train', exclude_symbols=excludes)
-# train_set = HINT('train', exclude_symbols=['!', '/'], n_sample_zero_res=0.2)
-# train_set = HINT('val', exclude_symbols=['!', '*', '/'])
-print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
+def parse_args():
+    parser = argparse.ArgumentParser('Give Me A HINT')
+    parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
+    parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
+    parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
+    parser.add_argument('--seed', type=int, default=314, help="Random seed.")
 
+    parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
+    parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
+    parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
+    parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
+
+    parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
+    parser.add_argument('--epochs_eval', type=int, default=5, help='how many epochs per evaluation')
+    args = parser.parse_args()
+    return args
 
 def evaluate(model, dataloader):
     model.eval() 
@@ -35,14 +42,11 @@ def evaluate(model, dataloader):
     dep_pred_all = []
 
     for sample in dataloader:
-        img_seq = sample['img_seq']
         res = sample['res']
-        seq_len = sample['len']
         expr = sample['expr']
         dep = sample['head']
-        img_seq = img_seq.to(DEVICE)
 
-        expr_preds, dep_preds, res_preds = model.deduce(img_seq, seq_len)
+        expr_preds, dep_preds, res_preds = model.deduce(sample)
         
         res_pred_all.append(res_preds)
         res_all.append(res)
@@ -56,7 +60,7 @@ def evaluate(model, dataloader):
     result_acc = (res_pred_all == res_all).mean()
     
     expr_pred_all = torch.cat(expr_pred_all).cpu().numpy()
-    expr_pred_all = ''.join([ID2SYM[x] for x in expr_pred_all])
+    expr_pred_all = ''.join([ID2SYM(x) for x in expr_pred_all])
     expr_all = ''.join(expr_all)
     assert len(expr_all) == len(expr_pred_all)
     perception_acc = np.mean([x == y for x,y in zip(expr_pred_all, expr_all)])
@@ -99,39 +103,46 @@ def evaluate(model, dataloader):
 
     return perception_acc, syntax_acc, result_acc
 
-def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
+def train(model, args, st_epoch=0):
     best_acc = 0.0
-    reward_moving_average = None
-    reward_decay = 0.99
-    
     batch_size = 256
-    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
+    train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,
                          shuffle=True, num_workers=4, collate_fn=HINT_collate)
-    eval_dataloader = torch.utils.data.DataLoader(val_set, batch_size=128,
+    eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=128,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     max_len = float("inf")
-    curriculum_strategy = dict([
-        (0, 1),
-        (5, 3),
-        (50, 5),
-        (100, float("inf"))
-    ])
-    for e, l in sorted(curriculum_strategy.items(), reverse=True):
-        if st_epoch >= e:
-            max_len = l
-            break
-    train_set.filter_by_len(max_len=max_len)
-    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
-                        shuffle=True, num_workers=4, collate_fn=HINT_collate)
+    if args.curriculum:
+        if args.semantics:
+            curriculum_strategy = dict([
+                (0, 1),
+                (5, 3),
+                (10, 5),
+                (20, float("inf"))
+            ])
+        else:
+            curriculum_strategy = dict([
+                (0, 1),
+                (5, 3),
+                (50, 5),
+                (100, float("inf"))
+            ])
+        print("Curriculum:", sorted(curriculum_strategy.items()))
+        for e, l in sorted(curriculum_strategy.items(), reverse=True):
+            if st_epoch >= e:
+                max_len = l
+                break
+        train_set.filter_by_len(max_len=max_len)
+        train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
+                            shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
     print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
-    for epoch in range(st_epoch, num_epochs):
-        if epoch in curriculum_strategy:
+    for epoch in range(st_epoch, args.epochs):
+        if args.curriculum and epoch in curriculum_strategy:
             max_len = curriculum_strategy[epoch]
             train_set.filter_by_len(max_len=max_len)
             train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
@@ -139,19 +150,15 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
 
         since = time.time()
         print('-' * 30)
-        print('Epoch {}/{} (max_len={}, data={})'.format(epoch, num_epochs - 1, max_len, len(train_set)))
+        print('Epoch {}/{} (max_len={}, data={})'.format(epoch, args.epochs - 1, max_len, len(train_set)))
 
         # Explore
         with torch.no_grad():
             model.train()
             train_acc = []
-            for sample in train_dataloader:
-                img_seq = sample['img_seq']
+            for sample in tqdm(train_dataloader):
                 res = sample['res']
-                seq_len = sample['len']
-                img_seq = img_seq.to(DEVICE)
-
-                _, _, res_pred = model.deduce(img_seq, seq_len)
+                _, _, res_pred = model.deduce(sample)
                 model.abduce(res, sample['img_paths'])
                 acc = np.mean(np.array(res_pred) == res.numpy())
                 train_acc.append(acc)
@@ -159,16 +166,15 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
             abduce_acc = len(model.buffer) / len(train_set)
             print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
         
-        print("Dep: ", Counter([tuple(ast.dependencies) for ast in model.buffer]))
         model.learn()
             
-        if (epoch+1) % n_epochs_per_eval == 0:
+        if (epoch+1) % args.epochs_eval == 0:
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
             print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
             if result_acc > best_acc:
                 best_acc = result_acc
 
-            model_path = "outputs/model_%03d.p"%(epoch + 1)
+            model_path = args.output_dir + "model_%03d.p"%(epoch + 1)
             model.save(model_path, epoch=epoch+1)
                 
         time_elapsed = time.time() - since
@@ -187,23 +193,44 @@ def train(model, num_epochs=500, n_epochs_per_eval = 5, st_epoch=0):
     # Test
     print('-' * 30)
     print('Evaluate on test set...')
-    eval_dataloader = torch.utils.data.DataLoader(test_set, batch_size=batch_size,
+    eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
     print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={2:.2f})'.format('test', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     return
 
 
-model = Jointer()
-model.to(DEVICE)
-st_epoch = 0
-resume = None
-# resume = "outputs/model_005.p"
-if resume:
-    st_epoch = model.load(resume)
-    model.semantics._print_semantics()
-    if st_epoch is None:
-        st_epoch = 0
 
-train(model, st_epoch=st_epoch)
+if __name__ == "__main__":
+    args = parse_args()
+    sys.argv = sys.argv[:1]
+
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
+    excludes = args.excludes
+    for sym in excludes:
+        SYMBOLS.remove(sym)
+    train_set = HINT('train', exclude_symbols=excludes)
+    val_set = HINT('val', exclude_symbols=excludes, max_len=7)
+    # test_set = HINT('val', exclude_symbols=excludes)
+    test_set = HINT('test', exclude_symbols=excludes)
+    print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
+
+    model = Jointer(args)
+    model.to(DEVICE)
+    st_epoch = 0
+    if args.resume:
+        st_epoch = model.load(args.resume)
+        if st_epoch is None:
+            st_epoch = 0
+
+    print(args)
+    model.print()
+    args.train_set = train_set
+    args.val_set = val_set
+    args.test_set = test_set
+
+    train(model, args, st_epoch=st_epoch)
 

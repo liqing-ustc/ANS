@@ -3,7 +3,7 @@ import numpy as np
 from copy import deepcopy
 import sys
 from func_timeout import func_timeout, FunctionTimedOut
-from utils import SYMBOLS
+from utils import SYMBOLS, DEVICE
 from collections import Counter
 from time import time
 import torch
@@ -70,12 +70,62 @@ class AST: # Abstract Syntax Tree
 
     def res(self): return self._res
 
-    def abduce(self, y):
+    def abduce(self, y, config):
         if self._res is not None and self._res == y:
             self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
             return self
         
-        # epsilon = 1e-5
+        if not config.perception:
+            et = self.abduce_perception(y)
+            if et is not None:
+                return et
+
+        if not config.syntax:
+            et = self.abduce_syntax(y)
+            if et is not None:
+                return et
+        
+        if not config.semantics:
+            et = self.abduce_semantics(y)
+            if et is not None:
+                return et
+        
+        return None
+
+        
+    def abduce_semantics(self, y):
+        # abduce over semantics
+        # Currently, if the root node's children are valid, we directly change the result to y
+        if self.root_node.children_res_valid():
+            # if self.root_node.smt.solved:
+            #     unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+            #     root_node_idx = self.dependencies.index(-1)
+            #     root_node_probs = self.sent_probs[root_node_idx]
+            #     sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
+            #     sampling_probs /= sampling_probs.sum()
+            #     sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
+            # if self.root_node.smt.solved:
+            #     unsolveds = [smt.idx for smt in self.semantics if smt.program is None]
+            #     root_node_idx = self.dependencies.index(-1)
+            #     if not unsolveds: return None
+            #     sym = unsolveds[0]
+            if self.root_node.smt.solved:
+                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+                if not unsolveds:
+                    return None
+                root_node_idx = self.dependencies.index(-1)
+                root_node_probs = self.sent_probs[root_node_idx]
+                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
+                sym = unsolveds[np.argmax(sampling_probs)]
+                self.root_node.symbol = sym
+                self.sentence[root_node_idx] = sym
+            self._res = None # we set the result of AST to None, and we will not use these data for learning perception and syntax
+            self.root_node._res = y
+            self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
+            return self
+        return None
+
+    def abduce_perception(self, y):
         epsilon = 0
         # abduce over sentence
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
@@ -90,7 +140,9 @@ class AST: # Abstract Syntax Tree
                 if et.res() is not None and et.res() == y:
                     et.joint_prob = joint_prob(new_sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
                     return et
+        return None
 
+    def abduce_syntax(self, y):
         # abduce over parse
         # if current trans is 'S', we try to swith it with the next token
         # if current trans is 'L' ('R'), we try to switch it to 'R' ('L')
@@ -121,49 +173,20 @@ class AST: # Abstract Syntax Tree
             if et.res() is not None and et.res() == y:
                 et.joint_prob = joint_prob(self.sentence, new_transitions, self.semantics, self.sent_probs, self.transition_probs)
                 return et
-
-        # abduce over semantics
-        # Currently, if the root node's children are valid, we directly change the result to y
-        if self.root_node.children_res_valid():
-            # if self.root_node.smt.solved:
-            #     unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-            #     root_node_idx = self.dependencies.index(-1)
-            #     root_node_probs = self.sent_probs[root_node_idx]
-            #     sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
-            #     sampling_probs /= sampling_probs.sum()
-            #     sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
-            # if self.root_node.smt.solved:
-            #     unsolveds = [smt.idx for smt in self.semantics if smt.program is None]
-            #     root_node_idx = self.dependencies.index(-1)
-            #     if not unsolveds: return None
-            #     sym = unsolveds[0]
-            if self.root_node.smt.solved:
-                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-                if not unsolveds:
-                    return None
-                root_node_idx = self.dependencies.index(-1)
-                root_node_probs = self.sent_probs[root_node_idx]
-                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
-                sym = unsolveds[np.argmax(sampling_probs)]
-                self.root_node.symbol = sym
-                self.sentence[root_node_idx] = sym
-            self._res = None # we set the result of AST to None, and we will not use these data for learning perception and syntax
-            self.root_node._res = y
-            self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
-            return self
-
         return None
 
     
 class Jointer:
     def __init__(self, config=None):
         super(Jointer, self).__init__()
+        self.config = config
         self.perception = perception.build(config)
         self.syntax = syntax.build(config)
         self.semantics = semantics.build(config)
         self.ASTs = []
         self.buffer = []
-        self.learn_cycle = 0
+        self.epochs = 0
+        self.epochs_learn = 1 if config.semantics else 5
 
     def save(self, save_path, epoch=None):
         model = {'epoch': epoch}
@@ -179,6 +202,11 @@ class Jointer:
         self.semantics.load(model['semantics'])
         return model['epoch']
 
+    def print(self):
+        print(self.perception.model)
+        print(self.syntax.model)
+        self.semantics._print_semantics()
+
     def train(self):
         self.perception.train()
         self.syntax.train()
@@ -193,18 +221,36 @@ class Jointer:
         self.perception.to(device)
         self.syntax.to(device)
     
-    def deduce(self, img_seqs, lengths):
-        sentences, sent_probs = self.perception(img_seqs)
-        sentences = sentences.detach()
-        sent_probs = sent_probs.detach()
+    def deduce(self, sample):
+        config = self.config
+        img_seq = sample['img_seq']
+        lengths = sample['len']
+        img_seq = img_seq.to(DEVICE)
+
+        if config.perception: # use gt perception
+            sentences = sample['label_seq']
+            sent_probs = np.ones(sentences.shape + (len(SYMBOLS) - 1,))
+        else:
+            sentences, sent_probs = self.perception(img_seq)
+            sentences = sentences.detach()
+            sent_probs = sent_probs.detach().cpu().numpy()
         sentences = [x[:l] for x, l in zip(sentences, lengths)]
         sent_probs = [x[:l] for x, l in zip(sent_probs, lengths)]
-        parses = self.syntax(sentences)
+
+        if config.syntax: # use gt parse
+            parses = []
+            for s, dep in zip(sentences, sample['head']):
+                pt = syntax.PartialParse(s)
+                pt.dependencies = dep
+                parses.append(pt)
+        else:
+            parses = self.syntax(sentences)
+
         semantics = self.semantics()
         
         self.ASTs = []
         for s_prob, pt in zip(sent_probs, parses):
-            et = AST(pt.sentence.cpu().numpy(), pt.dependencies, semantics, pt.transitions, s_prob.cpu().numpy(), pt.probs)
+            et = AST(pt.sentence.cpu().numpy(), pt.dependencies, semantics, pt.transitions, s_prob, pt.probs)
             self.ASTs.append(et)
         results = [x.res() for x in self.ASTs]
 
@@ -214,7 +260,7 @@ class Jointer:
     def abduce(self, gt_values, batch_img_paths):
         # abduce over perception (sentence) and syntax (parse)
         for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
-            new_et = et.abduce(y)
+            new_et = et.abduce(y, self.config)
             if new_et: 
                 new_et.img_paths = img_paths
                 self.buffer.append(new_et)
@@ -226,8 +272,9 @@ class Jointer:
         assert len(self.buffer) > 0
         self.train()
         print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.sentence) for x in self.buffer]), 2))
-        pred_symbols = sorted(list(Counter([y for x in self.buffer for y in x.sentence]).items()))
+        pred_symbols = Counter([y for x in self.buffer for y in x.sentence])
         print("Symbols: ", len(pred_symbols), pred_symbols)
+        print("Dep: ", Counter([tuple(ast.dependencies) for ast in self.buffer]))
 
         import json
         self.buffer = sorted(self.buffer, key=lambda x: -x.joint_prob)
@@ -243,40 +290,43 @@ class Jointer:
             dataset.append((sent, imgs, dep, root_res, ast_res, prob))
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
-        if (self.learn_cycle + 1) % 5 == 0:
+        if (self.epochs + 1) % self.epochs_learn == 0:
             # learn syntax
-            dataset = [{'word': x.sentence, 'head': x.dependencies} 
-                        for x in self.buffer if x.res() is not None]
-            if len(dataset) > 200:
-                n_iters = int(500)
-                print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                st = time()
-                self.syntax.learn(dataset, n_iters=n_iters)
-                print("take %d sec."%(time()-st))
+            if not self.config.syntax:
+                dataset = [{'word': x.sentence, 'head': x.dependencies} 
+                            for x in self.buffer if x.res() is not None]
+                if len(dataset) > 200:
+                    n_iters = int(500)
+                    print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+                    st = time()
+                    self.syntax.learn(dataset, n_iters=n_iters)
+                    print("take %d sec."%(time()-st))
 
             # learn perception
-            dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
-            if len(dataset) > 200:
-                n_iters = int(500)
-                print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                st = time()
-                self.perception.learn(dataset, n_iters=n_iters)
-                print("take %d sec."%(time()-st))
+            if not self.config.perception:
+                dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
+                if len(dataset) > 200:
+                    n_iters = int(500)
+                    print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+                    st = time()
+                    self.perception.learn(dataset, n_iters=n_iters)
+                    print("take %d sec."%(time()-st))
         else:
-            # learn semantics
-            dataset = [[] for _ in range(len(SYMBOLS) - 1)]
-            for ast in self.buffer:
-                queue = [ast.root_node]
-                while len(queue) > 0:
-                    node = queue.pop()
-                    queue.extend(node.children)
-                    xs = tuple([x.res() for x in node.children])
-                    y = int(node.res())
-                    dataset[node.symbol].append((xs, y, ast.joint_prob))
-            self.semantics.learn(dataset)
+            if not self.config.semantics:
+                # learn semantics
+                dataset = [[] for _ in range(len(SYMBOLS) - 1)]
+                for ast in self.buffer:
+                    queue = [ast.root_node]
+                    while len(queue) > 0:
+                        node = queue.pop()
+                        queue.extend(node.children)
+                        xs = tuple([x.res() for x in node.children])
+                        y = int(node.res())
+                        dataset[node.symbol].append((xs, y, ast.joint_prob))
+                self.semantics.learn(dataset)
 
         self.clear_buffer()
-        self.learn_cycle += 1
+        self.epochs += 1
 
 
 

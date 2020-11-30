@@ -1,21 +1,26 @@
-from utils import PROGRAMS
+from utils import SYMBOLS, SYM2PROG, NULL
 from .semantics import DreamCoder
 
 class SemanticsGT():
     def __init__(self):
-        self.semantics = PROGRAMS
+        self.semantics = [SYM2PROG[s] for s in SYMBOLS if s != NULL]
 
     def __call__(self):
         return self.semantics
 
-    def train(self):
+    def _print_semantics(self):
+        print("use ground-truth semantics.")
+
+    def save(self):
         pass
 
-    def eval(self):
+    def load(self, model):
         pass
 
 
 def build(config=None):
-    # model = SemanticsGT()
-    model = DreamCoder()
+    if config.semantics:
+        model = SemanticsGT()
+    else:
+        model = DreamCoder()
     return model
