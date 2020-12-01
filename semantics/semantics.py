@@ -223,7 +223,7 @@ class DreamCoder(object):
         extractor.H = args.pop("hidden")
 
         timestamp = datetime.datetime.now().isoformat()
-        outputDirectory = "outputs/%s"%timestamp
+        outputDirectory = "tmp/%s"%timestamp
         os.system("mkdir -p %s"%outputDirectory)
         
         args.update({

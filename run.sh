@@ -21,6 +21,10 @@ export OUTPUT=./outputs/exp_semantics_curriculum/
 mkdir $OUTPUT
 python train.py --semantics --curriculum --epochs=100 --output-dir=$OUTPUT >$OUTPUT/main.log
 
+export OUTPUT=./outputs/exp_semantics/ 
+mkdir $OUTPUT
+python train.py --semantics --epochs=100 --output-dir=$OUTPUT >$OUTPUT/main.log
+
 # Learn syntax and semantics
 export OUTPUT=./outputs/exp_perception_curriculum/ 
 mkdir $OUTPUT
