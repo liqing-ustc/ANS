@@ -9,6 +9,7 @@ from jointer import Jointer
 import torch
 import numpy as np
 import random
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 import argparse
 import sys
@@ -106,7 +107,10 @@ def evaluate(model, dataloader):
         ids = dataloader.dataset.cond2ids[k]
         res = res_all[ids]
         res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
+        if len(ids) == 0:
+            res_acc = 0.
+        else:
+            res_acc = (res == res_pred).mean()
         print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
     
 
@@ -222,7 +226,7 @@ if __name__ == "__main__":
     for sym in excludes:
         SYMBOLS.remove(sym)
     train_set = HINT('train', exclude_symbols=excludes)
-    exprs_train = {x['expr'] for x in train_set}
+    exprs_train = set([x['expr'] for x in train_set])
     val_set = HINT('val', exclude_symbols=excludes, max_len=7, seen_exprs=exprs_train)
     # test_set = HINT('val', exclude_symbols=excludes)
     test_set = HINT('test', exclude_symbols=excludes, seen_exprs=exprs_train)

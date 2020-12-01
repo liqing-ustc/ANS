@@ -173,8 +173,8 @@ class Semantics(object):
         n_examples = min(self.total_examples, 100)
         # examples = random.choices([e for e, _ in self.examples], weights=[p for _, p in self.examples], k=n_examples)
         for e, p in self.examples:
-            examples.extend([e] * int(round(p * n_examples)))
-        examples = examples[:n_examples]
+            examples.extend([e] * int(math.ceil(p * n_examples)))
+        examples = random.sample(examples, n_examples)
         return Task(str(self.idx), task_type, examples)
 
     def clear(self):

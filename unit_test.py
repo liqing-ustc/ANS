@@ -17,7 +17,8 @@ pg = ProgramWrapper(pg)
 print(pg(1, 1))
 
 # Minus
-pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 ($2 (decr0 $1) (decr0 $0)))))))))")
+# pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 ($2 (decr0 $1) (decr0 $0)))))))))")
+pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 ($2 $0 (decr0 $1)))))))))")
 pg = ProgramWrapper(pg)
 print(pg(0, 2))
 
