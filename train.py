@@ -59,7 +59,7 @@ def evaluate(model, dataloader):
     res_all = np.concatenate(res_all, axis=0)
     result_acc = (res_pred_all == res_all).mean()
     
-    expr_pred_all = torch.cat(expr_pred_all).cpu().numpy()
+    expr_pred_all = np.concatenate(expr_pred_all)
     expr_pred_all = ''.join([ID2SYM(x) for x in expr_pred_all])
     expr_all = ''.join(expr_all)
     assert len(expr_all) == len(expr_pred_all)
@@ -100,6 +100,15 @@ def evaluate(model, dataloader):
         res_pred = res_pred_all[ids]
         res_acc = (res == res_pred).mean()
         print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+
+    print("result accuracy by condition:")
+    for k in sorted(dataloader.dataset.cond2ids.keys()):
+        ids = dataloader.dataset.cond2ids[k]
+        res = res_all[ids]
+        res_pred = res_pred_all[ids]
+        res_acc = (res == res_pred).mean()
+        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+    
 
     return perception_acc, syntax_acc, result_acc
 
@@ -193,10 +202,10 @@ def train(model, args, st_epoch=0):
     # Test
     print('-' * 30)
     print('Evaluate on test set...')
-    eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=batch_size,
+    eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=64,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={2:.2f})'.format('test', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('test', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     return
 
 
@@ -213,9 +222,10 @@ if __name__ == "__main__":
     for sym in excludes:
         SYMBOLS.remove(sym)
     train_set = HINT('train', exclude_symbols=excludes)
-    val_set = HINT('val', exclude_symbols=excludes, max_len=7)
+    exprs_train = {x['expr'] for x in train_set}
+    val_set = HINT('val', exclude_symbols=excludes, max_len=7, seen_exprs=exprs_train)
     # test_set = HINT('val', exclude_symbols=excludes)
-    test_set = HINT('test', exclude_symbols=excludes)
+    test_set = HINT('test', exclude_symbols=excludes, seen_exprs=exprs_train)
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     model = Jointer(args)

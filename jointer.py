@@ -203,9 +203,18 @@ class Jointer:
         return model['epoch']
 
     def print(self):
-        print(self.perception.model)
-        print(self.syntax.model)
-        self.semantics._print_semantics()
+        if self.config.perception:
+            print('use ground-truth perception.')
+        else:
+            print(self.perception.model)
+        if self.config.syntax:
+            print('use ground-truth syntax.')
+        else:
+            print(self.syntax.model)
+        if self.config.semantics:
+            print('use ground-truth semantics.')
+        else:
+            self.semantics._print_semantics()
 
     def train(self):
         self.perception.train()
@@ -254,6 +263,7 @@ class Jointer:
             self.ASTs.append(et)
         results = [x.res() for x in self.ASTs]
 
+        sentences = [s.cpu().numpy() for s in sentences]
         dependencies = [pt.dependencies for pt in parses]
         return sentences, dependencies, results
     

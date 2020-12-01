@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 
 class HINT(Dataset):
-    def __init__(self, split='train', exclude_symbols=None, max_len=None, n_sample_zero_res=None, numSamples=None):
+    def __init__(self, split='train', exclude_symbols=None, max_len=None, n_sample_zero_res=None, numSamples=None, seen_exprs=None):
         super(HINT, self).__init__()
         
         assert split in ['train', 'val', 'test']
@@ -72,6 +72,16 @@ class HINT(Dataset):
                 digit2ids[s].append(i)
         self.digit2ids = digit2ids
 
+        if seen_exprs is not None:
+            cond2ids = {'seen': [], 'unseen': [], 'long': []}
+            for i, x in enumerate(self.dataset):
+                if len(x['expr']) > 7: # 7 is the max len in train set
+                    cond2ids['long'].append(i)
+                elif x['expr'] in seen_exprs:
+                    cond2ids['seen'].append(i)
+                else:
+                    cond2ids['unseen'].append(i)
+            self.cond2ids = cond2ids
 
     def __getitem__(self, index):
         index = self.valid_ids[index]

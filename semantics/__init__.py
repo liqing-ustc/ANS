@@ -8,9 +8,6 @@ class SemanticsGT():
     def __call__(self):
         return self.semantics
 
-    def _print_semantics(self):
-        print("use ground-truth semantics.")
-
     def save(self):
         pass
 
