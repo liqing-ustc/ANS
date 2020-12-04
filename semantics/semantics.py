@@ -209,7 +209,7 @@ class DreamCoder(object):
             extras=list_options)
 
         args['noConsolidation'] = True
-        random.seed(args.pop("random_seed"))
+        args.pop("random_seed")
         args['contextual'] = True
         args['biasOptimal'] = True
         args['auxiliaryLoss'] = True
