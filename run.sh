@@ -35,6 +35,18 @@ export OUTPUT=./outputs/exp_syntax_curriculum/
 mkdir $OUTPUT
 python train.py --syntax --curriculum --epochs=100 --output-dir=$OUTPUT >$OUTPUT/main.log
 
+export OUTPUT=./outputs/exp_syntax_curriculum_1/ 
+mkdir $OUTPUT
+python train.py --syntax --curriculum --epochs=100 --output-dir=$OUTPUT >$OUTPUT/main.log
+
+export OUTPUT=./outputs/exp_syntax_curriculum_2/ 
+mkdir $OUTPUT
+python train.py --syntax --curriculum --epochs=100 --seed=2 --output-dir=$OUTPUT >$OUTPUT/main.log
+
+export OUTPUT=./outputs/exp_syntax_curriculum_3/ 
+mkdir $OUTPUT
+python train.py --syntax --curriculum --epochs=100 --seed=3 --output-dir=$OUTPUT >$OUTPUT/main.log
+
 # Learn 3 meanings
 export OUTPUT=./outputs/exp_curriculum/ 
 mkdir $OUTPUT
