@@ -71,10 +71,20 @@ class ProgramWrapper(object):
             pass # TODO: assign name based on the function
         return self._name
 
-    def evaluate(self, examples): # used for equivalence check on a dataset
+    def evaluate(self, examples, store_y=True): 
         examples = [xs for xs in examples if len(xs) == self.arity]
-        self.y = np.array([self(*xs) for xs in examples])
-        return self.y
+        y = np.array([self(*xs) for xs in examples])
+        if store_y: # if store_y, save y for equivalence checking
+            self.y = y
+        return y
+
+def compute_likelihood(program=None, examples=None):
+    if program is None or examples is None:
+        return 0.
+    else:
+        pred = program.evaluate([e[0] for e in examples], store_y=False)
+        gt = np.array([e[1] for e in examples])
+        return np.mean(pred == gt)
 
 class Semantics(object):
     def __init__(self, idx):
@@ -84,98 +94,43 @@ class Semantics(object):
         self.arity = None
         self.solved = False
         self.likelihood = 0.
-        self.total_examples = 0
 
     def update_examples(self, examples):
         if not examples:
+            self.examples = []
             return
         arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
-        examples = [x for x in examples if len(x[0]) == arity]
+        examples = [x[:2] for x in examples if len(x[0]) == arity] 
 
-        counts = {}
-        T = 1 / 5
-        for e in examples:
-            p = np.exp(e[2])
-            xs, y = e[:2]
-            if xs not in counts:
-                counts[xs] = {}
-            if y not in counts[xs]:
-                counts[xs][y] = np.array([0., 0.])
-            counts[xs][y] += np.array([p ** T, 1])
-        new_counts = []
-        for xs, y2p in counts.items():
-            y2p = sorted(y2p.items(), key=lambda x: -x[1][0])
-            y, p = y2p[0]
-            new_counts.append(((xs, y), p))
-        total_examples = int(sum([p[1] for e, p in new_counts]))
-        counts = [(e, p[0]) for e, p in new_counts]
-        Z = sum([p for e, p in counts])
-        counts = [(e, p/Z) for e, p in counts]
-        counts = sorted(counts, key=lambda x: -x[1])
-
-        if total_examples < 10:
-            self.clear() # clear the semantics
-        else:
-            self.total_examples = total_examples
-            self.arity = arity
-            self.examples = counts
-            self.check_solved()
-            # print(self.examples)
+        self.arity = arity
+        self.examples = examples
+        self.likelihood = compute_likelihood(self.program, self.examples)
+        self.check_solved()
 
     def update_program(self, entry):
-        if math.exp(entry.logLikelihood) > self.likelihood:
-            self.program = ProgramWrapper(entry.program)
+        program = ProgramWrapper(entry.program)
+        likelihood = compute_likelihood(program, self.examples)
+        if likelihood > self.likelihood:
+            self.program = program
+            self.likelihood = likelihood
             self.check_solved()
-        # if self.arity > 0 and not self.program.prog.startswith("(lambda " * self.arity + "(fix"):
-        #     self.clear()
     
     def check_solved(self):
-        self.update_likelihood()
-        solved = False
         if self.likelihood >= 0.9:
-            if self.arity == 0:
-                solved = True
-            else:
-                # check the number of distinct examples
-                if self.program.prog.startswith("(lambda " * self.arity + "(fix"):
-                    if self.arity == 1 and len(self.examples) >= 5:
-                        solved = True
-                    elif self.arity == 2 and len(self.examples) >= 100:
-                        solved = True 
-        if solved:
             self.solved = True
-            self.likelihood = 1.0
             if self.arity > 0:
-                print(len(self.examples), sorted([x for x, p in self.examples]))
-    
-    def update_likelihood(self):
-        if self.program is None:
-            self.likelihood = 0.
+                print(self.program, len(self.examples), sorted(self.examples))
         else:
-            pred = self.program.evaluate([e[0] for e, p in self.examples])
-            gt = [e[1] for e, p in self.examples]
-            self.likelihood = np.sum(np.array(pred == gt) * np.array([p for e, p in self.examples]))
+            self.solved = False
 
-    @property
-    def priority(self):
-        # used for abduction, favor the solved semantics a little more
-        return self.likelihood + (1.0 if self.solved else 0.)
-    
     def __call__(self, *inputs):
         return self.program(*inputs)
 
     def make_task(self):
-        if self.solved or self.total_examples == 0:
+        if len(self.examples) <= 0:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
-
-        examples = []
-        n_examples = min(self.total_examples, 100)
-        # examples = random.choices([e for e, _ in self.examples], weights=[p for _, p in self.examples], k=n_examples)
-        for e, p in self.examples:
-            examples.extend([e] * int(math.ceil(p * n_examples)))
-        examples = random.sample(examples, n_examples)
-        return Task(str(self.idx), task_type, examples)
+        return Task(str(self.idx), task_type, self.examples)
 
     def clear(self):
         self.examples = None
@@ -183,11 +138,9 @@ class Semantics(object):
         self.arity = None
         self.solved = False
         self.likelihood = 0.
-        self.total_examples = 0
     
     def save(self):
-        model = {'idx': self.idx, 'solved': self.solved, 'likelihood': self.likelihood, 
-                'total_examples': self.total_examples, 'arity': self.arity}
+        model = {'idx': self.idx, 'solved': self.solved, 'likelihood': self.likelihood, 'arity': self.arity}
         model['program'] = None if self.program is None else self.program.prog
         return model
 
@@ -195,7 +148,6 @@ class Semantics(object):
         self.idx = model['idx']
         self.solved = model['solved']
         self.likelihood = model['likelihood']
-        self.total_examples = model['total_examples']
         self.arity = model['arity']
         self.program = None if model['program'] is None else ProgramWrapper(Program.parse(model['program']))
 
@@ -255,7 +207,6 @@ class DreamCoder(object):
         tasks = []
         max_arity = 0
         for smt, exps in zip(self.semantics, dataset):
-            if smt.solved: continue
             smt.update_examples(exps)
             t = smt.make_task()
             if t is not None:

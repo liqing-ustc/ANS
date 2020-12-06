@@ -95,29 +95,7 @@ class AST: # Abstract Syntax Tree
         # abduce over semantics
         # Currently, if the root node's children are valid, we directly change the result to y
         if self.root_node.children_res_valid():
-            # if self.root_node.smt.solved:
-            #     unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-            #     root_node_idx = self.dependencies.index(-1)
-            #     root_node_probs = self.sent_probs[root_node_idx]
-            #     sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
-            #     sampling_probs /= sampling_probs.sum()
-            #     sym = np.random.choice(unsolveds, size=1, p=sampling_probs)[0]
-            # if self.root_node.smt.solved:
-            #     unsolveds = [smt.idx for smt in self.semantics if smt.program is None]
-            #     root_node_idx = self.dependencies.index(-1)
-            #     if not unsolveds: return None
-            #     sym = unsolveds[0]
-            if self.root_node.smt.solved:
-                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-                if not unsolveds:
-                    return None
-                root_node_idx = self.dependencies.index(-1)
-                root_node_probs = self.sent_probs[root_node_idx]
-                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
-                sym = unsolveds[np.argmax(sampling_probs)]
-                self.root_node.symbol = sym
-                self.sentence[root_node_idx] = sym
-            self._res = None # we set the result of AST to None, and we will not use these data for learning perception and syntax
+            self._res = y
             self.root_node._res = y
             self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
             return self
@@ -128,7 +106,7 @@ class AST: # Abstract Syntax Tree
         # abduce over sentence
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
         for sent_pos in sent_pos_list:
-            s_prob = self.sent_probs[sent_pos] * np.array([smt.priority for smt in self.semantics])
+            s_prob = self.sent_probs[sent_pos]
             for sym_pos in np.argsort(s_prob)[::-1]:
                 if s_prob[sym_pos] <= epsilon:
                     break
@@ -304,7 +282,7 @@ class Jointer:
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
         if self.learned_module == 'perception':
-            dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
+            dataset = [(x.img_paths, x.sentence) for x in self.buffer]
             if len(dataset) > 200:
                 n_iters = int(100)
                 print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
@@ -313,7 +291,7 @@ class Jointer:
                 print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'syntax':
-            dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
+            dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
             if len(dataset) > 200:
                 n_iters = int(100)
                 print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
