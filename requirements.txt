@@ -7,7 +7,6 @@ chardet==3.0.4
 codetransformer==0.7.2
 colorama==0.4.1
 cycler==0.10.0
-dataclasses==0.8
 decorator==4.4.2
 dill==0.2.9
 frozendict==1.2
