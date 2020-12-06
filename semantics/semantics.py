@@ -55,7 +55,7 @@ class ProgramWrapper(object):
             return self.fn == prog.fn
         if self.y is not None and prog.y is not None:
             assert len(self.y) == len(prog.y) # the program should be evaluated on same examples
-            return np.mean(self.y == prog.y) > 0.5
+            return np.mean(self.y == prog.y) > 0.95
         return self.prog == prog.prog
 
     def __str__(self):
@@ -126,8 +126,8 @@ class Semantics(object):
         if math.exp(entry.logLikelihood) > self.likelihood:
             self.program = ProgramWrapper(entry.program)
             self.check_solved()
-        if self.arity > 0 and not self.program.prog.startswith("(lambda " * self.arity + "(fix"):
-            self.clear()
+        # if self.arity > 0 and not self.program.prog.startswith("(lambda " * self.arity + "(fix"):
+        #     self.clear()
     
     def check_solved(self):
         self.update_likelihood()
@@ -277,8 +277,9 @@ class DreamCoder(object):
             if not frontier.entries: continue
             symbol_idx = int(frontier.task.name)
             self.semantics[symbol_idx].update_program(frontier.bestPosterior)
-        examples = [xs for t in tasks for xs, y in t.examples]
-        self._removeEquivalentSemantics(examples)
+        # examples = [xs for t in tasks for xs, y in t.examples]
+        # self._removeEquivalentSemantics(examples)
+        self._removeEquivalentSemantics()
         self._print_semantics()
         # self.grammar = result.grammars[-1]
 

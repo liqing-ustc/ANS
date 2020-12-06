@@ -70,22 +70,20 @@ class AST: # Abstract Syntax Tree
 
     def res(self): return self._res
 
-    def abduce(self, y, config):
+    def abduce(self, y, module=None):
         if self._res is not None and self._res == y:
             self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
             return self
         
-        if not config.perception:
+        if module == 'perception':
             et = self.abduce_perception(y)
             if et is not None:
                 return et
-
-        if not config.syntax:
+        elif module == 'syntax':
             et = self.abduce_syntax(y)
             if et is not None:
                 return et
-        
-        if not config.semantics:
+        elif module == 'semantics':
             et = self.abduce_semantics(y)
             if et is not None:
                 return et
@@ -185,8 +183,14 @@ class Jointer:
         self.semantics = semantics.build(config)
         self.ASTs = []
         self.buffer = []
-        self.epochs = 0
-        self.epochs_learn = 1 if config.semantics else 5
+        self.epoch = 0
+        self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
+                                + ['perception'] * (0 if config.perception else 1) \
+                                + ['syntax'] * (0 if config.syntax else 1)
+
+    @property
+    def learned_module(self):
+        return self.learning_schedule[self.epoch % len(self.learning_schedule)]
 
     def save(self, save_path, epoch=None):
         model = {'epoch': epoch}
@@ -268,9 +272,8 @@ class Jointer:
         return sentences, dependencies, results
     
     def abduce(self, gt_values, batch_img_paths):
-        # abduce over perception (sentence) and syntax (parse)
         for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
-            new_et = et.abduce(y, self.config)
+            new_et = et.abduce(y, self.learned_module)
             if new_et: 
                 new_et.img_paths = img_paths
                 self.buffer.append(new_et)
@@ -300,45 +303,38 @@ class Jointer:
             dataset.append((sent, imgs, dep, root_res, ast_res, prob))
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
-        if (self.epochs + 1) % self.epochs_learn == 0:
-            # learn syntax
-            if not self.config.syntax:
-                dataset = [{'word': x.sentence, 'head': x.dependencies} 
-                            for x in self.buffer if x.res() is not None]
-                if len(dataset) > 200:
-                    n_iters = int(500)
-                    print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                    st = time()
-                    self.syntax.learn(dataset, n_iters=n_iters)
-                    print("take %d sec."%(time()-st))
+        if self.learned_module == 'perception':
+            dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
+            if len(dataset) > 200:
+                n_iters = int(100)
+                print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+                st = time()
+                self.perception.learn(dataset, n_iters=n_iters)
+                print("take %d sec."%(time()-st))
 
-            # learn perception
-            if not self.config.perception:
-                dataset = [(x.img_paths, x.sentence) for x in self.buffer if x.res() is not None]
-                if len(dataset) > 200:
-                    n_iters = int(500)
-                    print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                    st = time()
-                    self.perception.learn(dataset, n_iters=n_iters)
-                    print("take %d sec."%(time()-st))
-        else:
-            if not self.config.semantics:
-                # learn semantics
-                dataset = [[] for _ in range(len(SYMBOLS) - 1)]
-                for ast in self.buffer:
-                    queue = [ast.root_node]
-                    while len(queue) > 0:
-                        node = queue.pop()
-                        queue.extend(node.children)
-                        xs = tuple([x.res() for x in node.children])
-                        y = int(node.res())
-                        dataset[node.symbol].append((xs, y, ast.joint_prob))
-                self.semantics.learn(dataset)
+        elif self.learned_module == 'syntax':
+            dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer if x.res() is not None]
+            if len(dataset) > 200:
+                n_iters = int(100)
+                print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+                st = time()
+                self.syntax.learn(dataset, n_iters=n_iters)
+                print("take %d sec."%(time()-st))
+
+        elif self.learned_module == 'semantics':
+            dataset = [[] for _ in range(len(SYMBOLS) - 1)]
+            for ast in self.buffer:
+                queue = [ast.root_node]
+                while len(queue) > 0:
+                    node = queue.pop()
+                    queue.extend(node.children)
+                    xs = tuple([x.res() for x in node.children])
+                    y = int(node.res())
+                    dataset[node.symbol].append((xs, y, ast.joint_prob))
+            self.semantics.learn(dataset)
 
         self.clear_buffer()
-        self.epochs += 1
-
-
+        self.epoch += 1
 
 if __name__ == '__main__':
     # from utils import SEMANTICS

@@ -165,21 +165,21 @@ def train(model, args, st_epoch=0):
         print('-' * 30)
         print('Epoch {}/{} (max_len={}, data={})'.format(epoch, args.epochs - 1, max_len, len(train_set)))
 
-        # Explore
-        with torch.no_grad():
-            model.train()
-            train_acc = []
-            for sample in tqdm(train_dataloader):
-                res = sample['res']
-                _, _, res_pred = model.deduce(sample)
-                model.abduce(res, sample['img_paths'])
-                acc = np.mean(np.array(res_pred) == res.numpy())
-                train_acc.append(acc)
-            train_acc = np.mean(train_acc)
-            abduce_acc = len(model.buffer) / len(train_set)
-            print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
-        
-        model.learn()
+        for _ in range(len(model.learning_schedule)):
+            with torch.no_grad():
+                model.train()
+                train_acc = []
+                for sample in tqdm(train_dataloader):
+                    res = sample['res']
+                    _, _, res_pred = model.deduce(sample)
+                    model.abduce(res, sample['img_paths'])
+                    acc = np.mean(np.array(res_pred) == res.numpy())
+                    train_acc.append(acc)
+                train_acc = np.mean(train_acc)
+                abduce_acc = len(model.buffer) / len(train_set)
+                print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
+            
+            model.learn()
             
         if (epoch+1) % args.epochs_eval == 0:
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
