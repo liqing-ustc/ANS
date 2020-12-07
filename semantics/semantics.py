@@ -9,19 +9,19 @@ import math
 import os
 import datetime
 import numpy as np
+import torch
 
-from dreamcoder.dreamcoder import explorationCompression
-from dreamcoder.utilities import eprint, flatten, testTrainSplit
+from dreamcoder.dreamcoder import commandlineArguments, explorationCompression
+from dreamcoder.utilities import eprint, flatten, testTrainSplit, numberOfCPUs
 from dreamcoder.grammar import Grammar
 from dreamcoder.task import Task
 from dreamcoder.type import Context, arrow, tbool, tlist, tint, t0, UnificationFailure
-from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.recognition import RecurrentFeatureExtractor
 from dreamcoder.program import Program, Invented
+from dreamcoder.frontier import Frontier, FrontierEntry
 
+from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
-from dreamcoder.dreamcoder import commandlineArguments
-from dreamcoder.utilities import numberOfCPUs
 
 from utils import SYMBOLS
 
@@ -116,10 +116,11 @@ class Semantics(object):
             self.check_solved()
     
     def check_solved(self):
-        if self.likelihood >= 0.9:
+        if self.arity == 0:
             self.solved = True
-            if self.arity > 0:
-                print(self.program, len(self.examples), sorted(self.examples))
+        elif self.arity > 0 and self.likelihood > 0.9:
+            self.solved = True
+            print(self.program, len(self.examples), sorted(self.examples))
         else:
             self.solved = False
 
@@ -127,7 +128,7 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        if len(self.examples) <= 0:
+        if len(self.examples) <= 0 or (self.arity == 0 and self.solved):
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         return Task(str(self.idx), task_type, self.examples)
@@ -190,6 +191,7 @@ class DreamCoder(object):
         self.grammar = baseGrammar
         self.train_args = args
         self.semantics = [Semantics(i) for i in range(len(SYMBOLS) - 1)] # one symbol is NULL
+        self.allFrontiers = None
 
     def __call__(self):
         return self.semantics
@@ -202,6 +204,28 @@ class DreamCoder(object):
         assert len(self.semantics) == len(model)
         for i in range(len(self.semantics)):
             self.semantics[i].load(model[i])
+
+    def rescore_frontiers(self, tasks):
+        if self.allFrontiers is None:
+            return
+        print('Rescoring %d frontiers...'%len(self.allFrontiers))
+        id2task = {t.name: t for t in tasks}
+        id2frontier = {f.task.name: f for f in self.allFrontiers}
+        allFrontiers = {}
+        for name in id2task.keys():
+            task = id2task[name]
+            examples = task.examples
+            if name not in id2frontier:
+                frontier = Frontier([], task=task)
+            else:
+                frontier = id2frontier[name]
+                for entry in frontier.entries:
+                    program = ProgramWrapper(entry.program)
+                    entry.logLikelihood = float(np.log(compute_likelihood(program=program, examples=examples)))
+                frontier.removeLowLikelihood(low=0.1)
+
+            allFrontiers[task] = frontier
+        self.allFrontiers = allFrontiers
 
     def learn(self, dataset):
         tasks = []
@@ -220,9 +244,11 @@ class DreamCoder(object):
             self._print_semantics()
             return 
         self._print_tasks(tasks)
+        self.rescore_frontiers(tasks)
         self.update_grammar()
         print(self.grammar)
-        result = explorationCompression(self.grammar, tasks, **self.train_args)
+        result = explorationCompression(self.grammar, tasks, allFrontiers=self.allFrontiers, **self.train_args)
+        self.allFrontiers = list(result.allFrontiers.values())
 
         for frontier in result.taskSolutions.values():
             if not frontier.entries: continue

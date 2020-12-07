@@ -95,6 +95,16 @@ class AST: # Abstract Syntax Tree
         # abduce over semantics
         # Currently, if the root node's children are valid, we directly change the result to y
         if self.root_node.children_res_valid():
+            if self.root_node.smt.solved and self.root_node.smt.arity == 0:
+                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+                if not unsolveds:
+                    return None
+                root_node_idx = self.dependencies.index(-1)
+                root_node_probs = self.sent_probs[root_node_idx]
+                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
+                sym = unsolveds[np.argmax(sampling_probs)]
+                self.root_node.symbol = sym
+                self.sentence[root_node_idx] = sym
             self._res = y
             self.root_node._res = y
             self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
@@ -283,21 +293,19 @@ class Jointer:
 
         if self.learned_module == 'perception':
             dataset = [(x.img_paths, x.sentence) for x in self.buffer]
-            if len(dataset) > 200:
-                n_iters = int(100)
-                print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                st = time()
-                self.perception.learn(dataset, n_iters=n_iters)
-                print("take %d sec."%(time()-st))
+            n_iters = int(100)
+            print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+            st = time()
+            self.perception.learn(dataset, n_iters=n_iters)
+            print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'syntax':
             dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
-            if len(dataset) > 200:
-                n_iters = int(100)
-                print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
-                st = time()
-                self.syntax.learn(dataset, n_iters=n_iters)
-                print("take %d sec."%(time()-st))
+            n_iters = int(100)
+            print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+            st = time()
+            self.syntax.learn(dataset, n_iters=n_iters)
+            print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'semantics':
             dataset = [[] for _ in range(len(SYMBOLS) - 1)]
