@@ -117,9 +117,8 @@ class Semantics(object):
     def check_solved(self):
         if self.arity == 0 and self.likelihood > 0.:
             self.solved = True
-        elif self.arity > 0 and self.likelihood > 0.9:
+        elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80:
             self.solved = True
-            print(self.program, len(self.examples), sorted(self.examples))
         else:
             self.solved = False
 
