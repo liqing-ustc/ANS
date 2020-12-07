@@ -272,7 +272,7 @@ class DreamCoder(object):
     def _print_tasks(self, tasks):
         for task in tasks:
             # print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:20])
-            print("Symbol-%02d (%s), Samples: %3d, "%(int(task.name), task.request, len(task.examples)), Counter(task.examples))
+            print("Symbol-%02d (%s), Samples: %3d, "%(int(task.name), task.request, len(task.examples)), list(Counter(task.examples).items())[:10])
 
         json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
 
