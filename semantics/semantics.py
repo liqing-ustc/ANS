@@ -115,7 +115,7 @@ class Semantics(object):
             self.check_solved()
     
     def check_solved(self):
-        if self.arity == 0:
+        if self.arity == 0 and self.likelihood > 0.:
             self.solved = True
         elif self.arity > 0 and self.likelihood > 0.9:
             self.solved = True
