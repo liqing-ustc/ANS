@@ -53,9 +53,9 @@ class ProgramWrapper(object):
             return False
         if isinstance(self.fn, int) and isinstance(prog.fn, int):
             return self.fn == prog.fn
-        if self.y is not None and prog.y is not None:
-            assert len(self.y) == len(prog.y) # the program should be evaluated on same examples
-            return np.mean(self.y[self.y!=None] == prog.y[self.y!=None]) > 0.95
+        # if self.y is not None and prog.y is not None:
+        #     assert len(self.y) == len(prog.y) # the program should be evaluated on same examples
+        #     return np.mean(self.y[self.y!=None] == prog.y[self.y!=None]) > 0.95
         return self.prog == prog.prog
 
     def __str__(self):
