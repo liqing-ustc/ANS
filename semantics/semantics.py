@@ -55,7 +55,7 @@ class ProgramWrapper(object):
             return self.fn == prog.fn
         if self.y is not None and prog.y is not None:
             assert len(self.y) == len(prog.y) # the program should be evaluated on same examples
-            return np.mean(self.y == prog.y) > 0.95
+            return np.mean(self.y[self.y!=None] == prog.y[self.y!=None]) > 0.95
         return self.prog == prog.prog
 
     def __str__(self):
@@ -72,7 +72,6 @@ class ProgramWrapper(object):
         return self._name
 
     def evaluate(self, examples, store_y=True): 
-        examples = [xs for xs in examples if len(xs) == self.arity]
         y = np.array([self(*xs) for xs in examples])
         if store_y: # if store_y, save y for equivalence checking
             self.y = y
