@@ -218,6 +218,7 @@ class DreamCoder(object):
                 frontier = Frontier([], task=task)
             else:
                 frontier = id2frontier[name]
+                frontier.task = task
                 for entry in frontier.entries:
                     program = ProgramWrapper(entry.program)
                     entry.logLikelihood = float(np.log(compute_likelihood(program=program, examples=examples)))
