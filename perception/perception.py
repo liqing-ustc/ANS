@@ -65,7 +65,6 @@ class Perception(object):
 
     def learn(self, dataset, n_iters=100):
         batch_size = 512
-        dataset = [(img, label) for img_seq, label_seq in dataset for img, label in zip(img_seq, label_seq)]
         n_epochs = int(math.ceil(batch_size * n_iters / len(dataset)))
         n_epochs = max(n_epochs, 5) # run at least 5 epochs
         dataset = ImageSet(dataset)

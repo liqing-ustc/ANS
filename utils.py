@@ -14,16 +14,19 @@ from data.domain import *
 import torch
 import numpy as np
 np.set_printoptions(precision=2, suppress=True)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ROOT_DIR = './data/'
 IMG_DIR = ROOT_DIR + 'symbol_images/'
-IMG_SIZE = 45
+IMG_SIZE = 32
 
 from torchvision import transforms
 IMG_TRANSFORM = transforms.Compose([
                     transforms.ToTensor(),
-                    transforms.Normalize((0.5,), (1,))])
+                    transforms.Resize(IMG_SIZE),
+                    transforms.Lambda(lambda x: 1. - x),
+                    # transforms.Normalize((0.5,), (1,))
+                ])
 
 def compute_rewards(preds, res, seq_len):
     expr_preds, res_preds = eval_expr(preds, seq_len)

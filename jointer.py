@@ -292,9 +292,9 @@ class Jointer:
         json.dump(dataset, open('outputs/dataset.json', 'w'))
 
         if self.learned_module == 'perception':
-            dataset = [(x.img_paths, x.sentence) for x in self.buffer]
+            dataset = [(img, label) for x in self.buffer for img, label in zip(x.img_paths, x.sentence)]
             n_iters = int(100)
-            print("Learn perception with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+            print("Learn perception with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
             st = time()
             self.perception.learn(dataset, n_iters=n_iters)
             print("take %d sec."%(time()-st))
@@ -302,7 +302,7 @@ class Jointer:
         elif self.learned_module == 'syntax':
             dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
             n_iters = int(100)
-            print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+            print("Learn syntax with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
             st = time()
             self.syntax.learn(dataset, n_iters=n_iters)
             print("take %d sec."%(time()-st))
