@@ -109,7 +109,8 @@ class Semantics(object):
     def update_program(self, entry):
         program = ProgramWrapper(entry.program)
         likelihood = compute_likelihood(program, self.examples)
-        if likelihood > self.likelihood:
+        if (likelihood > self.likelihood) or \
+            (likelihood == self.likelihood and len(str(program)) < len(str(self.program))):
             self.program = program
             self.likelihood = likelihood
             self.check_solved()
@@ -126,10 +127,15 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        if len(self.examples) <= 0 or (self.arity == 0 and self.solved):
+        # if len(self.examples) <= 0 or (self.arity == 0 and self.solved):
+        if len(self.examples) <= 0 or self.solved:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
-        return Task(str(self.idx), task_type, self.examples)
+        examples = self.examples
+        max_samples = 100
+        if len(examples) > max_samples:
+            examples = random.sample(self.examples, k=max_samples)
+        return Task(str(self.idx), task_type, examples)
 
     def clear(self):
         self.examples = None
@@ -153,7 +159,7 @@ class Semantics(object):
 class DreamCoder(object):
     def __init__(self):
         args = commandlineArguments(
-            enumerationTimeout=200, activation='tanh', iterations=3, recognitionTimeout=3600,
+            enumerationTimeout=200, activation='tanh', iterations=1, recognitionTimeout=3600,
             a=3, maximumFrontier=5, topK=2, pseudoCounts=30.0,
             helmholtzRatio=0.5, structurePenalty=1.,
             CPUs=min(numberOfCPUs(), 8),
@@ -185,11 +191,13 @@ class DreamCoder(object):
         args.pop("maxTasks")
         args.pop("split")
         
-        baseGrammar = Grammar.uniform(McCarthyPrimitives())
+        self.primitives = McCarthyPrimitives()
+        baseGrammar = Grammar.uniform(self.primitives)
         self.grammar = baseGrammar
         self.train_args = args
         self.semantics = [Semantics(i) for i in range(len(SYMBOLS) - 1)] # one symbol is NULL
         self.allFrontiers = None
+        self.helmholtzFrontiers = None
 
     def __call__(self):
         return self.semantics
@@ -199,6 +207,8 @@ class DreamCoder(object):
         return model
 
     def load(self, model):
+        if model is None:
+            return
         assert len(self.semantics) == len(model)
         for i in range(len(self.semantics)):
             self.semantics[i].load(model[i])
@@ -221,6 +231,7 @@ class DreamCoder(object):
                 for entry in frontier.entries:
                     program = ProgramWrapper(entry.program)
                     entry.logLikelihood = float(np.log(compute_likelihood(program=program, examples=examples)))
+                    entry.logPosterior = entry.logLikelihood + entry.logPrior
                 frontier.removeLowLikelihood(low=0.1)
 
             allFrontiers[task] = frontier
@@ -236,22 +247,35 @@ class DreamCoder(object):
                 tasks.append(t)
                 max_arity = max(smt.arity, max_arity)
         self.train_args['enumerationTimeout'] = 10 if max_arity == 0 else 200
-        self.train_args['iterations'] = 1 if max_arity == 0 else 3
+        # self.train_args['iterations'] = 1 if max_arity == 0 else 3
         n_solved = len(['' for t in self.semantics if t.solved])
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         if len(tasks) == 0:
             self._print_semantics()
             return 
         self._print_tasks(tasks)
-        self.rescore_frontiers(tasks)
         self.update_grammar()
         print(self.grammar)
-        result = explorationCompression(self.grammar, tasks, allFrontiers=self.allFrontiers, **self.train_args)
+        # print(self.allFrontiers)
+        self.rescore_frontiers(tasks)
+        if self.allFrontiers is not None:
+            print(self.allFrontiers.values())
+
+        if self.helmholtzFrontiers is not None:
+            requests_old ={x.task.request for x in self.helmholtzFrontiers()}
+            requests = {t.request for t in tasks}
+            # if new requests, discard old helmholtz frontiers
+            if requests != requests_old:
+                self.helmholtzFrontiers = None
+
+        result = explorationCompression(self.grammar, tasks, allFrontiers=self.allFrontiers, helmholtzFrontiers=self.helmholtzFrontiers, **self.train_args)
         self.allFrontiers = list(result.allFrontiers.values())
+        self.helmholtzFrontiers = result.helmholtzFrontiers
 
         for frontier in result.taskSolutions.values():
             if not frontier.entries: continue
             symbol_idx = int(frontier.task.name)
+            # print(frontier)
             self.semantics[symbol_idx].update_program(frontier.bestPosterior)
         # examples = [xs for t in tasks for xs, y in t.examples]
         # self._removeEquivalentSemantics(examples)
@@ -260,12 +284,22 @@ class DreamCoder(object):
         # self.grammar = result.grammars[-1]
 
     def update_grammar(self):
-        programs = [Invented(smt.program.prog_ori) for smt in self.semantics if smt.solved and smt.program.arity > 0]
-        self.grammar = Grammar.uniform(McCarthyPrimitives() + programs)
+        programs = [Invented(smt.program.prog_ori) for smt in self.semantics 
+            if smt.solved and smt.program.arity > 0 and '#' not in str(smt.program)]
+            # if '#' in the program, the program uses a invented primitive, it is very likely to have a high computation cost.
+            # Therefore we don't add this program into primitives, since it might slow the enumeration a lot.
+            # it might be resolved by increasing the enumeration time
+        new_grammar = Grammar.uniform(self.primitives + programs)
+        # self.train_args['enumerationTimeout'] += 100 * len(programs)
+        if new_grammar != self.grammar:
+            self.grammar = new_grammar
+            self.helmholtzFrontiers = None
+            self.allFrontiers = None
+            print("Update grammar with invented programs and set frontiers to none.")
         
 
     def _print_semantics(self):
-        for smt in sorted(self.semantics, key=lambda x: str(x.program)):
+        for smt in sorted(self.semantics, key=lambda x: x.idx):
             print("Symbol-%02d: %s %.2f"%(smt.idx, smt.program, smt.likelihood))
             # print("Solved!" if smt.solved else "")
 

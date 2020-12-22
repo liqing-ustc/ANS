@@ -273,9 +273,9 @@ class Jointer:
         assert len(self.buffer) > 0
         self.train()
         print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.sentence) for x in self.buffer]), 2))
-        pred_symbols = Counter([y for x in self.buffer for y in x.sentence])
+        pred_symbols = sorted(Counter([y for x in self.buffer for y in x.sentence]).items())
         print("Symbols: ", len(pred_symbols), pred_symbols)
-        print("Dep: ", Counter([tuple(ast.dependencies) for ast in self.buffer]))
+        print("Dep: ", sorted(Counter([tuple(ast.dependencies) for ast in self.buffer]).items()))
 
         import json
         self.buffer = sorted(self.buffer, key=lambda x: -x.joint_prob)

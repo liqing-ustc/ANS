@@ -84,24 +84,19 @@ class Perception(object):
 class SymbolNet(nn.Module):
     def __init__(self):
         super(SymbolNet, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3, stride = 1, padding = 1)
-        self.conv2 = nn.Conv2d(32, 64, 3, stride = 1, padding = 1)
-        self.dropout1 = nn.Dropout2d(0.25)
-        self.dropout2 = nn.Dropout2d(0.5)
-        self.fc1 = nn.Linear(30976, 128)
-        self.fc2 = nn.Linear(128, len(SYMBOLS) - 1) # the last symbol is NULL
+        self.conv1 = nn.Conv2d(1, 6, 3, stride = 1, padding = 1)
+        self.conv2 = nn.Conv2d(6, 16, 3, stride = 1, padding = 1)
+        self.fc1 = nn.Linear(16 * 8 * 8, 120) 
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, len(SYMBOLS) - 1)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = F.relu(x)
-        x = self.conv2(x)
-        x = F.max_pool2d(x, 2)
-        x = self.dropout1(x)
+        x = F.max_pool2d(F.relu(self.conv1(x)), 2)
+        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.dropout2(x)
-        x = self.fc2(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 class ImageSet(Dataset):
