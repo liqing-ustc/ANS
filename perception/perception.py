@@ -7,13 +7,14 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 from tqdm import trange, tqdm
 import math
+import numpy as np
+from collections import Counter
 
 class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
         self.model = SymbolNet()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
-        self.criterion = nn.CrossEntropyLoss(ignore_index=-1)
         self.device = torch.device('cpu')
     
     def train(self):
@@ -57,7 +58,6 @@ class Perception(object):
 
     def check_accuarcy(self, dataset):
         from utils import ID2SYM
-        import numpy as np
         symbols = [x[0].split('/')[0] for x in dataset]
         labels = [ID2SYM(x[1]) for x in dataset]
         acc = np.mean(np.array(symbols) == np.array(labels))
@@ -65,6 +65,11 @@ class Perception(object):
 
     def learn(self, dataset, n_iters=100):
         batch_size = 512
+        labels = [l for _, l in dataset] + list(range(len(SYMBOLS) - 1))
+        class_weights = np.array([v for k, v in sorted(Counter(labels).items())], dtype=np.float32)
+        class_weights = class_weights.sum() / class_weights
+        criterion = nn.CrossEntropyLoss(ignore_index=-1, weight=torch.from_numpy(class_weights).to(self.device))
+
         n_epochs = int(math.ceil(batch_size * n_iters / len(dataset)))
         n_epochs = max(n_epochs, 5) # run at least 5 epochs
         dataset = ImageSet(dataset)
@@ -75,7 +80,7 @@ class Perception(object):
                 img = img.to(self.device)
                 label = label.to(self.device)
                 logit = self.model(img)
-                loss = self.criterion(logit, label)
+                loss = criterion(logit, label)
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()

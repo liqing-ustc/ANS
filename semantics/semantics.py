@@ -127,12 +127,13 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        # if len(self.examples) <= 0 or (self.arity == 0 and self.solved):
-        if len(self.examples) <= 0 or self.solved:
+        min_examples = 50
+        max_samples = 100
+        # if len(self.examples) <= min_examples or (self.arity == 0 and self.solved):
+        if len(self.examples) <= min_examples or self.solved:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         examples = self.examples
-        max_samples = 100
         if len(examples) > max_samples:
             examples = random.sample(self.examples, k=max_samples)
         return Task(str(self.idx), task_type, examples)
@@ -305,7 +306,6 @@ class DreamCoder(object):
 
     def _print_tasks(self, tasks):
         for task in tasks:
-            # print("Symbol-%s (%s), Samples: %3d, "%(task.name, task.request, len(task.examples)), task.examples[:20])
             print("Symbol-%02d (%s), Samples: %3d, "%(int(task.name), task.request, len(task.examples)), Counter(task.examples).most_common(10))
 
         json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
@@ -326,7 +326,7 @@ class DreamCoder(object):
                 if smt_j.program is None:
                     continue
                 if smt_i.program == smt_j.program:
-                    if smt_i.likelihood >= smt_j.likelihood:
+                    if (len(smt_i.examples) * smt_i.likelihood) >= (len(smt_j.examples) * smt_j.likelihood):
                         smt_j.clear()
                     else:
                         smt_i.clear()

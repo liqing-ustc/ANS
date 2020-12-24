@@ -18,7 +18,8 @@ def parse_args():
     parser = argparse.ArgumentParser('Give Me A HINT')
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
-    parser.add_argument('--perception-pretrain', type=str, default=None, help='initialize the perception from pretrained models.')
+    parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
+                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_60')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=314, help="Random seed.")
 
@@ -28,7 +29,7 @@ def parse_args():
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
-    parser.add_argument('--epochs_eval', type=int, default=5, help='how many epochs per evaluation')
+    parser.add_argument('--epochs_eval', type=int, default=1, help='how many epochs per evaluation')
     args = parser.parse_args()
     return args
 
@@ -137,9 +138,10 @@ def train(model, args, st_epoch=0):
         else:
             curriculum_strategy = dict([
                 (0, 1),
-                (5, 3),
-                (50, 5),
-                (100, float("inf"))
+                (1, float("inf")),
+                # (3, 3),
+                # (50, 5),
+                # (100, float("inf"))
             ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
