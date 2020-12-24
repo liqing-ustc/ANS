@@ -127,10 +127,10 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        min_examples = 50
+        min_examples = 50 
         max_samples = 100
-        # if len(self.examples) <= min_examples or (self.arity == 0 and self.solved):
-        if len(self.examples) <= min_examples or self.solved:
+        # if len(self.examples) < min_examples or (self.arity == 0 and self.solved):
+        if len(self.examples) < min_examples or self.solved:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         examples = self.examples
