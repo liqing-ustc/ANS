@@ -128,21 +128,12 @@ def train(model, args, st_epoch=0):
     
     max_len = float("inf")
     if args.curriculum:
-        if args.semantics:
-            curriculum_strategy = dict([
-                (0, 1),
-                (5, 3),
-                (10, 5),
-                (20, float("inf"))
-            ])
-        else:
-            curriculum_strategy = dict([
-                (0, 1),
-                (1, float("inf")),
-                # (3, 3),
-                # (50, 5),
-                # (100, float("inf"))
-            ])
+        curriculum_strategy = dict([
+            (0, 1),
+            (1, 3),
+            (10, 5),
+            (20, float("inf"))
+        ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
             if st_epoch >= e:
