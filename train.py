@@ -228,14 +228,16 @@ if __name__ == "__main__":
 
     model = Jointer(args)
     model.to(DEVICE)
+    
+    if args.perception_pretrain:
+        model.perception.load(torch.load(args.perception_pretrain))
+
     st_epoch = 0
     if args.resume:
         st_epoch = model.load(args.resume)
         if st_epoch is None:
             st_epoch = 0
 
-    if args.perception_pretrain:
-        model.perception.load(torch.load(args.perception_pretrain))
 
     print(args)
     model.print()
