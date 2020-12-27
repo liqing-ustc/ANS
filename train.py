@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
 
-    parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
+    parser.add_argument('--epochs', type=int, default=50, help='number of epochs for training')
     parser.add_argument('--epochs_eval', type=int, default=1, help='how many epochs per evaluation')
     args = parser.parse_args()
     return args
@@ -131,8 +131,9 @@ def train(model, args, st_epoch=0):
         curriculum_strategy = dict([
             (0, 1),
             (1, 3),
-            (10, 5),
-            (20, float("inf"))
+            (30, 5),
+            (50, 7),
+            (100, float("inf"))
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -228,7 +229,7 @@ if __name__ == "__main__":
 
     model = Jointer(args)
     model.to(DEVICE)
-    
+
     if args.perception_pretrain:
         model.perception.load(torch.load(args.perception_pretrain))
 
