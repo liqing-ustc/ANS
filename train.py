@@ -96,7 +96,7 @@ def evaluate(model, dataloader):
         res_acc = (res == res_pred).mean()
         print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
 
-    print("result accuracy by res:")
+    print("result accuracy by result:")
     for k in sorted(dataloader.dataset.res2ids.keys())[:10]:
         ids = dataloader.dataset.res2ids[k]
         res = res_all[ids]
@@ -104,7 +104,7 @@ def evaluate(model, dataloader):
         res_acc = (res == res_pred).mean()
         print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
 
-    print("result accuracy by condition:")
+    print("result accuracy by generalization:")
     for k in sorted(dataloader.dataset.cond2ids.keys()):
         ids = dataloader.dataset.cond2ids[k]
         res = res_all[ids]
