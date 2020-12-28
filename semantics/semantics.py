@@ -38,7 +38,7 @@ class ProgramWrapper(object):
         self.y = None # used for equivalence check
     
     def __call__(self, *inputs):
-        if len(inputs) != self.arity:
+        if len(inputs) != self.arity or None in inputs:
             return None
         fn = self.fn
         try:

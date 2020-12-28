@@ -113,7 +113,7 @@ def evaluate(model, dataloader):
             res_acc = 0.
         else:
             res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+        print(k, "(%.2f%%)"%(100*len(ids)/len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
     
 
     return perception_acc, syntax_acc, result_acc
@@ -221,10 +221,9 @@ if __name__ == "__main__":
     for sym in excludes:
         SYMBOLS.remove(sym)
     train_set = HINT('train', exclude_symbols=excludes)
-    exprs_train = set([x['expr'] for x in train_set])
-    val_set = HINT('val', exclude_symbols=excludes, max_len=7, seen_exprs=exprs_train)
+    val_set = HINT('val', exclude_symbols=excludes, max_len=7)
     # test_set = HINT('val', exclude_symbols=excludes)
-    test_set = HINT('test', exclude_symbols=excludes, seen_exprs=exprs_train)
+    test_set = HINT('test', exclude_symbols=excludes)
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     model = Jointer(args)

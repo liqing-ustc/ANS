@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 
 class HINT(Dataset):
-    def __init__(self, split='train', exclude_symbols=None, max_len=None, n_sample_zero_res=None, numSamples=None, seen_exprs=None):
+    def __init__(self, split='train', exclude_symbols=None, max_len=None, numSamples=None):
         super(HINT, self).__init__()
         
         assert split in ['train', 'val', 'test']
@@ -23,12 +23,6 @@ class HINT(Dataset):
             exclude_symbols = set(exclude_symbols)
             self.dataset = [x for x in self.dataset if len(set(x['expr']) & exclude_symbols) == 0]
 
-        if n_sample_zero_res is not None:
-            samples_non_zero = [x for x in self.dataset if len(x['expr']) == 1 or (x['res'] != 0 and '0' not in x['expr'])]
-            samples_zero = [x for x in self.dataset if len(x['expr']) > 1 and (x['res'] == 0 or '0' in x['expr'])]
-            samples_zero = random.sample(samples_zero, int(len(samples_zero) * n_sample_zero_res))
-            self.dataset = samples_non_zero + samples_zero
-        
         if max_len is not None:
             self.dataset = [x for x in self.dataset if len(x['expr']) <= max_len]
             
@@ -72,15 +66,10 @@ class HINT(Dataset):
                 digit2ids[s].append(i)
         self.digit2ids = digit2ids
 
-        if seen_exprs is not None:
-            cond2ids = {'seen': [], 'unseen': [], 'long': []}
+        if split in ['val', 'test']:
+            cond2ids = {i: [] for i in range(1, 6)}
             for i, x in enumerate(self.dataset):
-                if len(x['expr']) > 7: # 7 is the max len in train set
-                    cond2ids['long'].append(i)
-                elif x['expr'] in seen_exprs:
-                    cond2ids['seen'].append(i)
-                else:
-                    cond2ids['unseen'].append(i)
+                cond2ids[x['eval']].append(i)
             self.cond2ids = cond2ids
 
     def __getitem__(self, index):
@@ -119,6 +108,7 @@ def HINT_collate(batch):
     zero_img = torch.zeros_like(batch[0]['img_seq'][0])
     img_paths_list = []
     head_list = []
+    res_all_list = []
     for sample in batch:
         sample['img_seq'] += [zero_img] * (max_len - sample['len'])
         sample['img_seq'] = torch.stack(sample['img_seq'])
@@ -133,10 +123,14 @@ def HINT_collate(batch):
 
         head_list.append(sample['head'])
         del sample['head']
+
+        res_all_list.append(sample['res_all'])
+        del sample['res_all']
         
     batch = default_collate(batch)
     batch['img_paths'] = img_paths_list
     batch['head'] = head_list
+    batch['res_all'] = res_all_list
     return batch
 
 if __name__ == '__main__':
