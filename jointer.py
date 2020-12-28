@@ -20,7 +20,7 @@ class Node:
             return self._res
 
         self._res = self.smt(*[x.res() for x in self.children])
-        if self._res > sys.maxsize:
+        if self._res is None or self._res > sys.maxsize:
             self._res = None
         return self._res
 
@@ -69,6 +69,8 @@ class AST: # Abstract Syntax Tree
             pass
 
     def res(self): return self._res
+
+    def res_all(self): return [nd.res() for nd in self.nodes]
 
     def abduce(self, y, module=None):
         if self._res is not None and self._res == y:
