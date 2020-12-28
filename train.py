@@ -44,7 +44,7 @@ def evaluate(model, dataloader):
     dep_all = []
     dep_pred_all = []
 
-    for sample in dataloader:
+    for sample in tqdm(dataloader):
         res = sample['res']
         expr = sample['expr']
         dep = sample['head']
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     for sym in excludes:
         SYMBOLS.remove(sym)
     train_set = HINT('train', exclude_symbols=excludes)
-    val_set = HINT('val', exclude_symbols=excludes, max_len=7)
+    val_set = HINT('val', exclude_symbols=excludes)
     # test_set = HINT('val', exclude_symbols=excludes)
     test_set = HINT('test', exclude_symbols=excludes)
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
