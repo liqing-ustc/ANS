@@ -145,8 +145,8 @@ def train(model, args, st_epoch=0):
                             shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    # perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -175,6 +175,9 @@ def train(model, args, st_epoch=0):
                 print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
             
             model.learn()
+            
+        for smt in sorted(model.semantics.semantics, key=lambda x: x.idx):
+            print("Symbol-%02d: %d"%(smt.idx, len(smt.program.cache)), list(smt.program.cache.items())[-10:])
             
         if ((epoch+1) % args.epochs_eval == 0) or (epoch+1 == args.epochs):
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)

@@ -36,17 +36,21 @@ class ProgramWrapper(object):
         self.arity = len(prog.infer().functionArguments())
         self._name = None
         self.y = None # used for equivalence check
+        self.cache = {} # used for fast computation
     
     def __call__(self, *inputs):
         if len(inputs) != self.arity or None in inputs:
             return None
+        if inputs in self.cache:
+            return self.cache[inputs]
         fn = self.fn
         try:
             for x in inputs:
                 fn = fn(x)
-            return fn
         except RecursionError as e:
-            return None
+            fn = None
+        self.cache[inputs] = fn
+        return fn
 
     def __eq__(self, prog): # only used for removing equivalent semantics
         if self.arity != prog.arity:
