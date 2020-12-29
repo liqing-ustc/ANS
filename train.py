@@ -62,15 +62,16 @@ def evaluate(model, dataloader):
     res_all = np.concatenate(res_all, axis=0)
     result_acc = (res_pred_all == res_all).mean()
     
-    expr_pred_all = np.concatenate(expr_pred_all)
-    expr_pred_all = ''.join([ID2SYM(x) for x in expr_pred_all])
-    expr_all = ''.join(expr_all)
-    assert len(expr_all) == len(expr_pred_all)
-    perception_acc = np.mean([x == y for x,y in zip(expr_pred_all, expr_all)])
 
-    dep_all = [y for x in dep_all for y in x]
-    dep_pred_all = [y for x in dep_pred_all for y in x]
-    syntax_acc = np.mean([x == y for x,y in zip(dep_pred_all, dep_all)])
+    expr_pred_all = [''.join(list(map(ID2SYM, e))) for e in expr_pred_all]
+    assert len(expr_all) == len(expr_pred_all)
+    pred = [y for x in expr_pred_all for y in x]
+    gt = [y for x in expr_all for y in x]
+    perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
+
+    pred = [y for x in dep_pred_all for y in x]
+    gt = [y for x in dep_all for y in x]
+    syntax_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
     print("result accuracy by length:")
     for k in sorted(dataloader.dataset.len2ids.keys()):
@@ -115,6 +116,10 @@ def evaluate(model, dataloader):
             res_acc = (res == res_pred).mean()
         print(k, "(%.2f%%)"%(100*len(ids)/len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
     
+    print("error cases:")
+    errors = np.arange(len(res_all))[res_all != res_pred_all]
+    for i in errors[:5]:
+        print(expr_all[i], expr_pred_all[i], dep_all[i], dep_pred_all[i], res_all[i], res_pred_all[i])
 
     return perception_acc, syntax_acc, result_acc
 
@@ -131,9 +136,12 @@ def train(model, args, st_epoch=0):
         curriculum_strategy = dict([
             (0, 1),
             (1, 3),
-            (30, 5),
-            (50, 7),
-            (100, float("inf"))
+            (5, 5),
+            (10, 7),
+            (20, float("inf"))
+            # (30, 5),
+            # (50, 7),
+            # (100, float("inf"))
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -145,8 +153,8 @@ def train(model, args, st_epoch=0):
                             shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    # perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
+    # print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -175,9 +183,6 @@ def train(model, args, st_epoch=0):
                 print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
             
             model.learn()
-            
-        for smt in sorted(model.semantics.semantics, key=lambda x: x.idx):
-            print("Symbol-%02d: %d"%(smt.idx, len(smt.program.cache)), list(smt.program.cache.items())[-10:])
             
         if ((epoch+1) % args.epochs_eval == 0) or (epoch+1 == args.epochs):
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
