@@ -145,8 +145,8 @@ def train(model, args, st_epoch=0):
                             shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
+    # perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
+    # print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -176,7 +176,7 @@ def train(model, args, st_epoch=0):
             
             model.learn()
             
-        if (epoch+1) % args.epochs_eval == 0:
+        if ((epoch+1) % args.epochs_eval == 0) or (epoch+1 == args.epochs):
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
             print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
             if result_acc > best_acc:
@@ -188,15 +188,6 @@ def train(model, args, st_epoch=0):
         time_elapsed = time.time() - since
         print('Epoch time: {:.0f}m {:.0f}s'.format(
             time_elapsed // 60, time_elapsed % 60))
-
-    print('-' * 30)
-    perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Syntax Acc={2:.2f}, Result Acc={3:.2f})'.format('val', 100*perception_acc, 100*syntax_acc, 100*result_acc))
-    if result_acc > best_acc:
-        best_acc = result_acc
-    print('Best val acc: {:.2f}'.format(100*best_acc))
-    # load best model weights
-    # model.load_state_dict(best_model_wts)
 
     # Test
     print('-' * 30)
