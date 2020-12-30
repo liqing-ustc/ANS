@@ -203,12 +203,11 @@ class Parser(object):
             parse_index = list(range(len(minibatch_parses)))
             batch_parses = [None] * len(minibatch_parses)
             while minibatch_parses:
-                transitions, probs = self.predict(minibatch_parses)
-                probs = probs.detach().cpu().numpy()
+                transitions = self.predict(minibatch_parses)
                 transitions = transitions.detach().cpu().numpy()
                 index_rm = []
                 for i in range(len(minibatch_parses)):
-                    minibatch_parses[i].parse_step(transitions[i], probs[i])
+                    minibatch_parses[i].parse_step(transitions[i])
                     if minibatch_parses[i].finish:
                         batch_parses[parse_index[i]] = minibatch_parses[i]
                         index_rm.append(i)
@@ -235,7 +234,7 @@ class Parser(object):
         else:
             preds = torch.argmax(probs, -1)
 
-        return preds, probs
+        return preds
 
     def evaluate(self, dataset):
         sentences = [x['word'] for x in dataset]
@@ -256,7 +255,9 @@ class Parser(object):
         train_data = self.create_instances(dataset)
 
         batch_size = 1024
-        n_epochs = int(math.ceil(batch_size * n_iters // len(train_data)))
+        n_epochs = int(math.ceil(batch_size * n_iters / len(train_data)))
+        n_epochs = max(n_epochs, 5) # run at least 5 epochs
+        print(n_epochs, "epochs, ", end='')
         self.model.train() # Places model in "train" mode, i.e. apply dropout layer
         for epoch in range(n_epochs):
             for i, (train_x, train_y) in enumerate(minibatches(train_data, batch_size)):
@@ -282,10 +283,9 @@ class PartialParse(object):
         self.buffer = list(range(len(sentence)))
         self.dependencies = []
         self.transitions = []
-        self.probs = []
         self.finish = False # whether the parse has finished
 
-    def parse_step(self, transition, prob=None):
+    def parse_step(self, transition):
         """Performs a single parse step by applying the given transition to this partial parse
         @param transition (str): A string that equals "S", "LA", or "RA" representing the shift,
                                 left-arc, and right-arc transitions. You can assume the provided
@@ -302,16 +302,14 @@ class PartialParse(object):
         elif transition == 2: # Shift
             self.stack.append(self.buffer.pop(0))
         self.transitions.append(transition)
-        self.probs.append(prob)
         if len(self.buffer) == 0 and len(self.stack) == 1:
             self.finish = True
-            self.convert_dep()
+            self.compute_head()
     
-    def convert_dep(self):
-        head = [-1] * len(self.sentence)
+    def compute_head(self):
+        self.head = [-1] * len(self.sentence)
         for h, t in self.dependencies:
-            head[t] = h
-        self.dependencies = head
+            self.head[t] = h
 
     def parse(self, transitions):
         """Applies the provided transitions to this PartialParse

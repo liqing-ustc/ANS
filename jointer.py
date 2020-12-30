@@ -30,26 +30,13 @@ class Node:
                 return False
         return True
 
-def joint_prob(sentence, transitions, semantics, sent_probs, trans_probs):
-    probs = [sent_probs[i,w] for i, w in enumerate(sentence)] + \
-            [trans_probs[i][t] for i, t in enumerate(transitions)] + \
-            [semantics[w].likelihood for w in sentence]
-    probs = np.array(probs) + 1e-12
-    log_prob = np.log(probs).sum()
-    return log_prob
-
 class AST: # Abstract Syntax Tree
-    def __init__(self, sentence, dependencies, semantics, transitions=None, sent_probs=None, transition_probs=None):
-        self.sentence = sentence
-        self.dependencies = dependencies
-        self.transitions = transitions
-        self.sent_probs = sent_probs
-        self.transition_probs = transition_probs
+    def __init__(self, pt, semantics):
+        self.pt = pt
         self.semantics = semantics
-        self.joint_prob = None
 
-        nodes = [Node(s, semantics[s]) for s in sentence]
-        for node, h in zip(nodes, dependencies):
+        nodes = [Node(s, semantics[s]) for s in pt.sentence]
+        for node, h in zip(nodes, pt.head):
             if h == -1:
                 root_node = node
                 continue
@@ -74,7 +61,6 @@ class AST: # Abstract Syntax Tree
 
     def abduce(self, y, module=None):
         if self._res is not None and self._res == y:
-            self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
             return self
         
         if module == 'perception':
@@ -96,71 +82,60 @@ class AST: # Abstract Syntax Tree
     def abduce_semantics(self, y):
         # abduce over semantics
         # Currently, if the root node's children are valid, we directly change the result to y
+        # In future, we can consider to search the execution tree in a top-down manner
         if self.root_node.children_res_valid():
-            if self.root_node.smt.solved and self.root_node.smt.arity == 0:
-                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-                if not unsolveds:
-                    return None
-                root_node_idx = self.dependencies.index(-1)
-                root_node_probs = self.sent_probs[root_node_idx]
-                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
-                sym = unsolveds[np.argmax(sampling_probs)]
-                self.root_node.symbol = sym
-                self.sentence[root_node_idx] = sym
             self._res = y
             self.root_node._res = y
-            self.joint_prob = joint_prob(self.sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
             return self
         return None
 
     def abduce_perception(self, y):
-        epsilon = 0
         # abduce over sentence
-        sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.sentence)])
-        for sent_pos in sent_pos_list:
-            s_prob = self.sent_probs[sent_pos]
-            for sym_pos in np.argsort(s_prob)[::-1]:
-                if s_prob[sym_pos] <= epsilon:
-                    break
-                new_sentence = deepcopy(self.sentence)
-                new_sentence[sent_pos] = sym_pos
-                et = AST(new_sentence, self.dependencies, self.semantics)
+        for sent_pos in range(len(self.pt.sentence)):
+            for sym in range(len(SYMBOLS) - 1):
+                pt = deepcopy(self.pt)
+                pt.sentence[sent_pos] = sym
+                et = AST(pt, self.semantics)
                 if et.res() is not None and et.res() == y:
-                    et.joint_prob = joint_prob(new_sentence, self.transitions, self.semantics, self.sent_probs, self.transition_probs)
                     return et
         return None
 
     def abduce_syntax(self, y):
-        # abduce over parse
-        # if current trans is 'S', we try to swith it with the next token
-        # if current trans is 'L' ('R'), we try to switch it to 'R' ('L')
-        epsilon = 1e-12 # used to eniminate invalid actions
-        trans_pos_list = np.argsort([self.transition_probs[i][t] for i, t in enumerate(self.transitions)])
-        for trans_pos in trans_pos_list:
-            t_prob = self.transition_probs[trans_pos]
-            t_ori = self.transitions[trans_pos]
-            if t_prob[t_ori] > 1 - epsilon:
-                break
+        # rotate the tree w.r.t the root node
+        arcs = self.pt.dependencies
+        def get_lc(k):
+            return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] < k])
 
-            if t_ori == 0: # Left-Arc
-                new_transitions = deepcopy(self.transitions)
-                new_transitions[trans_pos] = 1
-            elif t_ori == 1: # Right-Arc
-                new_transitions = deepcopy(self.transitions)
-                new_transitions[trans_pos] = 0
-            elif t_ori == 2: # Shift
-                # skip when both current trans and next trans are 'S'
-                if trans_pos == len(self.transitions) - 1 or self.transitions[trans_pos + 1] == 2: 
-                    continue
-                else: # swith current trans and next trans
-                    new_transitions = deepcopy(self.transitions)
-                    new_transitions[trans_pos] = new_transitions[trans_pos+1]
-                    new_transitions[trans_pos+1] = t_ori
-            dependencies = syntax.convert_trans2dep(new_transitions)
-            et = AST(self.sentence, dependencies, self.semantics)
+        def get_rc(k):
+            return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
+
+        root_idx = self.pt.head.index(-1)
+        # left rotate
+        for i in get_rc(root_idx):
+            pt = deepcopy(self.pt)
+            pt.head[root_idx] = i
+            pt.head[i] = -1
+            ch = get_lc(i) # set the parent the leftmost child of i to root_idx
+            if len(ch) > 0:
+                pt.head[ch[0]] = root_idx
+
+            et = AST(pt, self.semantics)
             if et.res() is not None and et.res() == y:
-                et.joint_prob = joint_prob(self.sentence, new_transitions, self.semantics, self.sent_probs, self.transition_probs)
                 return et
+            
+        # right rotate
+        for i in get_lc(root_idx):
+            pt = deepcopy(self.pt)
+            pt.head[root_idx] = i
+            pt.head[i] = -1
+            ch = get_rc(i)
+            if len(ch) > 0:
+                pt.head[ch[0]] = root_idx
+
+            et = AST(pt, self.semantics)
+            if et.res() is not None and et.res() == y:
+                return et
+
         return None
 
     
@@ -174,9 +149,9 @@ class Jointer:
         self.ASTs = []
         self.buffer = []
         self.epoch = 0
-        self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
-                                + ['perception'] * (0 if config.perception else 10) \
-                                + ['syntax'] * (0 if config.syntax else 5)
+        self.learning_schedule = ['perception'] * (0 if config.perception else 10) \
+                               + ['syntax'] * (0 if config.syntax else 5) \
+                               + ['semantics'] * (0 if config.semantics else 1)
 
     @property
     def learned_module(self):
@@ -232,34 +207,26 @@ class Jointer:
 
         if config.perception: # use gt perception
             sentences = sample['label_seq']
-            sent_probs = np.ones(sentences.shape + (len(SYMBOLS) - 1,))
         else:
-            sentences, sent_probs = self.perception(img_seq)
+            sentences = self.perception(img_seq)
             sentences = sentences.detach()
-            sent_probs = sent_probs.detach().cpu().numpy()
-        sentences = [x[:l] for x, l in zip(sentences, lengths)]
-        sent_probs = [x[:l] for x, l in zip(sent_probs, lengths)]
+        sentences = [list(x[:l]) for x, l in zip(sentences.cpu().numpy(), lengths)]
 
         if config.syntax: # use gt parse
             parses = []
-            for s, dep in zip(sentences, sample['head']):
+            for s, head in zip(sentences, sample['head']):
                 pt = syntax.PartialParse(s)
-                pt.dependencies = dep
+                pt.head = head
                 parses.append(pt)
         else:
             parses = self.syntax(sentences)
 
         semantics = self.semantics()
         
-        self.ASTs = []
-        for s_prob, pt in zip(sent_probs, parses):
-            et = AST(pt.sentence.cpu().numpy(), pt.dependencies, semantics, pt.transitions, s_prob, pt.probs)
-            self.ASTs.append(et)
+        self.ASTs = [AST(pt, semantics) for pt in parses]
         results = [x.res() for x in self.ASTs]
-
-        sentences = [s.cpu().numpy() for s in sentences]
-        dependencies = [pt.dependencies for pt in parses]
-        return sentences, dependencies, results
+        head = [pt.head for pt in parses]
+        return sentences, head, results
     
     def abduce(self, gt_values, batch_img_paths):
         for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
@@ -274,27 +241,13 @@ class Jointer:
     def learn(self):
         assert len(self.buffer) > 0
         self.train()
-        print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.sentence) for x in self.buffer]), 2))
-        pred_symbols = sorted(Counter([y for x in self.buffer for y in x.sentence]).items())
+        print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.pt.sentence) for x in self.buffer]), 2))
+        pred_symbols = sorted(Counter([y for x in self.buffer for y in x.pt.sentence]).items())
         print("Symbols: ", len(pred_symbols), pred_symbols)
-        print("Dep: ", sorted(Counter([tuple(ast.dependencies) for ast in self.buffer]).items()))
-
-        import json
-        self.buffer = sorted(self.buffer, key=lambda x: -x.joint_prob)
-        dataset = []
-        for ast in self.buffer:
-            sent = [int(x) for x in ast.sentence]
-            imgs = [x.split('/')[0] for x in ast.img_paths]
-            dep = ast.dependencies
-            root_res = int(ast.root_node.res())
-            ast_res = ast.res()
-            ast_res = ast_res if ast_res is None else int(ast_res)
-            prob = round(ast.joint_prob, 1)
-            dataset.append((sent, imgs, dep, root_res, ast_res, prob))
-        json.dump(dataset, open('outputs/dataset.json', 'w'))
+        print("Head: ", sorted(Counter([tuple(ast.pt.head) for ast in self.buffer]).items(), key=lambda x: len(x[0])))
 
         if self.learned_module == 'perception':
-            dataset = [(img, label) for x in self.buffer for img, label in zip(x.img_paths, x.sentence)]
+            dataset = [(img, label) for x in self.buffer for img, label in zip(x.img_paths, x.pt.sentence)]
             n_iters = int(100)
             print("Learn perception with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
             st = time()
@@ -302,7 +255,7 @@ class Jointer:
             print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'syntax':
-            dataset = [{'word': x.sentence, 'head': x.dependencies} for x in self.buffer]
+            dataset = [{'word': x.pt.sentence, 'head': x.pt.head} for x in self.buffer]
             n_iters = int(100)
             print("Learn syntax with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
             st = time()
@@ -318,7 +271,7 @@ class Jointer:
                     queue.extend(node.children)
                     xs = tuple([x.res() for x in node.children])
                     y = int(node.res())
-                    dataset[node.symbol].append((xs, y, ast.joint_prob))
+                    dataset[node.symbol].append((xs, y))
             self.semantics.learn(dataset)
 
         self.clear_buffer()
@@ -327,8 +280,8 @@ class Jointer:
 if __name__ == '__main__':
     # from utils import SEMANTICS
     # sentences = ['5!-7-4', '1+5!*8', '8*9!+5+1/9/3!*9*5']
-    # dependencies = [[1, 2, 4, 2, -1, 4], [1, -1, 3, 4, 1, 4], [1, 4, 3, 1, 6, 4, -1, 8, 10, 8, 13, 12, 10, 15, 13, 6, 15]]
-    # for s, dep in zip(sentences, dependencies):
+    # head = [[1, 2, 4, 2, -1, 4], [1, -1, 3, 4, 1, 4], [1, 4, 3, 1, 6, 4, -1, 8, 10, 8, 13, 12, 10, 15, 13, 6, 15]]
+    # for s, dep in zip(sentences, head):
     #     et = AST(s, dep, SEMANTICS)
     #     print(et.res())
 

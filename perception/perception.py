@@ -46,15 +46,13 @@ class Perception(object):
         logits = self.model(images)
         logits = logits.reshape((batch_size, seq_len, -1))
         probs = nn.functional.softmax(logits, dim=-1)
-        epsilon = 0.
-        probs = probs * (1 - epsilon) + epsilon / (len(SYMBOLS) - 1) 
         if self.model.training:
             m = Categorical(probs=probs)
             preds = m.sample()
         else:
             preds = torch.argmax(probs, -1)
 
-        return preds, probs
+        return preds
 
     def check_accuarcy(self, dataset):
         from utils import ID2SYM
@@ -67,11 +65,12 @@ class Perception(object):
         batch_size = 512
         labels = [l for _, l in dataset] + list(range(len(SYMBOLS) - 1))
         class_weights = np.array([v for k, v in sorted(Counter(labels).items())], dtype=np.float32)
-        class_weights = class_weights.sum() / class_weights
+        class_weights = class_weights.max() / class_weights
         criterion = nn.CrossEntropyLoss(ignore_index=-1, weight=torch.from_numpy(class_weights).to(self.device))
 
         n_epochs = int(math.ceil(batch_size * n_iters / len(dataset)))
         n_epochs = max(n_epochs, 5) # run at least 5 epochs
+        print(n_epochs, "epochs, ", end='')
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)

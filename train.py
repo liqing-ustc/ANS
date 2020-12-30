@@ -135,13 +135,10 @@ def train(model, args, st_epoch=0):
     if args.curriculum:
         curriculum_strategy = dict([
             (0, 1),
-            (1, 3),
-            (5, 5),
-            (10, 7),
-            (20, float("inf"))
-            # (30, 5),
-            # (50, 7),
-            # (100, float("inf"))
+            (2, 3),
+            (30, 5),
+            (50, 7),
+            (100, float("inf"))
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
