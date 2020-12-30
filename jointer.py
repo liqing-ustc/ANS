@@ -31,9 +31,10 @@ class Node:
         return True
 
 class AST: # Abstract Syntax Tree
-    def __init__(self, pt, semantics):
+    def __init__(self, pt, semantics, sent_probs=None):
         self.pt = pt
         self.semantics = semantics
+        self.sent_probs = sent_probs
 
         nodes = [Node(s, semantics[s]) for s in pt.sentence]
         for node, h in zip(nodes, pt.head):
@@ -84,6 +85,16 @@ class AST: # Abstract Syntax Tree
         # Currently, if the root node's children are valid, we directly change the result to y
         # In future, we can consider to search the execution tree in a top-down manner
         if self.root_node.children_res_valid():
+            if self.root_node.smt.solved and self.root_node.smt.arity == 0:
+                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
+                if not unsolveds:
+                    return None
+                root_node_idx = self.pt.head.index(-1)
+                root_node_probs = self.sent_probs[root_node_idx]
+                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
+                sym = unsolveds[np.argmax(sampling_probs)]
+                self.root_node.symbol = sym
+                self.pt.sentence[root_node_idx] = sym
             self._res = y
             self.root_node._res = y
             return self
@@ -91,8 +102,10 @@ class AST: # Abstract Syntax Tree
 
     def abduce_perception(self, y):
         # abduce over sentence
-        for sent_pos in range(len(self.pt.sentence)):
-            for sym in range(len(SYMBOLS) - 1):
+        sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.pt.sentence)])
+        for sent_pos in sent_pos_list:
+            s_prob = self.sent_probs[sent_pos]
+            for sym in np.argsort(s_prob)[::-1]:
                 pt = deepcopy(self.pt)
                 pt.sentence[sent_pos] = sym
                 et = AST(pt, self.semantics)
@@ -101,7 +114,7 @@ class AST: # Abstract Syntax Tree
         return None
 
     def abduce_syntax(self, y):
-        # rotate the tree w.r.t the root node
+        # abduce syntax by rotating the tree w.r.t the root node
         arcs = self.pt.dependencies
         def get_lc(k):
             return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] < k])
@@ -207,9 +220,12 @@ class Jointer:
 
         if config.perception: # use gt perception
             sentences = sample['label_seq']
+            sent_probs = np.ones(sentences.shape + (len(SYMBOLS) - 1,))
         else:
-            sentences = self.perception(img_seq)
+            sentences, sent_probs = self.perception(img_seq)
             sentences = sentences.detach()
+            sent_probs = sent_probs.detach().cpu().numpy()
+        sent_probs = [x[:l] for x, l in zip(sent_probs, lengths)]
         sentences = [list(x[:l]) for x, l in zip(sentences.cpu().numpy(), lengths)]
 
         if config.syntax: # use gt parse
@@ -223,7 +239,7 @@ class Jointer:
 
         semantics = self.semantics()
         
-        self.ASTs = [AST(pt, semantics) for pt in parses]
+        self.ASTs = [AST(pt, semantics, s_prob) for pt, s_prob in zip(parses, sent_probs)]
         results = [x.res() for x in self.ASTs]
         head = [pt.head for pt in parses]
         return sentences, head, results
@@ -239,11 +255,13 @@ class Jointer:
         self.buffer = []
 
     def learn(self):
-        assert len(self.buffer) > 0
+        if len(self.buffer) == 0: 
+            return
+
         self.train()
         print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.pt.sentence) for x in self.buffer]), 2))
-        pred_symbols = sorted(Counter([y for x in self.buffer for y in x.pt.sentence]).items())
-        print("Symbols: ", len(pred_symbols), pred_symbols)
+        pred_symbols = Counter([y for x in self.buffer for y in x.pt.sentence])
+        print("Symbols: ", len(pred_symbols), sorted(pred_symbols.items()))
         print("Head: ", sorted(Counter([tuple(ast.pt.head) for ast in self.buffer]).items(), key=lambda x: len(x[0])))
 
         if self.learned_module == 'perception':
@@ -275,7 +293,6 @@ class Jointer:
             self.semantics.learn(dataset)
 
         self.clear_buffer()
-        self.epoch += 1
 
 if __name__ == '__main__':
     # from utils import SEMANTICS

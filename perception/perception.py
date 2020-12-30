@@ -16,6 +16,7 @@ class Perception(object):
         self.model = SymbolNet()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
+        self.n_class = len(SYMBOLS) - 1
     
     def train(self):
         self.model.train()
@@ -45,6 +46,7 @@ class Perception(object):
         images = img_seq.reshape((-1, img_seq.shape[-3], img_seq.shape[-2], img_seq.shape[-1]))
         logits = self.model(images)
         logits = logits.reshape((batch_size, seq_len, -1))
+        # probs = torch.sigmoid(logits)
         probs = nn.functional.softmax(logits, dim=-1)
         if self.model.training:
             m = Categorical(probs=probs)
@@ -52,7 +54,7 @@ class Perception(object):
         else:
             preds = torch.argmax(probs, -1)
 
-        return preds
+        return preds, probs
 
     def check_accuarcy(self, dataset):
         from utils import ID2SYM
@@ -63,10 +65,23 @@ class Perception(object):
 
     def learn(self, dataset, n_iters=100):
         batch_size = 512
-        labels = [l for _, l in dataset] + list(range(len(SYMBOLS) - 1))
-        class_weights = np.array([v for k, v in sorted(Counter(labels).items())], dtype=np.float32)
-        class_weights = class_weights.max() / class_weights
-        criterion = nn.CrossEntropyLoss(ignore_index=-1, weight=torch.from_numpy(class_weights).to(self.device))
+        labels = [l for _, l in dataset]
+        counts = Counter(labels)
+        max_count = counts.most_common(1)[0][1]
+        total_count = len(labels)
+        
+        # class_weights = np.array([(total_count - counts[i])/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
+        class_weights = np.array([max_count/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
+        class_weights = torch.from_numpy(class_weights).to(self.device)
+
+        classes_valid = np.array([i for i in range(self.n_class) if counts[i] > 0])
+        classes_valid = torch.from_numpy(classes_valid).to(self.device)
+
+        classes_invalid = np.array([i for i in range(self.n_class) if counts[i] == 0])
+        # classes_invalid = torch.from_numpy(classes_invalid).to(self.device)
+
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
+        # criterion = nn.BCEWithLogitsLoss(pos_weight=class_weights, reduction='none')
 
         n_epochs = int(math.ceil(batch_size * n_iters / len(dataset)))
         n_epochs = max(n_epochs, 5) # run at least 5 epochs
@@ -79,7 +94,12 @@ class Perception(object):
                 img = img.to(self.device)
                 label = label.to(self.device)
                 logit = self.model(img)
+                # logit[:, classes_invalid] = float('-inf')
+                # label = nn.functional.one_hot(label, num_classes=self.n_class).type_as(logit)
                 loss = criterion(logit, label)
+                # loss[:, classes_invalid] = 0.
+                # loss = torch.index_select(loss, 1, classes_valid)
+                # loss = loss.mean()
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()

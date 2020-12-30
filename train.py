@@ -19,9 +19,9 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_60')
+                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_56')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
-    parser.add_argument('--seed', type=int, default=314, help="Random seed.")
+    parser.add_argument('--seed', type=int, default=777, help="Random seed.")
 
     parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
     parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
@@ -29,7 +29,7 @@ def parse_args():
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
 
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs for training')
-    parser.add_argument('--epochs_eval', type=int, default=1, help='how many epochs per evaluation')
+    parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
     args = parser.parse_args()
     return args
 
@@ -180,6 +180,7 @@ def train(model, args, st_epoch=0):
                 print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
             
             model.learn()
+            model.epoch += 1
             
         if ((epoch+1) % args.epochs_eval == 0) or (epoch+1 == args.epochs):
             perception_acc, syntax_acc, result_acc = evaluate(model, eval_dataloader)
@@ -212,6 +213,7 @@ if __name__ == "__main__":
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
 
     excludes = args.excludes
     for sym in excludes:
