@@ -122,28 +122,46 @@ class AST: # Abstract Syntax Tree
         def get_rc(k):
             return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
 
-        root_idx = self.pt.head.index(-1)
+        root = self.pt.head.index(-1)
         # left rotate
-        for i in get_rc(root_idx):
+        children = get_rc(root)
+        for i in children:
             pt = deepcopy(self.pt)
-            pt.head[root_idx] = i
-            pt.head[i] = -1
-            ch = get_lc(i) # set the parent the leftmost child of i to root_idx
+
+            # set the parent of i to the parent of the original root
+            pt.head[i] = pt.head[root]
+
+            # set to i the parent of the original root and its children that is right to i.
+            pt.head[root] = i
+            for j in children[:children.index(i)]:
+                pt.head[j] = i
+
+            # set to the original root the parent the leftmost child of i
+            ch = get_lc(i) 
             if len(ch) > 0:
-                pt.head[ch[0]] = root_idx
+                pt.head[ch[0]] = root
 
             et = AST(pt, self.semantics)
             if et.res() is not None and et.res() == y:
                 return et
-            
+
         # right rotate
-        for i in get_lc(root_idx):
+        children = get_lc(root)
+        for i in children:
             pt = deepcopy(self.pt)
-            pt.head[root_idx] = i
-            pt.head[i] = -1
-            ch = get_rc(i)
+
+            # set the parent of i to the parent of the original root
+            pt.head[i] = pt.head[root]
+
+            # set to i the parent of the original root and its children that is left to i.
+            pt.head[root] = i
+            for j in children[:children.index(i)]:
+                pt.head[j] = i
+
+            # set to the original root the parent the rightmost child of i
+            ch = get_rc(i) 
             if len(ch) > 0:
-                pt.head[ch[0]] = root_idx
+                pt.head[ch[0]] = root
 
             et = AST(pt, self.semantics)
             if et.res() is not None and et.res() == y:
