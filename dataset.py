@@ -108,6 +108,7 @@ def HINT_collate(batch):
     zero_img = torch.zeros_like(batch[0]['img_seq'][0])
     img_paths_list = []
     head_list = []
+    mask_list = []
     res_all_list = []
     for sample in batch:
         sample['img_seq'] += [zero_img] * (max_len - sample['len'])
@@ -124,12 +125,16 @@ def HINT_collate(batch):
         head_list.append(sample['head'])
         del sample['head']
 
+        mask_list.append(sample['mask'])
+        del sample['mask']
+
         res_all_list.append(sample['res_all'])
         del sample['res_all']
         
     batch = default_collate(batch)
     batch['img_paths'] = img_paths_list
     batch['head'] = head_list
+    batch['mask'] = mask_list
     batch['res_all'] = res_all_list
     return batch
 

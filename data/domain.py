@@ -1,7 +1,8 @@
 DIGITS= [str(i) for i in range(0, 10)]
 OPERATORS = list('+-*/!')
+PARENTHESES = list('()')
 NULL = '<NULL>'
-SYMBOLS = DIGITS + OPERATORS + [NULL]
+SYMBOLS = DIGITS + OPERATORS + PARENTHESES + [NULL]
 # SYM2ID = {v:i for i, v in enumerate(SYMBOLS)}
 # ID2SYM = {i:v for i, v in enumerate(SYMBOLS)}
 SYM2ID = lambda x: SYMBOLS.index(x)
@@ -29,7 +30,8 @@ functions = [
     lambda: 0, lambda: 1, lambda: 2, lambda: 3, lambda: 4, lambda: 5, lambda: 6, lambda: 7, lambda: 8, lambda: 9,
     lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: math.ceil(x/y) if y != 0 else None, 
     lambda x: math.factorial(x) if x <=20 else None,
-    lambda: None
+    lambda: None, lambda: None,
+    lambda: None, 
 ]
 
 PROGRAMS = [Program(f) for f in functions]

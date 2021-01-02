@@ -37,19 +37,21 @@ class AST: # Abstract Syntax Tree
         self.sent_probs = sent_probs
 
         nodes = [Node(s, semantics[s]) for s in pt.sentence]
-        for node, h in zip(nodes, pt.head):
-            if h == -1:
-                root_node = node
+        for node, h, m in zip(nodes, pt.head, pt.mask):
+            if m==0 or h == -1:
                 continue
             nodes[h].children.append(node)
         self.nodes = nodes
-        self.root_node = root_node
+        root_idx = pt.head.index(-1)
+        self.root_node = nodes[root_idx]
+        if pt.mask[root_idx] == 0:
+            pt.mask[root_idx] = 1
 
         self._res = None
         try:
             # TODO: set a timeout for the execution
             # self._res = func_timeout(timeout=0.01, func=root_node.res)
-            self._res = root_node.res()
+            self._res = self.root_node.res()
         except (IndexError, TypeError, ZeroDivisionError, ValueError, RecursionError, FunctionTimedOut) as e:
             # Must be extremely careful about these errors
             # if isinstance(e, FunctionTimedOut):
@@ -136,10 +138,9 @@ class AST: # Abstract Syntax Tree
             for j in children[:children.index(i)]:
                 pt.head[j] = i
 
-            # set to the original root the parent the leftmost child of i
-            ch = get_lc(i) 
-            if len(ch) > 0:
-                pt.head[ch[0]] = root
+            # set to the original root the parent the left child of i
+            for j in get_lc(i):
+                pt.head[j] = root
 
             et = AST(pt, self.semantics)
             if et.res() is not None and et.res() == y:
@@ -158,14 +159,21 @@ class AST: # Abstract Syntax Tree
             for j in children[:children.index(i)]:
                 pt.head[j] = i
 
-            # set to the original root the parent the rightmost child of i
-            ch = get_rc(i) 
-            if len(ch) > 0:
-                pt.head[ch[0]] = root
+            # set to the original root the parent the right child of i
+            for j in get_rc(i):
+                pt.head[j] = root
 
             et = AST(pt, self.semantics)
             if et.res() is not None and et.res() == y:
                 return et
+
+        # # mutate mask
+        # for i in range(len(self.pt.sentence)):
+        #     pt = deepcopy(self.pt)
+        #     pt.mask[i] = 0 if pt.mask[i] == 1 else 1
+        #     et = AST(pt, self.semantics)
+        #     if et.res() is not None and et.res() == y:
+        #         return et
 
         return None
 
@@ -260,8 +268,9 @@ class Jointer:
         self.ASTs = [AST(pt, semantics, s_prob) for pt, s_prob in zip(parses, sent_probs)]
         results = [x.res() for x in self.ASTs]
         head = [pt.head for pt in parses]
-        return sentences, head, results
-    
+        mask = [pt.mask for pt in parses]
+        return results, sentences, head, mask
+
     def abduce(self, gt_values, batch_img_paths):
         for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
             new_et = et.abduce(y, self.learned_module)
@@ -280,7 +289,8 @@ class Jointer:
         print("Hit samples: ", len(self.buffer), ' Ave length: ', round(np.mean([len(x.pt.sentence) for x in self.buffer]), 2))
         pred_symbols = Counter([y for x in self.buffer for y in x.pt.sentence])
         print("Symbols: ", len(pred_symbols), sorted(pred_symbols.items()))
-        print("Head: ", sorted(Counter([tuple(ast.pt.head) for ast in self.buffer]).items(), key=lambda x: len(x[0])))
+        pred_heads = Counter([tuple(ast.pt.head) for ast in self.buffer])
+        print("Head: ", sorted(pred_heads.most_common(10), key=lambda x: len(x[0])))
 
         if self.learned_module == 'perception':
             dataset = [(img, label) for x in self.buffer for img, label in zip(x.img_paths, x.pt.sentence)]
@@ -291,7 +301,7 @@ class Jointer:
             print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'syntax':
-            dataset = [{'word': x.pt.sentence, 'head': x.pt.head} for x in self.buffer]
+            dataset = [x.pt for x in self.buffer]
             n_iters = int(100)
             print("Learn syntax with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
             st = time()
