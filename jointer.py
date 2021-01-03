@@ -39,14 +39,20 @@ class AST: # Abstract Syntax Tree
         self.semantics = semantics
         self.sent_probs = sent_probs
 
+        mask = [0 if semantics[s].program is None else 1 for s in pt.sentence]
         nodes = [Node(s, semantics[s]) for s in pt.sentence]
-        for node, h, m in zip(nodes, pt.head, pt.mask):
+
+        root_idx = pt.head.index(-1)
+        self.root_node = nodes[root_idx]
+
+        for node, h, m in zip(nodes, pt.head, mask):
             if m==0 or h == -1:
                 continue
+            if mask[h] == 0 and h != root_idx: # if the head node is masked and it is not the root, break and set the root_node to None
+                self.root_node = None
+                break
             nodes[h].children.append(node)
         self.nodes = nodes
-        root_idx = pt.head.index(-1)
-        self.root_node = nodes[root_idx] if pt.mask[root_idx] == 1 else None
 
         self._res = None
         try:
@@ -216,8 +222,8 @@ class Jointer:
         img_seq = img_seq.to(DEVICE)
 
         if config.perception: # use gt perception
-            sentences = sample['label_seq']
-            sent_probs = np.ones(sentences.shape + (len(SYMBOLS) - 1,))
+            sentences = sample['sentence']
+            sent_probs = np.ones(sentences.shape + (len(SYMBOLS),))
         else:
             sentences, sent_probs = self.perception(img_seq)
             sentences = sentences.detach()
@@ -239,8 +245,7 @@ class Jointer:
         self.ASTs = [AST(pt, semantics, s_prob) for pt, s_prob in zip(parses, sent_probs)]
         results = [x.res() for x in self.ASTs]
         head = [pt.head for pt in parses]
-        mask = [pt.mask for pt in parses]
-        return results, sentences, head, mask
+        return results, sentences, head
 
     def abduce(self, gt_values, batch_img_paths):
         for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
@@ -280,7 +285,7 @@ class Jointer:
             print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'semantics':
-            dataset = [[] for _ in range(len(SYMBOLS) - 1)]
+            dataset = [[] for _ in range(len(self.semantics.semantics))]
             for ast in self.buffer:
                 queue = [ast.root_node]
                 while len(queue) > 0:

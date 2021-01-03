@@ -13,13 +13,13 @@ import numpy as np
 import math
 import random
 
+NULL = '<NULL>'
 try:
-    from utils import SYMBOLS, NULL
+    from utils import SYMBOLS
     from .general_utils import minibatches
-    TOKENS = SYMBOLS
+    TOKENS = SYMBOLS + [NULL]
 except ImportError:
     from general_utils import minibatches
-    NULL = '<NULL>'
     TOKENS = list('0123456789+-*/!') + [NULL]
 
 TRANSITIONS = ['L', 'R', 'S'] # Left-Arc, Right-Arc, Shift 
@@ -45,9 +45,6 @@ class ParserModel(nn.Module):
             nn.Dropout(p=dropout_prob),
             nn.Linear(hidden_size, n_classes),
         )
-        self.mask_classifier = nn.Sequential(
-            nn.Linear(embed_size, 2),
-        )
 
     def forward(self, t):
         """ Run the model forward.
@@ -57,11 +54,6 @@ class ParserModel(nn.Module):
         """
         x = self.embeddings(t)
         logits = self.model(x.view(x.shape[0], -1))
-        return logits
-
-    def forward_mask(self, t):
-        x = self.embeddings(t)
-        logits = self.mask_classifier(x)
         return logits
 
 class Parser(object):
@@ -205,8 +197,7 @@ class Parser(object):
 
     def parse(self, sentences, batch_size=5000):
         parses = []
-        masks = self.predict_mask(sentences)
-        partial_parses = [PartialParse(sen, m) for sen, m in zip(sentences, masks)]
+        partial_parses = [PartialParse(sen) for sen in sentences]
         unfinished_parses = partial_parses[:]
         while unfinished_parses:
             minibatch_parses = unfinished_parses[:batch_size]
@@ -228,25 +219,6 @@ class Parser(object):
                     del parse_index[index]
             parses.extend(batch_parses)
         return parses
-
-    def predict_mask(self, sentences):
-        null_idx = self.tok2id[NULL]
-        lengths = [len(x) for x in sentences]
-        max_len = max(lengths)
-        sentences = [x + [null_idx] * (max_len - len(x))  for x in sentences]
-        sentences = np.array(sentences).astype('int32')
-        sentences = torch.from_numpy(sentences).long().to(self.device)
-        logits = self.model.forward_mask(sentences)
-        probs = nn.functional.softmax(logits, dim=-1)
-        if self.model.training:
-            m = Categorical(probs=probs)
-            preds = m.sample()
-        else:
-            preds = torch.argmax(probs, -1)
-
-        preds = preds.detach().cpu().numpy()
-        preds = [list(p[:l]) for p, l in zip(preds, lengths)]
-        return preds
 
     def predict(self, partial_parses):
         mb_x = [self.extract_features(p.stack, p.buffer, p.dependencies, p.sentence) for p in partial_parses]
@@ -299,37 +271,17 @@ class Parser(object):
                 output_y = self.model(train_x)
                 loss = self.criterion(output_y, train_y)
 
-                # loss for mask prediction
-                data_batch = random.sample(dataset, k=min(batch_size, len(dataset)))
-                sentences = [x.sentence for x in data_batch]
-                masks = [x.mask for x in data_batch]
-                lengths = [len(x) for x in sentences]
-                max_len = max(lengths)
-                sentences = [x + [self.null_idx] * (max_len - len(x))  for x in sentences]
-                sentences = np.array(sentences).astype('int32')
-                sentences = torch.from_numpy(sentences).long().to(self.device)
-                masks = [x + [-1] * (max_len - len(x))  for x in masks]
-                masks = np.array(masks).astype('int32')
-                masks = torch.from_numpy(masks).long().to(self.device)
-                logits = self.model.forward_mask(sentences)
-                logits = torch.transpose(logits, 1, 2)
-                loss_mask = self.criterion(logits, masks)
-
-                loss = loss + loss_mask
-
                 self.optimizer.zero_grad()   # remove any baggage in the optimizer
                 loss.backward()
                 self.optimizer.step()
 
 class PartialParse(object):
-    def __init__(self, sentence, mask):
+    def __init__(self, sentence):
         """Initializes this partial parse.
         @param sentence (list of str): The sentence to be parsed as a list of words.
                                         Your code should not modify the sentence.
         """
         self.sentence = sentence
-        self.mask = mask
-        assert len(sentence) > 0 and len(sentence) == len(mask)
         self.stack = [] 
         self.buffer = list(range(len(sentence)))
         self.dependencies = []
@@ -359,7 +311,6 @@ class PartialParse(object):
         if len(self.buffer) == 0 and len(self.stack) == 1:
             self.finish = True
             self.compute_head()
-            self.mask[self.head.index(-1)] = 1 # the root node cannot be masked.
     
     def compute_head(self):
         self.head = [-1] * len(self.sentence)

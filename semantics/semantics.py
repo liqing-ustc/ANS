@@ -91,10 +91,10 @@ def compute_likelihood(program=None, examples=None):
         return np.mean(pred == gt)
 
 class Semantics(object):
-    def __init__(self, idx):
+    def __init__(self, idx, program=None):
         self.idx = idx
         self.examples = None
-        self.program = None
+        self.program = program
         self.arity = None
         self.solved = False
         self.likelihood = 0.
@@ -132,7 +132,7 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        min_examples = 50 
+        min_examples = 10 
         max_samples = 100
         # if len(self.examples) < min_examples or (self.arity == 0 and self.solved):
         if len(self.examples) < min_examples or self.solved:
@@ -201,7 +201,7 @@ class DreamCoder(object):
         baseGrammar = Grammar.uniform(self.primitives)
         self.grammar = baseGrammar
         self.train_args = args
-        self.semantics = [Semantics(i) for i in range(len(SYMBOLS) - 1)] # one symbol is NULL
+        self.semantics = [Semantics(i) for i in range(len(SYMBOLS))] 
         self.allFrontiers = None
         self.helmholtzFrontiers = None
 

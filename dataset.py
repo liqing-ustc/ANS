@@ -84,9 +84,9 @@ class HINT(Dataset):
         # del sample['img_paths']
         sample['expr'] = ''.join(sample['expr'])
         
-        label_seq = [SYM2ID(sym) for sym in sample['expr']]
+        sentence = [SYM2ID(sym) for sym in sample['expr']]
         sample['img_seq'] = img_seq
-        sample['label_seq'] = label_seq
+        sample['sentence'] = sentence
         return sample
             
     
@@ -114,8 +114,8 @@ def HINT_collate(batch):
         sample['img_seq'] += [zero_img] * (max_len - sample['len'])
         sample['img_seq'] = torch.stack(sample['img_seq'])
         
-        sample['label_seq'] += [SYM2ID(NULL)] * (max_len - sample['len'])
-        sample['label_seq'] = torch.tensor(sample['label_seq'])
+        sample['sentence'] += [-1] * (max_len - sample['len'])
+        sample['sentence'] = torch.tensor(sample['sentence'])
 
         # sample['head'] += [-2] * (max_len - sample['len'])
         # sample['head'] = torch.tensor(sample['head'])

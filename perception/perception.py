@@ -13,10 +13,10 @@ from collections import Counter
 class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
-        self.model = SymbolNet()
+        self.n_class = len(SYMBOLS)
+        self.model = SymbolNet(self.n_class)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
-        self.n_class = len(SYMBOLS) - 1
     
     def train(self):
         self.model.train()
@@ -106,13 +106,13 @@ class Perception(object):
                 
 
 class SymbolNet(nn.Module):
-    def __init__(self):
+    def __init__(self, n_class):
         super(SymbolNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 3, stride = 1, padding = 1)
         self.conv2 = nn.Conv2d(6, 16, 3, stride = 1, padding = 1)
         self.fc1 = nn.Linear(16 * 8 * 8, 120) 
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, len(SYMBOLS) - 1)
+        self.fc3 = nn.Linear(84, n_class)
 
     def forward(self, x):
         x = F.max_pool2d(F.relu(self.conv1(x)), 2)

@@ -1,9 +1,9 @@
-from utils import SYMBOLS, SYM2PROG, NULL
-from .semantics import DreamCoder
+from utils import SYMBOLS, SYM2PROG
+from .semantics import DreamCoder, Semantics
 
 class SemanticsGT():
     def __init__(self):
-        self.semantics = [SYM2PROG[s] for s in SYMBOLS if s != NULL]
+        self.semantics = [Semantics(i, SYM2PROG[s]) for i, s in enumerate(SYMBOLS)]
 
     def __call__(self):
         return self.semantics

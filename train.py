@@ -55,16 +55,12 @@ def evaluate(model, dataloader):
     dep_all = []
     dep_pred_all = []
 
-    mask_all = []
-    mask_pred_all = []
-
     for sample in tqdm(dataloader):
         res = sample['res']
         expr = sample['expr']
         dep = sample['head']
-        mask = sample['mask']
 
-        res_preds, expr_preds, dep_preds, mask_preds = model.deduce(sample)
+        res_preds, expr_preds, dep_preds = model.deduce(sample)
         
         res_pred_all.append(res_preds)
         res_all.append(res)
@@ -72,8 +68,6 @@ def evaluate(model, dataloader):
         expr_all.extend(expr)
         dep_pred_all.extend(dep_preds)
         dep_all.extend(dep)
-        mask_pred_all.extend(mask_preds)
-        mask_all.extend(mask)
 
     res_pred_all = np.concatenate(res_pred_all, axis=0)
     res_all = np.concatenate(res_all, axis=0)
@@ -84,16 +78,12 @@ def evaluate(model, dataloader):
     assert len(expr_all) == len(expr_pred_all)
     pred = [y for x in expr_pred_all for y in x]
     gt = [y for x in expr_all for y in x]
+    mask = np.array([0 if x in '()' else 1 for x in gt], dtype=bool)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
     pred = [y for x in dep_pred_all for y in x]
     gt = [y for x in dep_all for y in x]
-    mask = np.array([y for x in mask_all for y in x], dtype=bool)
     head_acc = np.mean(np.array(pred)[mask] == np.array(gt)[mask])
-
-    pred = [y for x in mask_pred_all for y in x]
-    gt = [y for x in mask_all for y in x]
-    mask_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
     print("result accuracy by length:")
     for k in sorted(dataloader.dataset.len2ids.keys()):
@@ -141,10 +131,10 @@ def evaluate(model, dataloader):
     print("error cases:")
     errors = np.arange(len(res_all))[res_all != res_pred_all]
     for i in errors[:10]:
-        print(expr_all[i], expr_pred_all[i], dep_all[i], dep_pred_all[i], mask_all[i], mask_pred_all[i], res_all[i], res_pred_all[i])
+        print(expr_all[i], expr_pred_all[i], dep_all[i], dep_pred_all[i], res_all[i], res_pred_all[i])
         # draw_parse(expr_pred_all[i], dep_pred_all[i])
 
-    return perception_acc, head_acc, mask_acc, result_acc
+    return perception_acc, head_acc, result_acc
 
 def train(model, args, st_epoch=0):
     best_acc = 0.0
@@ -164,8 +154,9 @@ def train(model, args, st_epoch=0):
             (0, 1),
             (2, 3),
             (30, 5),
-            (50, 7),
-            (100, float("inf"))
+            (40, 9),
+            (50, 15),
+            (60, float("inf"))
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -177,8 +168,8 @@ def train(model, args, st_epoch=0):
                             shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    # perception_acc, head_acc, mask_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{0} (Perception Acc={1:.2f}, Head Acc={2:.2f}, Mask Acc={3:.2f}, Result Acc={4:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*mask_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -210,8 +201,8 @@ def train(model, args, st_epoch=0):
             model.epoch += 1
             
         if ((epoch+1) % args.epochs_eval == 0) or (epoch+1 == args.epochs):
-            perception_acc, head_acc, mask_acc, result_acc = evaluate(model, eval_dataloader)
-            print('{0} (Perception Acc={1:.2f}, Head Acc={2:.2f}, Mask Acc={3:.2f}, Result Acc={4:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*mask_acc, 100*result_acc))
+            perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+            print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
             if result_acc > best_acc:
                 best_acc = result_acc
 
@@ -227,8 +218,8 @@ def train(model, args, st_epoch=0):
     print('Evaluate on test set...')
     eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=64,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
-    perception_acc, head_acc, mask_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Head Acc={2:.2f}, Mask Acc={3:.2f}, Result Acc={4:.2f})'.format('test', 100*perception_acc, 100*head_acc, 100*mask_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('test', 100*perception_acc, 100*head_acc, 100*result_acc))
     return
 
 
