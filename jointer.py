@@ -4,9 +4,12 @@ from copy import deepcopy
 import sys
 from func_timeout import func_timeout, FunctionTimedOut
 from utils import SYMBOLS, DEVICE
-from collections import Counter
+from collections import Counter, namedtuple
 from time import time
 import torch
+import random
+
+Parse = namedtuple('Parse', ['sentence', 'mask', 'head'])
 
 class Node:
     def __init__(self, symbol, smt):
@@ -43,15 +46,14 @@ class AST: # Abstract Syntax Tree
             nodes[h].children.append(node)
         self.nodes = nodes
         root_idx = pt.head.index(-1)
-        self.root_node = nodes[root_idx]
-        if pt.mask[root_idx] == 0:
-            pt.mask[root_idx] = 1
+        self.root_node = nodes[root_idx] if pt.mask[root_idx] == 1 else None
 
         self._res = None
         try:
             # TODO: set a timeout for the execution
             # self._res = func_timeout(timeout=0.01, func=root_node.res)
-            self._res = self.root_node.res()
+            if self.root_node is not None:
+                self._res = self.root_node.res() 
         except (IndexError, TypeError, ZeroDivisionError, ValueError, RecursionError, FunctionTimedOut) as e:
             # Must be extremely careful about these errors
             # if isinstance(e, FunctionTimedOut):
@@ -70,10 +72,10 @@ class AST: # Abstract Syntax Tree
             et = self.abduce_perception(y)
             if et is not None:
                 return et
-        elif module == 'syntax':
-            et = self.abduce_syntax(y)
-            if et is not None:
-                return et
+        # elif module == 'syntax':
+        #     et = self.abduce_syntax(y)
+        #     if et is not None:
+        #         return et
         elif module == 'semantics':
             et = self.abduce_semantics(y)
             if et is not None:
@@ -86,7 +88,7 @@ class AST: # Abstract Syntax Tree
         # abduce over semantics
         # Currently, if the root node's children are valid, we directly change the result to y
         # In future, we can consider to search the execution tree in a top-down manner
-        if self.root_node.children_res_valid():
+        if self.root_node is not None and self.root_node.children_res_valid():
             if self.root_node.smt.solved and self.root_node.smt.arity == 0:
                 unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
                 if not unsolveds:
@@ -108,9 +110,9 @@ class AST: # Abstract Syntax Tree
         for sent_pos in sent_pos_list:
             s_prob = self.sent_probs[sent_pos]
             for sym in np.argsort(s_prob)[::-1]:
-                pt = deepcopy(self.pt)
-                pt.sentence[sent_pos] = sym
-                et = AST(pt, self.semantics)
+                sentence = deepcopy(self.pt.sentence)
+                sentence[sent_pos] = sym
+                et = AST(Parse(sentence, self.pt.mask, self.pt.head), self.semantics)
                 if et.res() is not None and et.res() == y:
                     return et
         return None
@@ -124,56 +126,25 @@ class AST: # Abstract Syntax Tree
         def get_rc(k):
             return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
 
-        root = self.pt.head.index(-1)
-        # left rotate
-        children = get_rc(root)
-        for i in children:
-            pt = deepcopy(self.pt)
+        for arc in sorted(arcs, key=lambda x: x[2]):
+            h, t = arc[:2]
+            head = deepcopy(self.pt.head)
 
-            # set the parent of i to the parent of the original root
-            pt.head[i] = pt.head[root]
+            head[t] = head[h]
+            head[h] = t 
 
-            # set to i the parent of the original root and its children that is right to i.
-            pt.head[root] = i
-            for j in children[:children.index(i)]:
-                pt.head[j] = i
+            children = get_rc(h) if h < t else get_lc(h)
+            for j in children[:children.index(t)]:
+                head[j] = t
 
-            # set to the original root the parent the left child of i
-            for j in get_lc(i):
-                pt.head[j] = root
+            children = get_lc(t) if h < t else get_rc(h)
+            for j in children:
+                head[j] = h
 
-            et = AST(pt, self.semantics)
+            et = AST(Parse(self.pt.sentence, self.pt.mask, head), self.semantics)
             if et.res() is not None and et.res() == y:
                 return et
 
-        # right rotate
-        children = get_lc(root)
-        for i in children:
-            pt = deepcopy(self.pt)
-
-            # set the parent of i to the parent of the original root
-            pt.head[i] = pt.head[root]
-
-            # set to i the parent of the original root and its children that is left to i.
-            pt.head[root] = i
-            for j in children[:children.index(i)]:
-                pt.head[j] = i
-
-            # set to the original root the parent the right child of i
-            for j in get_rc(i):
-                pt.head[j] = root
-
-            et = AST(pt, self.semantics)
-            if et.res() is not None and et.res() == y:
-                return et
-
-        # # mutate mask
-        # for i in range(len(self.pt.sentence)):
-        #     pt = deepcopy(self.pt)
-        #     pt.mask[i] = 0 if pt.mask[i] == 1 else 1
-        #     et = AST(pt, self.semantics)
-        #     if et.res() is not None and et.res() == y:
-        #         return et
 
         return None
 

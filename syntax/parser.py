@@ -214,11 +214,12 @@ class Parser(object):
             parse_index = list(range(len(minibatch_parses)))
             batch_parses = [None] * len(minibatch_parses)
             while minibatch_parses:
-                transitions = self.predict(minibatch_parses)
+                transitions, probs = self.predict(minibatch_parses)
+                probs = probs.detach().cpu().numpy()
                 transitions = transitions.detach().cpu().numpy()
                 index_rm = []
                 for i in range(len(minibatch_parses)):
-                    minibatch_parses[i].parse_step(transitions[i])
+                    minibatch_parses[i].parse_step(transitions[i], probs[i])
                     if minibatch_parses[i].finish:
                         batch_parses[parse_index[i]] = minibatch_parses[i]
                         index_rm.append(i)
@@ -264,7 +265,7 @@ class Parser(object):
         else:
             preds = torch.argmax(probs, -1)
 
-        return preds
+        return preds, probs
 
     def evaluate(self, dataset):
         sentences = [x['word'] for x in dataset]
@@ -333,25 +334,28 @@ class PartialParse(object):
         self.buffer = list(range(len(sentence)))
         self.dependencies = []
         self.transitions = []
+        self.probs = []
         self.finish = False # whether the parse has finished
 
-    def parse_step(self, transition):
+    def parse_step(self, transition, prob=None):
         """Performs a single parse step by applying the given transition to this partial parse
         @param transition (str): A string that equals "S", "LA", or "RA" representing the shift,
                                 left-arc, and right-arc transitions. You can assume the provided
                                 transition is a legal transition.
         """
+        transition_prob = prob[transition]
         if transition == 0: # Left-Arc
-            d=(self.stack[-1],self.stack[-2])
+            d=(self.stack[-1],self.stack[-2],transition_prob)
             self.dependencies.append(d)
             self.stack.pop(-2)
         elif transition == 1: # Right-Arc
-            d=(self.stack[-2],self.stack[-1])
+            d=(self.stack[-2],self.stack[-1],transition_prob)
             self.dependencies.append(d)
             self.stack.pop(-1)
         elif transition == 2: # Shift
             self.stack.append(self.buffer.pop(0))
         self.transitions.append(transition)
+        self.probs.append(prob)
         if len(self.buffer) == 0 and len(self.stack) == 1:
             self.finish = True
             self.compute_head()
@@ -359,7 +363,7 @@ class PartialParse(object):
     
     def compute_head(self):
         self.head = [-1] * len(self.sentence)
-        for h, t in self.dependencies:
+        for h, t, _ in self.dependencies:
             self.head[t] = h
 
     def parse(self, transitions):

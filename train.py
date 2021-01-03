@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_56')
+                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_68')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=777, help="Random seed.")
 
@@ -157,15 +157,15 @@ def train(model, args, st_epoch=0):
     max_len = float("inf")
     if args.curriculum:
         curriculum_strategy = dict([
-            (0, 3),
-            (1, 9),
-            (3, 15),
-            (5, float('inf')),
-            # (0, 1),
-            # (2, 3),
-            # (30, 5),
-            # (50, 7),
-            # (100, float("inf"))
+            # (0, 3),
+            # (1, 9),
+            # (5, 15),
+            # (10, float('inf')),
+            (0, 1),
+            (2, 3),
+            (30, 5),
+            (50, 7),
+            (100, float("inf"))
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -177,8 +177,8 @@ def train(model, args, st_epoch=0):
                             shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    perception_acc, head_acc, mask_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{0} (Perception Acc={1:.2f}, Head Acc={2:.2f}, Mask Acc={3:.2f}, Result Acc={4:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*mask_acc, 100*result_acc))
+    # perception_acc, head_acc, mask_acc, result_acc = evaluate(model, eval_dataloader)
+    # print('{0} (Perception Acc={1:.2f}, Head Acc={2:.2f}, Mask Acc={3:.2f}, Result Acc={4:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*mask_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
