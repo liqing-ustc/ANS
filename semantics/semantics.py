@@ -93,15 +93,17 @@ def compute_likelihood(program=None, examples=None):
 class Semantics(object):
     def __init__(self, idx, program=None):
         self.idx = idx
-        self.examples = None
+        self.examples = []
         self.program = program
         self.arity = None
         self.solved = False
         self.likelihood = 0.
+        self.min_examples = 10 
+        self.max_examples = 100
 
     def update_examples(self, examples):
-        if not examples:
-            self.examples = []
+        if len(examples) < self.min_examples:
+            self.clear()
             return
         arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
         examples = [x[:2] for x in examples if len(x[0]) == arity] 
@@ -132,19 +134,19 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        min_examples = 10 
-        max_samples = 100
+        min_examples = self.min_examples
+        max_examples = self.max_examples
         # if len(self.examples) < min_examples or (self.arity == 0 and self.solved):
         if len(self.examples) < min_examples or self.solved:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         examples = self.examples
-        if len(examples) > max_samples:
-            examples = random.sample(self.examples, k=max_samples)
+        if len(examples) > max_examples:
+            examples = random.sample(self.examples, k=max_examples)
         return Task(str(self.idx), task_type, examples)
 
     def clear(self):
-        self.examples = None
+        self.examples = []
         self.program = None
         self.arity = None
         self.solved = False

@@ -1,5 +1,5 @@
 DIGITS= [str(i) for i in range(0, 10)]
-OPERATORS = list('+-*/!')
+OPERATORS = list('+-*/')
 PARENTHESES = list('()')
 NULL = '<NULL>'
 SYMBOLS = DIGITS + OPERATORS + PARENTHESES

@@ -9,7 +9,7 @@ from time import time
 import torch
 import random
 
-Parse = namedtuple('Parse', ['sentence', 'mask', 'head'])
+Parse = namedtuple('Parse', ['sentence', 'head'])
 
 class Node:
     def __init__(self, symbol, smt):
@@ -46,7 +46,7 @@ class AST: # Abstract Syntax Tree
         self.root_node = nodes[root_idx]
 
         for node, h, m in zip(nodes, pt.head, mask):
-            if m==0 or h == -1:
+            if m == 0 or h == -1:
                 continue
             if mask[h] == 0 and h != root_idx: # if the head node is masked and it is not the root, break and set the root_node to None
                 self.root_node = None
@@ -101,8 +101,8 @@ class AST: # Abstract Syntax Tree
                     return None
                 root_node_idx = self.pt.head.index(-1)
                 root_node_probs = self.sent_probs[root_node_idx]
-                sampling_probs = np.array([root_node_probs[i] for i in unsolveds])
-                sym = unsolveds[np.argmax(sampling_probs)]
+                sampling_probs = [root_node_probs[i] for i in unsolveds]
+                sym = random.choices(unsolveds, weights=sampling_probs)[0]
                 self.root_node.symbol = sym
                 self.pt.sentence[root_node_idx] = sym
             self._res = y
@@ -118,7 +118,7 @@ class AST: # Abstract Syntax Tree
             for sym in np.argsort(s_prob)[::-1]:
                 sentence = deepcopy(self.pt.sentence)
                 sentence[sent_pos] = sym
-                et = AST(Parse(sentence, self.pt.mask, self.pt.head), self.semantics)
+                et = AST(Parse(sentence, self.pt.head), self.semantics)
                 if et.res() is not None and et.res() == y:
                     return et
         return None
@@ -165,9 +165,9 @@ class Jointer:
         self.ASTs = []
         self.buffer = []
         self.epoch = 0
-        self.learning_schedule = ['perception'] * (0 if config.perception else 10) \
-                               + ['syntax'] * (0 if config.syntax else 5) \
-                               + ['semantics'] * (0 if config.semantics else 1)
+        self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
+                               + ['perception'] * (0 if config.perception else 10) \
+                               + ['syntax'] * (0 if config.syntax else 10) \
 
     @property
     def learned_module(self):
