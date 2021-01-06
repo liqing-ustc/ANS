@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
-    parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
+    parser.add_argument('--epochs_eval', type=int, default=5, help='how many epochs per evaluation')
     args = parser.parse_args()
     return args
 
@@ -169,9 +169,9 @@ def train(model, args, st_epoch=0):
             # (10, float('inf')),
             (0, 1),
             (1, 3),
-            (10, 9),
-            (15, 15),
-            (20, float('inf')),
+            (20, 9),
+            (30, 15),
+            (50, float('inf')),
             # (30, 5),
             # (40, 9),
             # (50, 15),
