@@ -67,7 +67,11 @@ class AST: # Abstract Syntax Tree
         if self._res is not None and self._res == y:
             return self
         
-        if module == 'perception':
+        if module == 'semantics':
+            et = self.abduce_semantics(y)
+            if et is not None:
+                return et
+        elif module == 'perception':
             et = self.abduce_perception(y)
             if et is not None:
                 return et
@@ -75,10 +79,6 @@ class AST: # Abstract Syntax Tree
         #     et = self.abduce_syntax(y)
         #     if et is not None:
         #         return et
-        elif module == 'semantics':
-            et = self.abduce_semantics(y)
-            if et is not None:
-                return et
         
         return None
 
@@ -130,7 +130,7 @@ class AST: # Abstract Syntax Tree
             for j in children:
                 head[j] = h
 
-            et = AST(Parse(self.pt.sentence, self.pt.mask, head), self.semantics)
+            et = AST(Parse(self.pt.sentence, head), self.semantics)
             if et.res() is not None and et.res() == y:
                 return et
 
@@ -149,7 +149,7 @@ class Jointer:
         self.buffer = []
         self.epoch = 0
         self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
-                               + ['perception'] * (0 if config.perception else 10) \
+                               + ['perception'] * (0 if config.perception else 1) \
                                + ['syntax'] * (0 if config.syntax else 10) \
 
     @property
@@ -273,7 +273,7 @@ class Jointer:
                 for node in ast.nodes:
                     xs = tuple([x.res() for x in node.children if x.res() is not None])
                     y = node.res()
-                    if y is None and len(xs) > 0:
+                    if y is None:
                         continue
                     dataset[node.symbol].append((xs, y))
             self.semantics.learn(dataset)

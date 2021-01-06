@@ -4,11 +4,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 from torch.utils.data import Dataset, DataLoader
-from PIL import Image
+from PIL import Image, ImageOps
 from tqdm import trange, tqdm
 import math
 import numpy as np
 from collections import Counter
+from . import resnet_scan
 
 def check_accuarcy(dataset):
     from utils import SYM2ID
@@ -24,15 +25,20 @@ class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
         self.n_class = len(SYMBOLS)
-        self.model = SymbolNet(self.n_class)
+        # self.model = SymbolNet(self.n_class)
+        self.model = resnet_scan.make_model(self.n_class)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
+        self.training = False
     
     def train(self):
-        self.model.train()
+        # self.model.train()
+        self.model.eval()
+        self.training = True
     
     def eval(self):
         self.model.eval()
+        self.training = False
     
     def to(self, device):
         self.model.to(device)
@@ -85,7 +91,7 @@ class Perception(object):
         logits = logits.reshape((batch_size, seq_len, -1))
         # probs = torch.sigmoid(logits)
         probs = nn.functional.softmax(logits, dim=-1)
-        if self.model.training:
+        if self.training:
             m = Categorical(probs=probs)
             preds = m.sample()
         else:
@@ -102,10 +108,10 @@ class Perception(object):
         min_samples = 100
         classes_invalid = [i for i in range(self.n_class) if counts[i] < min_samples]
         if classes_invalid:
-            check_accuarcy(dataset, end='->')
+            check_accuarcy(dataset)
             for cls_id in classes_invalid:
                 dataset.extend(self.selflabel_dataset[cls_id])
-            check_accuarcy(dataset, end=', ')
+            check_accuarcy(dataset)
 
         labels = [l for i, l in dataset]
         counts = Counter(labels)
@@ -124,7 +130,7 @@ class Perception(object):
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)
-        self.train()
+        self.model.train()
         for epoch in range(n_epochs):
             for img, label in train_dataloader:
                 img = img.to(self.device)
@@ -165,6 +171,7 @@ class ImageSet(Dataset):
         sample = self.dataset[index]
         img_path, label = sample
         img = Image.open(IMG_DIR+img_path).convert('L')
+        img = ImageOps.invert(img)
         img = self.img_transform(img)
 
         return img, label

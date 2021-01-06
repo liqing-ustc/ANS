@@ -3,6 +3,11 @@ import time
 from tqdm import tqdm
 from collections import Counter
 
+from sklearn.metrics import classification_report, confusion_matrix
+import pandas as pd
+pd.options.display.float_format = '{:.2f}'.format
+pd.options.display.max_columns = 20
+
 from dataset import HINT, HINT_collate
 from jointer import Jointer
 
@@ -19,7 +24,8 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_68')
+                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/SCAN/outputs/hint/selflabel/model.pth.tar_72_match')
+                        # default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_68')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=777, help="Random seed.")
 
@@ -55,19 +61,20 @@ def evaluate(model, dataloader):
     dep_all = []
     dep_pred_all = []
 
-    for sample in tqdm(dataloader):
-        res = sample['res']
-        expr = sample['expr']
-        dep = sample['head']
+    with torch.no_grad():
+        for sample in tqdm(dataloader):
+            res = sample['res']
+            expr = sample['expr']
+            dep = sample['head']
 
-        res_preds, expr_preds, dep_preds = model.deduce(sample)
-        
-        res_pred_all.append(res_preds)
-        res_all.append(res)
-        expr_pred_all.extend(expr_preds)
-        expr_all.extend(expr)
-        dep_pred_all.extend(dep_preds)
-        dep_all.extend(dep)
+            res_preds, expr_preds, dep_preds = model.deduce(sample)
+            
+            res_pred_all.append(res_preds)
+            res_all.append(res)
+            expr_pred_all.extend(expr_preds)
+            expr_all.extend(expr)
+            dep_pred_all.extend(dep_preds)
+            dep_all.extend(dep)
 
     res_pred_all = np.concatenate(res_pred_all, axis=0)
     res_all = np.concatenate(res_all, axis=0)
@@ -80,6 +87,16 @@ def evaluate(model, dataloader):
     gt = [y for x in expr_all for y in x]
     mask = np.array([0 if x in '()' else 1 for x in gt], dtype=bool)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
+
+    report = classification_report(gt, pred, target_names=SYMBOLS)
+    cmtx = confusion_matrix(gt, pred, normalize='pred')
+    cmtx = pd.DataFrame(
+        (100*cmtx).astype('int'),
+        index=SYMBOLS,
+        columns=SYMBOLS
+    )
+    print(report)
+    print(cmtx)
 
     pred = [y for x in dep_pred_all for y in x]
     gt = [y for x in dep_all for y in x]
@@ -138,10 +155,10 @@ def evaluate(model, dataloader):
 
 def train(model, args, st_epoch=0):
     best_acc = 0.0
-    batch_size = 256
+    batch_size = 128
     train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,
                          shuffle=True, num_workers=4, collate_fn=HINT_collate)
-    eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=128,
+    eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=32,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     max_len = float("inf")
@@ -153,7 +170,7 @@ def train(model, args, st_epoch=0):
             # (10, float('inf')),
             (0, 1),
             (1, 3),
-            (8, 9),
+            (10, 9),
             (15, 15),
             (20, float('inf')),
             # (30, 5),
@@ -171,8 +188,8 @@ def train(model, args, st_epoch=0):
                             shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -247,7 +264,7 @@ if __name__ == "__main__":
     model.to(DEVICE)
 
     if args.perception_pretrain and not args.perception:
-        model.perception.load(torch.load(args.perception_pretrain))
+        model.perception.load({'model': torch.load(args.perception_pretrain)})
         model.perception.selflabel(train_set.all_symbols(max_len=15))
 
     st_epoch = 0

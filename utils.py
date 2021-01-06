@@ -18,13 +18,14 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ROOT_DIR = '/home/qing/Desktop/Closed-Loop-Learning/CLL-NeSy/data/'
 IMG_DIR = ROOT_DIR + 'symbol_images/'
-IMG_SIZE = 32
+IMG_SIZE = 45
 
 from torchvision import transforms
 IMG_TRANSFORM = transforms.Compose([
-                    transforms.ToTensor(),
                     transforms.Resize(IMG_SIZE),
-                    transforms.Lambda(lambda x: 1. - x),
+                    transforms.CenterCrop(32),
+                    transforms.ToTensor(),
+                    # transforms.Lambda(lambda x: 1. - x),
                     # transforms.Normalize((0.5,), (1,))
                 ])
 
