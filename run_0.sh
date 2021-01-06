@@ -1,15 +1,6 @@
+export seed=0
+
 # Learn 3 meanings
-export seed=1
-export OUTPUT=./outputs/exp_curriculum/seed_${seed}
-mkdir -p $OUTPUT
-python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
-
-export seed=2
-export OUTPUT=./outputs/exp_curriculum/seed_${seed}
-mkdir -p $OUTPUT
-python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
-
-export seed=3
 export OUTPUT=./outputs/exp_curriculum/seed_${seed}
 mkdir -p $OUTPUT
 python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
