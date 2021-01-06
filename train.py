@@ -24,8 +24,7 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/SCAN/outputs/hint/selflabel/model.pth.tar_72_match')
-                        # default='/home/qing/Desktop/Closed-Loop-Learning/perception-pretrain/supervised/perception_68')
+                        default='data/perception-pretrain/model.pth.tar_72_match')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=777, help="Random seed.")
 
