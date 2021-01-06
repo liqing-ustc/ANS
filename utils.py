@@ -16,7 +16,7 @@ import numpy as np
 np.set_printoptions(precision=2, suppress=True)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-ROOT_DIR = '/home/qing/Desktop/Closed-Loop-Learning/CLL-NeSy/data/'
+ROOT_DIR = './Closed-Loop-Learning/CLL-NeSy/data/'
 IMG_DIR = ROOT_DIR + 'symbol_images/'
 IMG_SIZE = 45
 
