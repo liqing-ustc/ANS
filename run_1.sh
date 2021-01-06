@@ -1,4 +1,5 @@
 export seed=1
+export CUDA_VISIBLE_DEVICES=$seed
 
 # Learn 3 meanings
 export OUTPUT=./outputs/exp_curriculum/seed_${seed}
