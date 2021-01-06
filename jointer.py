@@ -22,7 +22,7 @@ class Node:
         if self._res is not None:
             return self._res
 
-        self._res = self.smt(*[x.res() for x in self.children])
+        self._res = self.smt(*[x.res() for x in self.children if x.res() is not None])
         if self._res is None or self._res > sys.maxsize:
             self._res = None
         return self._res
@@ -39,31 +39,24 @@ class AST: # Abstract Syntax Tree
         self.semantics = semantics
         self.sent_probs = sent_probs
 
-        mask = [0 if semantics[s].program is None else 1 for s in pt.sentence]
         nodes = [Node(s, semantics[s]) for s in pt.sentence]
 
-        root_idx = pt.head.index(-1)
-        self.root_node = nodes[root_idx]
-
-        for node, h, m in zip(nodes, pt.head, mask):
-            if m == 0 or h == -1:
+        for node, h in zip(nodes, pt.head):
+            if h == -1:
+                self.root_node = node
                 continue
-            if mask[h] == 0 and h != root_idx: # if the head node is masked and it is not the root, break and set the root_node to None
-                self.root_node = None
-                break
             nodes[h].children.append(node)
         self.nodes = nodes
 
-        self._res = None
         try:
             # TODO: set a timeout for the execution
             # self._res = func_timeout(timeout=0.01, func=root_node.res)
-            if self.root_node is not None:
-                self._res = self.root_node.res() 
+            self._res = self.root_node.res() 
         except (IndexError, TypeError, ZeroDivisionError, ValueError, RecursionError, FunctionTimedOut) as e:
             # Must be extremely careful about these errors
             # if isinstance(e, FunctionTimedOut):
             #     print(e)
+            self._res = None
             pass
 
     def res(self): return self._res
@@ -95,16 +88,6 @@ class AST: # Abstract Syntax Tree
         # Currently, if the root node's children are valid, we directly change the result to y
         # In future, we can consider to search the execution tree in a top-down manner
         if self.root_node is not None and self.root_node.children_res_valid():
-            if self.root_node.smt.solved and self.root_node.smt.arity == 0:
-                unsolveds = [smt.idx for smt in self.semantics if not smt.solved]
-                if not unsolveds:
-                    return None
-                root_node_idx = self.pt.head.index(-1)
-                root_node_probs = self.sent_probs[root_node_idx]
-                sampling_probs = [root_node_probs[i] for i in unsolveds]
-                sym = random.choices(unsolveds, weights=sampling_probs)[0]
-                self.root_node.symbol = sym
-                self.pt.sentence[root_node_idx] = sym
             self._res = y
             self.root_node._res = y
             return self
@@ -248,8 +231,8 @@ class Jointer:
         return results, sentences, head
 
     def abduce(self, gt_values, batch_img_paths):
-        for et, y, img_paths in zip(self.ASTs, gt_values.numpy(), batch_img_paths):
-            new_et = et.abduce(y, self.learned_module)
+        for et, y, img_paths in zip(self.ASTs, gt_values, batch_img_paths):
+            new_et = et.abduce(int(y), self.learned_module)
             if new_et: 
                 new_et.img_paths = img_paths
                 self.buffer.append(new_et)
@@ -287,12 +270,11 @@ class Jointer:
         elif self.learned_module == 'semantics':
             dataset = [[] for _ in range(len(self.semantics.semantics))]
             for ast in self.buffer:
-                queue = [ast.root_node]
-                while len(queue) > 0:
-                    node = queue.pop()
-                    queue.extend(node.children)
-                    xs = tuple([x.res() for x in node.children])
-                    y = int(node.res())
+                for node in ast.nodes:
+                    xs = tuple([x.res() for x in node.children if x.res() is not None])
+                    y = node.res()
+                    if y is None and len(xs) > 0:
+                        continue
                     dataset[node.symbol].append((xs, y))
             self.semantics.learn(dataset)
 

@@ -98,9 +98,9 @@ class HINT(Dataset):
         if max_len is None: max_len = 1e7
         self.valid_ids = [i for i, x in enumerate(self.dataset) if x['len'] <= max_len and x['len'] >= min_len]
 
-    def all_symbols(self):
-        # symbol_set = {(x,SYM2ID(y)) for sample in self.dataset for x, y in zip(sample['img_paths'], sample['expr'])}
-        symbol_set = [(x,SYM2ID(y)) for sample in self.dataset for x, y in zip(sample['img_paths'], sample['expr'])]
+    def all_symbols(self, max_len=float('inf')):
+        dataset = [sample for sample in self.dataset if len(sample['expr']) <= max_len]
+        symbol_set = [(x,SYM2ID(y)) for sample in dataset for x, y in zip(sample['img_paths'], sample['expr'])]
         return sorted(list(symbol_set))
 
 def HINT_collate(batch):

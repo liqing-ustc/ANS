@@ -10,6 +10,16 @@ import math
 import numpy as np
 from collections import Counter
 
+def check_accuarcy(dataset):
+    from utils import SYM2ID
+    symbols = [x[0].split('/')[0] for x in dataset]
+    symbols = ['/' if x == 'div' else x for x in symbols]
+    symbols = ['*' if x == 'times' else x for x in symbols]
+    symbols = [SYM2ID(x) for x in symbols]
+    labels = [x[1] for x in dataset]
+    acc = np.mean(np.array(symbols) == np.array(labels))
+    print(acc)
+
 class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
@@ -39,6 +49,33 @@ class Perception(object):
         if 'optimizer' in loaded:
             self.optimizer.load_state_dict(loaded['optimizer'])
 
+    def selflabel(self, symbols):
+        dataloader = torch.utils.data.DataLoader(ImageSet(symbols), batch_size=512,
+                         shuffle=False, drop_last=False, num_workers=8)
+        with torch.no_grad():
+            self.eval()
+            prob_all = []
+            for img, _ in dataloader:
+                img = img.to(self.device)
+                prob = self.model(img)
+                prob = nn.functional.softmax(prob, dim=-1)
+                prob_all.append(prob)
+            prob_all = torch.cat(prob_all)
+        
+        n_samples = 100
+        confidence = 0.5
+        selflabel_dataset = {}
+        for cls_id in range(self.n_class):
+            idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:n_samples]
+            images = [symbols[i][0] for i in idx_list]
+            # images = list(set(images))
+            labels = [symbols[i][1] for i in idx_list]
+            acc = np.mean(np.array(labels) == cls_id)
+            selflabel_dataset[cls_id] = [(x, cls_id) for x in images]
+            print("Add %d samples for class %d, acc %.2f."%(len(images), cls_id, acc))
+        self.selflabel_dataset = selflabel_dataset
+
+
     
     def __call__(self, img_seq):
         batch_size = img_seq.shape[0]
@@ -56,29 +93,27 @@ class Perception(object):
 
         return preds, probs
 
-    def check_accuarcy(self, dataset):
-        from utils import ID2SYM
-        symbols = [x[0].split('/')[0] for x in dataset]
-        labels = [ID2SYM(x[1]) for x in dataset]
-        acc = np.mean(np.array(symbols) == np.array(labels))
-        print(acc)
 
     def learn(self, dataset, n_iters=100):
         batch_size = 512
-        labels = [l for _, l in dataset]
+        labels = [l for i, l in dataset]
+        counts = Counter(labels)
+
+        min_samples = 100
+        classes_invalid = [i for i in range(self.n_class) if counts[i] < min_samples]
+        if classes_invalid:
+            check_accuarcy(dataset, end='->')
+            for cls_id in classes_invalid:
+                dataset.extend(self.selflabel_dataset[cls_id])
+            check_accuarcy(dataset, end=', ')
+
+        labels = [l for i, l in dataset]
         counts = Counter(labels)
         max_count = counts.most_common(1)[0][1]
         total_count = len(labels)
-        
-        # class_weights = np.array([(total_count - counts[i])/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
+        class_weights = np.array([(total_count - counts[i])/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
         class_weights = np.array([max_count/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
         class_weights = torch.from_numpy(class_weights).to(self.device)
-
-        classes_valid = np.array([i for i in range(self.n_class) if counts[i] > 0])
-        classes_valid = torch.from_numpy(classes_valid).to(self.device)
-
-        classes_invalid = np.array([i for i in range(self.n_class) if counts[i] == 0])
-        # classes_invalid = torch.from_numpy(classes_invalid).to(self.device)
 
         criterion = nn.CrossEntropyLoss(weight=class_weights)
         # criterion = nn.BCEWithLogitsLoss(pos_weight=class_weights, reduction='none')
@@ -89,17 +124,14 @@ class Perception(object):
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                          shuffle=True, num_workers=8)
+        self.train()
         for epoch in range(n_epochs):
             for img, label in train_dataloader:
                 img = img.to(self.device)
                 label = label.to(self.device)
                 logit = self.model(img)
-                # logit[:, classes_invalid] = float('-inf')
                 # label = nn.functional.one_hot(label, num_classes=self.n_class).type_as(logit)
                 loss = criterion(logit, label)
-                # loss[:, classes_invalid] = 0.
-                # loss = torch.index_select(loss, 1, classes_valid)
-                # loss = loss.mean()
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()

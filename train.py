@@ -153,10 +153,13 @@ def train(model, args, st_epoch=0):
             # (10, float('inf')),
             (0, 1),
             (1, 3),
-            (30, 5),
-            (40, 9),
-            (50, 15),
-            (60, float("inf"))
+            (8, 9),
+            (15, 15),
+            (20, float('inf')),
+            # (30, 5),
+            # (40, 9),
+            # (50, 15),
+            # (60, float("inf"))
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -188,10 +191,10 @@ def train(model, args, st_epoch=0):
                 model.train()
                 train_acc = []
                 for sample in tqdm(train_dataloader):
-                    res = sample['res']
+                    res = sample['res'].numpy()
                     res_pred = model.deduce(sample)[0]
                     model.abduce(res, sample['img_paths'])
-                    acc = np.mean(np.array(res_pred) == res.numpy())
+                    acc = np.mean(np.array(res_pred) == res)
                     train_acc.append(acc)
                 train_acc = np.mean(train_acc)
                 abduce_acc = len(model.buffer) / len(train_set)
@@ -233,14 +236,11 @@ if __name__ == "__main__":
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
-    excludes = args.excludes
-    for sym in excludes:
-        SYMBOLS.remove(sym)
-    # train_set = HINT('train', exclude_symbols=excludes, numSamples=5000)
-    train_set = HINT('train', exclude_symbols=excludes)
-    val_set = HINT('val', exclude_symbols=excludes)
-    # test_set = HINT('val', exclude_symbols=excludes)
-    test_set = HINT('test', exclude_symbols=excludes)
+    # train_set = HINT('train', numSamples=5000)
+    train_set = HINT('train')
+    val_set = HINT('val')
+    # test_set = HINT('val')
+    test_set = HINT('test')
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     model = Jointer(args)
@@ -248,6 +248,7 @@ if __name__ == "__main__":
 
     if args.perception_pretrain and not args.perception:
         model.perception.load(torch.load(args.perception_pretrain))
+        model.perception.selflabel(train_set.all_symbols(max_len=15))
 
     st_epoch = 0
     if args.resume:

@@ -31,16 +31,14 @@ class ProgramWrapper(object):
             self.fn = prog.evaluate([])
         except RecursionError as e:
             self.fn = None
-        self.prog_ori = prog
-        self.prog = str(prog)
+        self.prog = prog
         self.arity = len(prog.infer().functionArguments())
         self._name = None
-        self.y = None # used for equivalence check
         self.cache = {} # used for fast computation
     
     def __call__(self, *inputs):
         if len(inputs) != self.arity or None in inputs:
-            return None
+            raise TypeError
         if inputs in self.cache:
             return self.cache[inputs]
         fn = self.fn
@@ -77,14 +75,20 @@ class ProgramWrapper(object):
         return self._name
 
     def evaluate(self, examples, store_y=True): 
-        y = np.array([self(*xs) for xs in examples])
-        if store_y: # if store_y, save y for equivalence checking
-            self.y = y
-        return y
+        ys = []
+        for exp in examples:
+            try:
+                y = self(*exp)
+            except TypeError:
+                y = None
+            ys.append(y)
+        return ys
 
 def compute_likelihood(program=None, examples=None):
-    if program is None or examples is None:
+    if examples is None:
         return 0.
+    elif program is None:
+        return len([1 for xs, y in examples if len(xs) == 0 and y is None]) / len(examples)
     else:
         pred = program.evaluate([e[0] for e in examples], store_y=False)
         gt = np.array([e[1] for e in examples])
@@ -123,7 +127,7 @@ class Semantics(object):
             self.check_solved()
     
     def check_solved(self):
-        if self.arity == 0 and self.likelihood > 0.:
+        if self.arity == 0 and self.likelihood > 0. and self.program is not None:
             self.solved = True
         elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80:
             self.solved = True
@@ -131,13 +135,15 @@ class Semantics(object):
             self.solved = False
 
     def __call__(self, *inputs):
+        if self.program is None and len(inputs) == 0:
+            return None
         return self.program(*inputs)
 
     def make_task(self):
         min_examples = self.min_examples
         max_examples = self.max_examples
         # if len(self.examples) < min_examples or (self.arity == 0 and self.solved):
-        if len(self.examples) < min_examples or self.solved:
+        if len(self.examples) < min_examples or self.solved or None in [x[1] for x in self.examples]:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         examples = self.examples
@@ -162,7 +168,7 @@ class Semantics(object):
         self.solved = model['solved']
         self.likelihood = model['likelihood']
         self.arity = model['arity']
-        self.program = None if model['program'] is None else ProgramWrapper(Program.parse(model['program']))
+        self.program = None if model['program'] is None else ProgramWrapper(model['program'])
 
 class DreamCoder(object):
     def __init__(self):
@@ -292,8 +298,8 @@ class DreamCoder(object):
         # self.grammar = result.grammars[-1]
 
     def update_grammar(self):
-        programs = [Invented(smt.program.prog_ori) for smt in self.semantics 
-            if smt.solved and smt.program.arity > 0 and '#' not in str(smt.program)]
+        programs = [Invented(smt.program.prog) for smt in self.semantics 
+            if smt.solved and smt.program is not None and smt.program.arity > 0 and '#' not in str(smt.program)]
             # if '#' in the program, the program uses a invented primitive, it is very likely to have a high computation cost.
             # Therefore we don't add this program into primitives, since it might slow the enumeration a lot.
             # it might be resolved by increasing the enumeration time
