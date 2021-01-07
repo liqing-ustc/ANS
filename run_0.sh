@@ -2,7 +2,7 @@ export seed=0
 export CUDA_VISIBLE_DEVICES=$seed
 
 # Learn 3 meanings
-export OUTPUT=./outputs/exp_curriculum/seed_${seed}
+export OUTPUT=./outputs/exp_curriculum/seed_${seed}/
 mkdir -p $OUTPUT
 python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
