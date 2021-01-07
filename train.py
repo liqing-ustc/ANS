@@ -95,7 +95,7 @@ def evaluate(model, dataloader):
         index=SYMBOLS,
         columns=SYMBOLS
     )
-    print(report)
+    # print(report)
     print(cmtx)
 
     pred = [y for x in dep_pred_all for y in x]
