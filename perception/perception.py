@@ -34,7 +34,7 @@ class Perception(object):
     def train(self):
         # self.model.train()
         self.model.eval()
-        self.training = True
+        self.training = False
     
     def eval(self):
         self.model.eval()
