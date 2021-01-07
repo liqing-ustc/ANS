@@ -205,9 +205,6 @@ def train(model, args, st_epoch=0):
         print('-' * 30)
         print('Epoch {}/{} (max_len={}, data={})'.format(epoch, args.epochs - 1, max_len, len(train_set)))
 
-        model.train()
-        perception_acc, head_acc, result_acc = evaluate(model, train_dataloader)
-        print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
         model.eval()
         perception_acc, head_acc, result_acc = evaluate(model, train_dataloader)
         print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
