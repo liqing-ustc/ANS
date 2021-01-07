@@ -90,6 +90,7 @@ def evaluate(model, dataloader):
     # report = classification_report(gt, pred, target_names=SYMBOLS)
     # cmtx = confusion_matrix(gt, pred, normalize='pred')
     cmtx = confusion_matrix(gt, pred)
+    print(cmtx)
     cmtx = pd.DataFrame(
         (100*cmtx).astype('int'),
         index=SYMBOLS,
