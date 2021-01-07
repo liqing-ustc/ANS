@@ -87,16 +87,17 @@ def evaluate(model, dataloader):
     mask = np.array([0 if x in '()' else 1 for x in gt], dtype=bool)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
-    # report = classification_report(gt, pred, target_names=SYMBOLS)
-    # cmtx = confusion_matrix(gt, pred, normalize='pred')
     cmtx = confusion_matrix(gt, pred)
     print(cmtx)
+
+    report = classification_report(gt, pred, target_names=SYMBOLS)
+    cmtx = confusion_matrix(gt, pred, normalize='pred')
     cmtx = pd.DataFrame(
         (100*cmtx).astype('int'),
         index=SYMBOLS,
         columns=SYMBOLS
     )
-    # print(report)
+    print(report)
     print(cmtx)
 
     pred = [y for x in dep_pred_all for y in x]
