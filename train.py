@@ -87,7 +87,7 @@ def evaluate(model, dataloader):
     mask = np.array([0 if x in '()' else 1 for x in gt], dtype=bool)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
-    report = classification_report(gt, pred, target_names=SYMBOLS)
+    # report = classification_report(gt, pred, target_names=SYMBOLS)
     # cmtx = confusion_matrix(gt, pred, normalize='pred')
     cmtx = confusion_matrix(gt, pred)
     cmtx = pd.DataFrame(
