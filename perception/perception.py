@@ -9,7 +9,7 @@ from tqdm import trange, tqdm
 import math
 import numpy as np
 from collections import Counter
-from . import resnet_scan
+from . import resnet_scan, lenet_scan
 from torchvision import transforms
 
 def check_accuarcy(dataset):
@@ -26,8 +26,9 @@ class Perception(object):
     def __init__(self):
         super(Perception, self).__init__()
         self.n_class = len(SYMBOLS)
-        self.model = SymbolNet(self.n_class)
+        # self.model = SymbolNet(self.n_class)
         # self.model = resnet_scan.make_model(self.n_class)
+        self.model = lenet_scan.make_model(self.n_class)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
         self.training = False
