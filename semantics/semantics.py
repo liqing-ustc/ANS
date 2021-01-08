@@ -102,7 +102,7 @@ class Semantics(object):
         self.arity = None
         self.solved = False
         self.likelihood = 0.
-        self.min_examples = 10 
+        self.min_examples = 50 
         self.max_examples = 100
 
     def update_examples(self, examples):
