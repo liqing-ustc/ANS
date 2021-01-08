@@ -272,8 +272,8 @@ class DreamCoder(object):
         print(self.grammar)
         # print(self.allFrontiers)
         self.rescore_frontiers(tasks)
-        if self.allFrontiers is not None:
-            print(self.allFrontiers.values())
+        # if self.allFrontiers is not None:
+        #     print(self.allFrontiers.values())
 
         if self.helmholtzFrontiers is not None:
             requests_old ={x.task.request for x in self.helmholtzFrontiers()}
