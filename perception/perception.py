@@ -20,7 +20,7 @@ def check_accuarcy(dataset):
     symbols = [SYM2ID(x) for x in symbols]
     labels = [x[1] for x in dataset]
     acc = np.mean(np.array(symbols) == np.array(labels))
-    print(acc)
+    print(acc, end=', ')
 
 class Perception(object):
     def __init__(self):
@@ -107,10 +107,10 @@ class Perception(object):
         labels = [l for i, l in dataset]
         counts = Counter(labels)
 
+        check_accuarcy(dataset)
         min_samples = 100
         classes_invalid = [i for i in range(self.n_class) if counts[i] < min_samples]
         if classes_invalid:
-            check_accuarcy(dataset)
             for cls_id in classes_invalid:
                 dataset.extend(self.selflabel_dataset[cls_id])
             check_accuarcy(dataset)
