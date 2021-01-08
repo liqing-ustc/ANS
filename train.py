@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='data/perception-pretrain/model.pth.tar_78.2_match')
+                        default='data/perception-pretrain/model.pth.tar_66.6_match')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=777, help="Random seed.")
 
@@ -168,7 +168,7 @@ def train(model, args, st_epoch=0):
             # (5, 15),
             # (10, float('inf')),
             (0, 1),
-            (1, 3),
+            (2, 3),
             (20, 9),
             (30, 15),
             (50, float('inf')),
