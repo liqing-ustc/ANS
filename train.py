@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='../SCAN/outputs/hint/selflabel/model.pth.tar_68_match')
+                        default='data/perception-pretrain/model.pth.tar_78.2_match')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=777, help="Random seed.")
 
@@ -168,7 +168,7 @@ def train(model, args, st_epoch=0):
             # (5, 15),
             # (10, float('inf')),
             (0, 1),
-            (2, 3),
+            (1, 3),
             (20, 9),
             (30, 15),
             (50, float('inf')),
@@ -187,8 +187,8 @@ def train(model, args, st_epoch=0):
                             shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
