@@ -145,6 +145,8 @@ class Semantics(object):
         # if len(self.examples) < min_examples or (self.arity == 0 and self.solved):
         if len(self.examples) < min_examples or self.solved or None in [x[1] for x in self.examples]:
             return None
+        if self.arity > 0 and len(self.examples) < 50:
+            return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         examples = self.examples
         if len(examples) > max_examples:
