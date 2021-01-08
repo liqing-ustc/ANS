@@ -168,7 +168,7 @@ def train(model, args, st_epoch=0):
             # (5, 15),
             # (10, float('inf')),
             (0, 1),
-            (2, 3),
+            (1, 3),
             (20, 9),
             (30, 15),
             (50, float('inf')),
