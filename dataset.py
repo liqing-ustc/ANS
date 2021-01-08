@@ -1,4 +1,4 @@
-from utils import SYM2ID, ROOT_DIR, IMG_DIR, NULL, IMG_TRANSFORM
+from utils import SYM2ID, ROOT_DIR, IMG_DIR, NULL, IMG_TRANSFORM, pad_image
 from copy import deepcopy
 import random
 import json
@@ -7,6 +7,7 @@ from PIL import Image, ImageOps
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
+from torchvision import transforms
 
 class HINT(Dataset):
     def __init__(self, split='train', exclude_symbols=None, max_len=None, numSamples=None):
@@ -79,7 +80,8 @@ class HINT(Dataset):
         for img_path in sample['img_paths']:
             img = Image.open(IMG_DIR+img_path).convert('L')
             img = ImageOps.invert(img)
-            #print(img.size, img.mode)
+            img = pad_image(img, 60)
+            img = transforms.functional.resize(img, 45)
             img = self.img_transform(img)
             img_seq.append(img)
         # del sample['img_paths']

@@ -1,4 +1,4 @@
-from utils import SYMBOLS, IMG_TRANSFORM, IMG_DIR
+from utils import SYMBOLS, IMG_TRANSFORM, IMG_DIR, pad_image
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,6 +10,7 @@ import math
 import numpy as np
 from collections import Counter
 from . import resnet_scan
+from torchvision import transforms
 
 def check_accuarcy(dataset):
     from utils import SYM2ID
@@ -172,6 +173,8 @@ class ImageSet(Dataset):
         img_path, label = sample
         img = Image.open(IMG_DIR+img_path).convert('L')
         img = ImageOps.invert(img)
+        img = pad_image(img, 60)
+        img = transforms.functional.resize(img, 45)
         img = self.img_transform(img)
 
         return img, label
