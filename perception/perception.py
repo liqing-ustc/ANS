@@ -11,6 +11,7 @@ import numpy as np
 from collections import Counter
 from . import resnet_scan, lenet_scan
 from torchvision import transforms
+import random
 
 def check_accuarcy(dataset):
     from utils import SYM2ID
@@ -32,7 +33,7 @@ class Perception(object):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
         self.training = False
-        self.min_examples = 10
+        self.min_examples = 100
     
     def train(self):
         # self.model.train()
@@ -71,22 +72,14 @@ class Perception(object):
                 prob_all.append(prob)
             prob_all = torch.cat(prob_all)
         
-        confidence = 0.1
+        confidence = 0.9
         selflabel_dataset = {}
-        # for cls_id in range(self.n_class):
-        #     idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:self.min_examples]
-        #     images = [symbols[i][0] for i in idx_list]
-        #     # images = list(set(images))
-        #     labels = [symbols[i][1] for i in idx_list]
-        #     acc = np.mean(np.array(labels) == cls_id)
-        #     selflabel_dataset[cls_id] = [(x, cls_id) for x in images]
-        #     print("Add %d samples for class %d, acc %.2f."%(len(images), cls_id, acc))
-        # self.selflabel_dataset = selflabel_dataset
-        probs, preds = torch.max(prob_all, dim=0)
+        probs, preds = torch.max(prob_all, dim=1)
         probs = probs.cpu().numpy()
         preds = preds.cpu().numpy()
         for cls_id in range(self.n_class):
             idx_list = np.where(preds == cls_id)[0]
+            idx_list = sorted(idx_list, key=lambda x: probs[x], reverse=True)
             idx_list = [i for i in idx_list if probs[i] >= confidence]
             images = [symbols[i][0] for i in idx_list]
             # images = list(set(images))
@@ -124,8 +117,9 @@ class Perception(object):
         classes_invalid = [i for i in range(self.n_class) if counts[i] < self.min_examples]
         if classes_invalid:
             for cls_id in classes_invalid:
-                dataset.extend(self.selflabel_dataset[cls_id])
+                dataset.extend(random.choices(self.selflabel_dataset[cls_id], k=self.min_examples - counts[cls_id]))
             check_accuarcy(dataset)
+            print(len(dataset), end=', ')
 
         labels = [l for i, l in dataset]
         counts = Counter(labels)

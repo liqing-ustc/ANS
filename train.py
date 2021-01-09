@@ -168,7 +168,7 @@ def train(model, args, st_epoch=0):
             # (5, 15),
             # (10, float('inf')),
             (0, 1),
-            (2, 3),
+            (1, 3),
             (20, 9),
             (30, 15),
             (50, float('inf')),
@@ -187,8 +187,8 @@ def train(model, args, st_epoch=0):
                             shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    # print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):

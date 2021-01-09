@@ -102,7 +102,7 @@ class Semantics(object):
         self.arity = None
         self.solved = False
         self.likelihood = 0.
-        self.min_examples = 10 
+        self.min_examples = 30 
         self.max_examples = 100
 
     def update_examples(self, examples):
@@ -260,7 +260,7 @@ class DreamCoder(object):
             if t is not None:
                 tasks.append(t)
                 max_arity = max(smt.arity, max_arity)
-        self.train_args['enumerationTimeout'] = 10 if max_arity == 0 else 200
+        self.train_args['enumerationTimeout'] = 5 if max_arity == 0 else 200
         # self.train_args['iterations'] = 1 if max_arity == 0 else 3
         n_solved = len(['' for t in self.semantics if t.solved])
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
