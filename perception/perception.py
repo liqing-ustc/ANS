@@ -32,6 +32,7 @@ class Perception(object):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
         self.training = False
+        self.min_examples = 10
     
     def train(self):
         # self.model.train()
@@ -70,11 +71,10 @@ class Perception(object):
                 prob_all.append(prob)
             prob_all = torch.cat(prob_all)
         
-        n_samples = 100
         confidence = 0.5
         selflabel_dataset = {}
         for cls_id in range(self.n_class):
-            idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:n_samples]
+            idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:self.min_examples]
             images = [symbols[i][0] for i in idx_list]
             # images = list(set(images))
             labels = [symbols[i][1] for i in idx_list]
@@ -108,8 +108,7 @@ class Perception(object):
         counts = Counter(labels)
 
         check_accuarcy(dataset)
-        min_samples = 100
-        classes_invalid = [i for i in range(self.n_class) if counts[i] < min_samples]
+        classes_invalid = [i for i in range(self.n_class) if counts[i] < self.min_samples]
         if classes_invalid:
             for cls_id in classes_invalid:
                 dataset.extend(self.selflabel_dataset[cls_id])
