@@ -73,8 +73,21 @@ class Perception(object):
         
         confidence = 0.5
         selflabel_dataset = {}
+        # for cls_id in range(self.n_class):
+        #     idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:self.min_examples]
+        #     images = [symbols[i][0] for i in idx_list]
+        #     # images = list(set(images))
+        #     labels = [symbols[i][1] for i in idx_list]
+        #     acc = np.mean(np.array(labels) == cls_id)
+        #     selflabel_dataset[cls_id] = [(x, cls_id) for x in images]
+        #     print("Add %d samples for class %d, acc %.2f."%(len(images), cls_id, acc))
+        # self.selflabel_dataset = selflabel_dataset
+        probs, preds = torch.max(prob_all, dim=0)
+        probs = probs.cpu().numpy()
+        preds = preds.cpu().numpy()
         for cls_id in range(self.n_class):
-            idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:self.min_examples]
+            idx_list = np.where(preds == cls_id)[0]
+            idx_list = [i for i in idx_list if probs[i] >= confidence]
             images = [symbols[i][0] for i in idx_list]
             # images = list(set(images))
             labels = [symbols[i][1] for i in idx_list]
@@ -108,7 +121,7 @@ class Perception(object):
         counts = Counter(labels)
 
         check_accuarcy(dataset)
-        classes_invalid = [i for i in range(self.n_class) if counts[i] < self.min_samples]
+        classes_invalid = [i for i in range(self.n_class) if counts[i] < self.min_examples]
         if classes_invalid:
             for cls_id in classes_invalid:
                 dataset.extend(self.selflabel_dataset[cls_id])
