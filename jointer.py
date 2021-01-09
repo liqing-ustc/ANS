@@ -273,8 +273,6 @@ class Jointer:
                 for node in ast.nodes:
                     xs = tuple([x.res() for x in node.children if x.res() is not None])
                     y = node.res()
-                    if y is None:
-                        continue
                     dataset[node.symbol].append((xs, y))
             self.semantics.learn(dataset)
 

@@ -109,6 +109,14 @@ class Semantics(object):
         if len(examples) < self.min_examples:
             self.clear()
             return
+
+        if None in [x[1] for x in examples]:
+            counts = Counter([x[1] for x in examples])
+            if counts[None] / len(examples) >= 0.8:
+                self.program = None
+            else:
+                examples = [x for x in examples if x[1] is not None]
+        
         arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
         examples = [x[:2] for x in examples if len(x[0]) == arity] 
 
@@ -129,7 +137,9 @@ class Semantics(object):
     def check_solved(self):
         if self.arity == 0 and self.likelihood > 0. and self.program is not None:
             self.solved = True
-        elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80:
+        elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80 and '#' not in str(self.program):
+            self.solved = True
+        elif self.arity > 0 and self.likelihood >= 0.95 and len(set(self.examples)) >= 80 and '#' in str(self.program):
             self.solved = True
         else:
             self.solved = False
@@ -142,13 +152,12 @@ class Semantics(object):
     def make_task(self):
         min_examples = self.min_examples
         max_examples = self.max_examples
-        # if len(self.examples) < min_examples or (self.arity == 0 and self.solved):
-        if len(self.examples) < min_examples or self.solved or None in [x[1] for x in self.examples]:
+        examples = self.examples
+        if len(examples) < min_examples or self.solved or None in [x[1] for x in examples]:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
-        examples = self.examples
         if len(examples) > max_examples:
-            examples = random.sample(self.examples, k=max_examples)
+            examples = random.sample(examples, k=max_examples)
         return Task(str(self.idx), task_type, examples)
 
     def clear(self):
