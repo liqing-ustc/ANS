@@ -33,7 +33,7 @@ class Perception(object):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
         self.training = False
-        self.min_examples = 100
+        self.min_examples = 200
     
     def train(self):
         # self.model.train()

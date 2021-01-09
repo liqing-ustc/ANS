@@ -86,13 +86,15 @@ class ProgramWrapper(object):
 
 def compute_likelihood(program=None, examples=None):
     if examples is None:
-        return 0.
+        return 0., None
     elif program is None:
-        return len([1 for xs, y in examples if len(xs) == 0 and y is None]) / len(examples)
+        res = [True if len(xs) == 0 and y is None else False for xs, y in examples ]
+        return np.mean(res), np.array(res)
     else:
         pred = program.evaluate([e[0] for e in examples], store_y=False)
         gt = np.array([e[1] for e in examples])
-        return np.mean(pred == gt)
+        res = pred == gt
+        return np.mean(res), np.array(res)
 
 class Semantics(object):
     def __init__(self, idx, program=None):
@@ -102,11 +104,9 @@ class Semantics(object):
         self.arity = None
         self.solved = False
         self.likelihood = 0.
-        self.min_examples = 10 
-        self.max_examples = 100
 
     def update_examples(self, examples):
-        if len(examples) < self.min_examples:
+        if len(examples) < 10:
             self.clear()
             return
 
@@ -122,12 +122,12 @@ class Semantics(object):
 
         self.arity = arity
         self.examples = examples
-        self.likelihood = compute_likelihood(self.program, self.examples)
+        self.likelihood, self.res = compute_likelihood(self.program, self.examples)
         self.check_solved()
 
     def update_program(self, entry):
         program = ProgramWrapper(entry.program)
-        likelihood = compute_likelihood(program, self.examples)
+        likelihood = compute_likelihood(program, self.examples)[0]
         if (likelihood > self.likelihood) or \
             (likelihood == self.likelihood and len(str(program)) < len(str(self.program))):
             self.program = program
@@ -150,13 +150,17 @@ class Semantics(object):
         return self.program(*inputs)
 
     def make_task(self):
-        min_examples = self.min_examples
-        max_examples = self.max_examples
+        min_examples = 30 if self.arity is not None and self.arity > 0 else 10
+        max_examples = 100
         examples = self.examples
         if len(examples) < min_examples or self.solved or None in [x[1] for x in examples]:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         if len(examples) > max_examples:
+            wrong_examples = [e for e, r in zip(examples, self.res) if not r]
+            right_examples = [e for e, r in zip(examples, self.res) if r]
+            right_examples = random.choices(right_examples, k=max_examples-len(wrong_examples))
+            examples = wrong_examples + right_examples
             examples = random.sample(examples, k=max_examples)
         return Task(str(self.idx), task_type, examples)
 
@@ -253,7 +257,7 @@ class DreamCoder(object):
                 frontier.task = task
                 for entry in frontier.entries:
                     program = ProgramWrapper(entry.program)
-                    entry.logLikelihood = float(np.log(compute_likelihood(program=program, examples=examples)))
+                    entry.logLikelihood = float(np.log(compute_likelihood(program=program, examples=examples)[0]))
                     entry.logPosterior = entry.logLikelihood + entry.logPrior
                 frontier.removeLowLikelihood(low=0.1)
 

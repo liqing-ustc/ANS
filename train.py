@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
                         default='data/perception-pretrain/model.pth.tar_66.6_match')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
-    parser.add_argument('--seed', type=int, default=777, help="Random seed.")
+    parser.add_argument('--seed', type=int, default=0, help="Random seed.")
 
     parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
     parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
