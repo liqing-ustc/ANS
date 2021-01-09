@@ -71,7 +71,7 @@ class Perception(object):
                 prob_all.append(prob)
             prob_all = torch.cat(prob_all)
         
-        confidence = 0.5
+        confidence = 0.1
         selflabel_dataset = {}
         # for cls_id in range(self.n_class):
         #     idx_list = torch.argsort(prob_all[:, cls_id], descending=True)[:self.min_examples]
