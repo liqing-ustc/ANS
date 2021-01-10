@@ -154,7 +154,7 @@ class Jointer:
         self.buffer = []
         self.epoch = 0
         self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
-                               + ['perception'] * (0 if config.perception else 10) \
+                               + ['perception'] * (0 if config.perception else 1) \
                                + ['syntax'] * (0 if config.syntax else 10) \
 
     @property
