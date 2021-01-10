@@ -28,12 +28,13 @@ class Perception(object):
         super(Perception, self).__init__()
         self.n_class = len(SYMBOLS)
         # self.model = SymbolNet(self.n_class)
-        # self.model = resnet_scan.make_model(self.n_class)
-        self.model = lenet_scan.make_model(self.n_class)
+        self.model = resnet_scan.make_model(self.n_class)
+        # self.model = lenet_scan.make_model(self.n_class)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
         self.device = torch.device('cpu')
         self.training = False
         self.min_examples = 200
+        self.selflabel_dataset = None
     
     def train(self):
         # self.model.train()
@@ -115,7 +116,7 @@ class Perception(object):
 
         check_accuarcy(dataset)
         classes_invalid = [i for i in range(self.n_class) if counts[i] < self.min_examples]
-        if classes_invalid:
+        if classes_invalid and self.selflabel_dataset is not None:
             for cls_id in classes_invalid:
                 dataset.extend(random.choices(self.selflabel_dataset[cls_id], k=self.min_examples - counts[cls_id]))
             check_accuarcy(dataset)
@@ -181,7 +182,7 @@ class ImageSet(Dataset):
         img = Image.open(IMG_DIR+img_path).convert('L')
         img = ImageOps.invert(img)
         img = pad_image(img, 60)
-        img = transforms.functional.resize(img, 45)
+        img = transforms.functional.resize(img, 40)
         img = self.img_transform(img)
 
         return img, label

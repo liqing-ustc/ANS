@@ -95,10 +95,15 @@ class AST: # Abstract Syntax Tree
 
     def abduce_perception(self, y):
         # abduce over sentence
+        epsilon = 0.0
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.pt.sentence)])
         for sent_pos in sent_pos_list:
             s_prob = self.sent_probs[sent_pos]
+            if s_prob[self.pt.sentence[sent_pos]] >= 1 - epsilon:
+                break
             for sym in np.argsort(s_prob)[::-1]:
+                if s_prob[sym] < epsilon:
+                    break
                 sentence = deepcopy(self.pt.sentence)
                 sentence[sent_pos] = sym
                 et = AST(Parse(sentence, self.pt.head), self.semantics)
@@ -149,8 +154,8 @@ class Jointer:
         self.buffer = []
         self.epoch = 0
         self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
-                               + ['perception'] * (0 if config.perception else 5) \
-                               + ['syntax'] * (0 if config.syntax else 5) \
+                               + ['perception'] * (0 if config.perception else 10) \
+                               + ['syntax'] * (0 if config.syntax else 10) \
 
     @property
     def learned_module(self):

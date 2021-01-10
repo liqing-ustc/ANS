@@ -1,4 +1,4 @@
-from utils import DEVICE, SYMBOLS, ID2SYM
+from utils import DEVICE, SYMBOLS, ID2SYM, SYM2ID
 import time
 from tqdm import tqdm
 from collections import Counter
@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='data/perception-pretrain/model.pth.tar_66.6_match')
+                        default='data/perception-pretrain/model.pth.tar_78.2_match')
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
 
@@ -80,11 +80,10 @@ def evaluate(model, dataloader):
     result_acc = (res_pred_all == res_all).mean()
     
 
-    expr_pred_all = [''.join(list(map(ID2SYM, e))) for e in expr_pred_all]
-    assert len(expr_all) == len(expr_pred_all)
     pred = [y for x in expr_pred_all for y in x]
-    gt = [y for x in expr_all for y in x]
-    mask = np.array([0 if x in '()' else 1 for x in gt], dtype=bool)
+    gt = [SYM2ID(y) for x in expr_all for y in x]
+    assert len(gt) == len(pred)
+    mask = np.array([0 if x == SYM2ID('(') or x == SYM2ID(')')  else 1 for x in gt], dtype=bool)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
     report = classification_report(gt, pred, target_names=SYMBOLS)
@@ -163,20 +162,13 @@ def train(model, args, st_epoch=0):
     max_len = float("inf")
     if args.curriculum:
         curriculum_strategy = dict([
-            # (0, 3),
-            # (1, 9),
-            # (5, 15),
-            # (10, float('inf')),
-            (0, 1),
-            (1, 3),
-            (20, 7),
-            (40, 11),
-            (60, 15),
-            (80, float('inf')),
-            # (30, 5),
-            # (40, 9),
-            # (50, 15),
-            # (60, float("inf"))
+            (0, 7)
+            # (0, 1),
+            # (1, 3),
+            # (20, 7),
+            # (40, 11),
+            # (60, 15),
+            # (80, float('inf')),
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -188,8 +180,8 @@ def train(model, args, st_epoch=0):
                             shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
