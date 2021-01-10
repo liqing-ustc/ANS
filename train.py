@@ -147,8 +147,9 @@ def evaluate(model, dataloader):
     print("error cases:")
     errors = np.arange(len(res_all))[res_all != res_pred_all]
     for i in errors[:10]:
-        print(expr_all[i], expr_pred_all[i], dep_all[i], dep_pred_all[i], res_all[i], res_pred_all[i])
-        # draw_parse(expr_pred_all[i], dep_pred_all[i])
+        expr_pred = ''.join(map(ID2SYM, expr_pred_all[i]))
+        print(expr_all[i], expr_pred, dep_all[i], dep_pred_all[i], res_all[i], res_pred_all[i])
+        # draw_parse(expr_pred, dep_pred_all[i])
 
     return perception_acc, head_acc, result_acc
 
