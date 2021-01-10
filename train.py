@@ -5,8 +5,9 @@ from collections import Counter
 
 from sklearn.metrics import classification_report, confusion_matrix
 import pandas as pd
-pd.options.display.float_format = '{:.2f}'.format
-pd.options.display.max_columns = 20
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 
 from dataset import HINT, HINT_collate
 from jointer import Jointer
@@ -87,9 +88,9 @@ def evaluate(model, dataloader):
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
     report = classification_report(gt, pred, target_names=SYMBOLS)
-    cmtx = confusion_matrix(gt, pred, normalize='pred')
+    cmtx = confusion_matrix(gt, pred, normalize='all')
     cmtx = pd.DataFrame(
-        (100*cmtx).astype('int'),
+        (10000*cmtx).astype('int'),
         index=SYMBOLS,
         columns=SYMBOLS
     )
@@ -162,13 +163,13 @@ def train(model, args, st_epoch=0):
     max_len = float("inf")
     if args.curriculum:
         curriculum_strategy = dict([
-            (0, 7)
-            # (0, 1),
-            # (1, 3),
-            # (20, 7),
-            # (40, 11),
-            # (60, 15),
-            # (80, float('inf')),
+            # (0, 7)
+            (0, 1),
+            (1, 3),
+            (20, 7),
+            (40, 11),
+            (60, 15),
+            (80, float('inf')),
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -257,7 +258,7 @@ if __name__ == "__main__":
 
     if args.perception_pretrain and not args.perception:
         model.perception.load({'model': torch.load(args.perception_pretrain)})
-        model.perception.selflabel(train_set.all_symbols(max_len=15))
+        model.perception.selflabel(train_set.all_symbols())
 
     st_epoch = 0
     if args.resume:

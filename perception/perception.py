@@ -73,7 +73,7 @@ class Perception(object):
                 prob_all.append(prob)
             prob_all = torch.cat(prob_all)
         
-        confidence = 0.9
+        confidence = 0.95
         selflabel_dataset = {}
         probs, preds = torch.max(prob_all, dim=1)
         probs = probs.cpu().numpy()

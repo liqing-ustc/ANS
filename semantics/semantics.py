@@ -352,7 +352,7 @@ class DreamCoder(object):
                 if smt_j.program is None:
                     continue
                 if smt_i.program == smt_j.program:
-                    if (len(smt_i.examples) * smt_i.likelihood) >= (len(smt_j.examples) * smt_j.likelihood):
+                    if len(smt_i.examples) >= len(smt_j.examples):
                         smt_j.clear()
                     else:
                         smt_i.clear()

@@ -81,7 +81,7 @@ class HINT(Dataset):
             img = Image.open(IMG_DIR+img_path).convert('L')
             img = ImageOps.invert(img)
             img = pad_image(img, 60)
-            img = transforms.functional.resize(img, 45)
+            img = transforms.functional.resize(img, 40)
             img = self.img_transform(img)
             img_seq.append(img)
         # del sample['img_paths']
