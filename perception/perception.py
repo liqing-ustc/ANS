@@ -134,7 +134,6 @@ class Perception(object):
         # criterion = nn.BCEWithLogitsLoss(pos_weight=class_weights, reduction='none')
 
         n_epochs = int(math.ceil(batch_size * n_iters / len(dataset)))
-        n_epochs = max(n_epochs, 5) # run at least 5 epochs
         print(n_epochs, "epochs, ", end='')
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
