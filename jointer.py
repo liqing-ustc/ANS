@@ -120,7 +120,7 @@ class AST: # Abstract Syntax Tree
         def get_rc(k):
             return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
 
-        epsilon = 1
+        epsilon = 0
         for arc in sorted(arcs, key=lambda x: x[2]):
             h, t, p = arc
             if p >= 1 - epsilon:
