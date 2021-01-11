@@ -75,10 +75,10 @@ class AST: # Abstract Syntax Tree
             et = self.abduce_perception(y)
             if et is not None:
                 return et
-        # elif module == 'syntax':
-        #     et = self.abduce_syntax(y)
-        #     if et is not None:
-        #         return et
+        elif module == 'syntax':
+            et = self.abduce_syntax(y)
+            if et is not None:
+                return et
         
         return None
 
@@ -120,8 +120,11 @@ class AST: # Abstract Syntax Tree
         def get_rc(k):
             return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
 
+        epsilon = 1
         for arc in sorted(arcs, key=lambda x: x[2]):
-            h, t = arc[:2]
+            h, t, p = arc
+            if p >= 1 - epsilon:
+                break
             head = deepcopy(self.pt.head)
 
             head[t] = head[h]
