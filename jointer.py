@@ -75,10 +75,10 @@ class AST: # Abstract Syntax Tree
             et = self.abduce_perception(y)
             if et is not None:
                 return et
-        elif module == 'syntax':
-            et = self.abduce_syntax(y)
-            if et is not None:
-                return et
+        # elif module == 'syntax':
+        #     et = self.abduce_syntax(y)
+        #     if et is not None:
+        #         return et
         
         return None
 
@@ -95,7 +95,7 @@ class AST: # Abstract Syntax Tree
 
     def abduce_perception(self, y):
         # abduce over sentence
-        epsilon = 0.0
+        epsilon = -1
         sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.pt.sentence)])
         for sent_pos in sent_pos_list:
             s_prob = self.sent_probs[sent_pos]
@@ -134,7 +134,7 @@ class AST: # Abstract Syntax Tree
             for j in children[:children.index(t)]:
                 head[j] = t
 
-            children = get_lc(t) if h < t else get_rc(h)
+            children = get_lc(t) if h < t else get_rc(t)
             for j in children:
                 head[j] = h
 

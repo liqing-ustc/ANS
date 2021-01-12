@@ -7,7 +7,6 @@ SYMBOLS = DIGITS + OPERATORS + PARENTHESES
 # ID2SYM = {i:v for i, v in enumerate(SYMBOLS)}
 SYM2ID = lambda x: SYMBOLS.index(x)
 ID2SYM = lambda x: SYMBOLS[x]
-MAX_RES = 1e5
 
 import math
 from inspect import signature
@@ -19,12 +18,10 @@ class Program():
         self.priority = 1.0
 
     def __call__(self, *inputs):
-        if len(inputs) != self.arity or None in inputs or self.fn is None:
-            return None
+        if len(inputs) != self.arity or None in inputs:
+            raise TypeError
         res = self.fn(*inputs)
-        if res is not None and res <= MAX_RES:
-            return res
-        return None
+        return res
 
 functions = [
     lambda: 0, lambda: 1, lambda: 2, lambda: 3, lambda: 4, lambda: 5, lambda: 6, lambda: 7, lambda: 8, lambda: 9,

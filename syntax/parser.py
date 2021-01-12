@@ -314,7 +314,8 @@ class PartialParse(object):
     
     def compute_head(self):
         self.head = [-1] * len(self.sentence)
-        for h, t, _ in self.dependencies:
+        for arc in self.dependencies:
+            h, t = arc[:2]
             self.head[t] = h
 
     def parse(self, transitions):

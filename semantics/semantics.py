@@ -42,11 +42,8 @@ class ProgramWrapper(object):
         if inputs in self.cache:
             return self.cache[inputs]
         fn = self.fn
-        try:
-            for x in inputs:
-                fn = fn(x)
-        except RecursionError as e:
-            fn = None
+        for x in inputs:
+            fn = fn(x)
         self.cache[inputs] = fn
         return fn
 
