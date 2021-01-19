@@ -47,8 +47,7 @@ def draw_parse(sentence, head):
     
     root = head.index(-1)
     tree = build_tree(root)
-    tree.draw()
-    return
+    return tree
 
 def evaluate(model, dataloader):
     model.eval() 
@@ -149,7 +148,9 @@ def evaluate(model, dataloader):
     for i in errors[:10]:
         expr_pred = ''.join(map(ID2SYM, expr_pred_all[i]))
         print(expr_all[i], expr_pred, dep_all[i], dep_pred_all[i], res_all[i], res_pred_all[i])
-        # draw_parse(expr_pred, dep_pred_all[i])
+        # tree = draw_parse(expr_pred, dep_pred_all[i])
+        # tree.draw()
+
 
     return perception_acc, head_acc, result_acc
 

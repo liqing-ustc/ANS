@@ -61,7 +61,7 @@ class AST: # Abstract Syntax Tree
 
     def res(self): return self._res
 
-    def res_all(self): return [nd.res() for nd in self.nodes]
+    def res_all(self): return [nd._res for nd in self.nodes]
 
     def abduce(self, y, module=None):
         if self._res is not None and self._res == y:
