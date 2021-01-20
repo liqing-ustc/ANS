@@ -15,7 +15,7 @@ from tqdm import tqdm
 import sys
 sys.path.append("..")
 from perception import resnet_scan
-from utils import SYMBOLS, INP_VOCAB, DEVICE
+from baseline_utils import SYMBOLS, INP_VOCAB, DEVICE
 
 class Encoder(nn.Module):
     def __init__(self, emb_dim, hid_dim, n_layers, dropout):

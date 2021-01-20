@@ -1,4 +1,4 @@
-from utils import DEVICE, SYMBOLS, ID2SYM, SYM2ID, seq2res
+from baseline_utils import *
 import time
 from tqdm import tqdm
 from collections import Counter
@@ -65,8 +65,8 @@ def evaluate(model, dataloader):
     with torch.no_grad():
         for sample in tqdm(dataloader):
             src = sample['img_seq']
-            trg = sample['res_seq']
             res = sample['res']
+            trg = torch.tensor(res2seq(res.numpy()))
             expr = sample['expr']
             dep = sample['head']
             inp_len = sample['len']
@@ -189,8 +189,8 @@ def train(model, args, st_epoch=0):
         train_loss = []
         for sample in tqdm(train_dataloader):
             src = sample['img_seq']
-            trg = sample['res_seq']
             res = sample['res']
+            trg = torch.tensor(res2seq(res.numpy()))
             inp_len = sample['len']
 
             src = src.to(DEVICE)

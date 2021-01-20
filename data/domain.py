@@ -1,6 +1,8 @@
 DIGITS= [str(i) for i in range(0, 10)]
 OPERATORS = list('+-*/')
 PARENTHESES = list('()')
+START = '<START>'
+END = '<END>'
 NULL = '<NULL>'
 SYMBOLS = DIGITS + OPERATORS + PARENTHESES
 # SYM2ID = {v:i for i, v in enumerate(SYMBOLS)}
