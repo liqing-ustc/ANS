@@ -31,6 +31,9 @@ def parse_args():
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
 
+    parser.add_argument('--enc_layers', type=int, default=1, help="number of layers in encoder")
+    parser.add_argument('--dec_layers', type=int, default=1, help="number of layers in decoder")
+
     parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
     parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
     parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
