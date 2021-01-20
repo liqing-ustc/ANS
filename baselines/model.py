@@ -15,7 +15,7 @@ from tqdm import tqdm
 import sys
 sys.path.append("..")
 from perception import resnet_scan
-from baseline_utils import SYMBOLS, INP_VOCAB, DEVICE
+from baseline_utils import SYMBOLS, INP_VOCAB, RES_VOCAB, DEVICE
 
 class Encoder(nn.Module):
     def __init__(self, emb_dim, hid_dim, n_layers, dropout):
@@ -64,13 +64,13 @@ class Decoder(nn.Module):
     def __init__(self, output_dim, emb_dim, hid_dim, n_layers, dropout):
         super().__init__()
         
-        self.output_dim = 13
+        self.output_dim = len(RES_VOCAB)
         self.hid_dim = hid_dim
         self.n_layers = n_layers
         
         self.embedding = nn.Embedding(output_dim, emb_dim)
         
-        self.rnn = nn.LSTM(emb_dim, hid_dim, n_layers, dropout = dropout, bidirectional=True)
+        self.rnn = nn.LSTM(emb_dim, hid_dim, n_layers, dropout = dropout, bidirectional=False)
         
         self.fc_out = nn.Linear(hid_dim * 2, output_dim)
         
