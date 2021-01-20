@@ -108,16 +108,12 @@ class HINT(Dataset):
         return sorted(list(symbol_set))
 
 def HINT_collate(batch):
-    max_len = np.max([x['len'] for x in batch])
-    max_len_res = np.max([len(x['res_seq']) for x in batch])
+    img_seq_list = []
+    sentence_list = []
     img_paths_list = []
     head_list = []
     res_all_list = []
-    img_seq_list = []
     for sample in batch:
-        sample['sentence'] += [-1] * (max_len - sample['len'])
-        sample['sentence'] = torch.tensor(sample['sentence'])
-
         sample['res_seq'] += [RES_VOCAB.index(NULL)] * (max_len_res - len(sample['res_seq']))
         sample['res_seq'] = torch.tensor(sample['res_seq'])
 
@@ -125,10 +121,11 @@ def HINT_collate(batch):
         img_seq_list.extend(sample['img_seq'])
         del sample['img_seq']
 
-        # sample['head'] += [-2] * (max_len - sample['len'])
-        # sample['head'] = torch.tensor(sample['head'])
         img_paths_list.append(sample['img_paths'])
         del sample['img_paths']
+
+        sentence_list.append(sample['sentence'])
+        del sample['sentence']
 
         head_list.append(sample['head'])
         del sample['head']
@@ -139,6 +136,7 @@ def HINT_collate(batch):
     batch = default_collate(batch)
     batch['img_seq'] = torch.stack(img_seq_list)
     batch['img_paths'] = img_paths_list
+    batch['sentence'] = sentence_list
     batch['head'] = head_list
     batch['res_all'] = res_all_list
     return batch

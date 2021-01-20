@@ -214,13 +214,19 @@ class Jointer:
 
         if config.perception: # use gt perception
             sentences = sample['sentence']
-            sent_probs = np.ones(sentences.shape + (len(SYMBOLS),))
+            sent_probs = [np.ones((l, len(SYMBOLS))) for l in lengths]
         else:
-            sentences, sent_probs = self.perception(img_seq)
-            sentences = sentences.detach()
-            sent_probs = sent_probs.detach().cpu().numpy()
-        sent_probs = [x[:l] for x, l in zip(sent_probs, lengths)]
-        sentences = [list(x[:l]) for x, l in zip(sentences.cpu().numpy(), lengths)]
+            symbols , probs = self.perception(img_seq)
+            symbols = symbols.detach().cpu().numpy()
+            probs = probs.detach().cpu().numpy()
+
+            sentences = []
+            sent_probs = []
+            current = 0
+            for l in lengths:
+                sentences.append(list(symbols[current:current+l]))
+                sent_probs.append(probs[current:current+l])
+                current += l
 
         if config.syntax: # use gt parse
             parses = []

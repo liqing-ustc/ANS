@@ -92,12 +92,8 @@ class Perception(object):
 
 
     
-    def __call__(self, img_seq):
-        batch_size = img_seq.shape[0]
-        seq_len = img_seq.shape[1]
-        images = img_seq.reshape((-1, img_seq.shape[-3], img_seq.shape[-2], img_seq.shape[-1]))
+    def __call__(self, images):
         logits = self.model(images)
-        logits = logits.reshape((batch_size, seq_len, -1))
         # probs = torch.sigmoid(logits)
         probs = nn.functional.softmax(logits, dim=-1)
         if self.training:
