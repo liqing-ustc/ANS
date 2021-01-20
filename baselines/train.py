@@ -25,7 +25,6 @@ import sys
 
 def parse_args():
     parser = argparse.ArgumentParser('Give Me A HINT')
-    parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
                         default='data/perception-pretrain/model.pth.tar_78.2_match')

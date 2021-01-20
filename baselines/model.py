@@ -12,7 +12,9 @@ import math
 import time
 from tqdm import tqdm
 
-import resnet_scan
+import sys
+sys.path.append("..")
+from perception import resnet_scan
 from utils import SYMBOLS, INP_VOCAB, DEVICE
 
 class Encoder(nn.Module):
