@@ -141,7 +141,7 @@ def evaluate(model, dataloader):
 
 def train(model, args, st_epoch=0):
     best_acc = 0.0
-    batch_size = 16
+    batch_size = 64
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.CrossEntropyLoss(ignore_index=-1)
     train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,

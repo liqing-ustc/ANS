@@ -1,4 +1,4 @@
-from utils import SYM2ID, ROOT_DIR, IMG_DIR, NULL, IMG_TRANSFORM, pad_image, res2seq
+from utils import SYM2ID, ROOT_DIR, IMG_DIR, NULL, IMG_TRANSFORM, pad_image, res2seq, RES_VOCAB
 from copy import deepcopy
 import random
 import json
@@ -118,7 +118,7 @@ def HINT_collate(batch):
         sample['sentence'] += [-1] * (max_len - sample['len'])
         sample['sentence'] = torch.tensor(sample['sentence'])
 
-        sample['res_seq'] += [-1] * (max_len_res - len(sample['res_seq']))
+        sample['res_seq'] += [RES_VOCAB.index(NULL)] * (max_len_res - len(sample['res_seq']))
         sample['res_seq'] = torch.tensor(sample['res_seq'])
 
         
