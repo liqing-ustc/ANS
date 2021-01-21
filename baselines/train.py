@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
 
-    parser.add_argument('--seq2seq', type=str, default='TRAN', help='the type of seq2seq: RNN for GRU, TRAN for Transformer')
+    parser.add_argument('--seq2seq', type=str, default='RNN', help='the type of seq2seq: RNN for GRU, TRAN for Transformer')
     parser.add_argument('--nhead', type=int, default=1, help="number of attention heads in the Transformer model")
     parser.add_argument('--enc_layers', type=int, default=1, help="number of layers in encoder")
     parser.add_argument('--dec_layers', type=int, default=1, help="number of layers in decoder")
