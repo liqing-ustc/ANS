@@ -22,6 +22,8 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 
 import argparse
 import sys
+from optimization import AdamW, WarmupLinearSchedule
+from baseline_utils import SYMBOLS, INP_VOCAB, RES_VOCAB, DEVICE, NULL, END, RES_MAX_LEN
 
 def parse_args():
     parser = argparse.ArgumentParser('Give Me A HINT')
@@ -31,16 +33,21 @@ def parse_args():
     parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
 
+    parser.add_argument('--seq2seq', type=str, default='TRAN', help='the type of seq2seq: RNN for GRU, TRAN for Transformer')
+    parser.add_argument('--nhead', type=int, default=1, help="number of attention heads in the Transformer model")
     parser.add_argument('--enc_layers', type=int, default=1, help="number of layers in encoder")
     parser.add_argument('--dec_layers', type=int, default=1, help="number of layers in decoder")
+    parser.add_argument('--emb_dim', type=int, default=128, help="embedding dim")
+    parser.add_argument('--hid_dim', type=int, default=128, help="hidden dim")
+    parser.add_argument('--dropout', type=float, default=0.5, help="dropout ratio")
 
     parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
     parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
     parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
 
-    parser.add_argument('--epochs', type=int, default=200, help='number of epochs for training')
-    parser.add_argument('--epochs_eval', type=int, default=5, help='how many epochs per evaluation')
+    parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
+    parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
     args = parser.parse_args()
     return args
 
@@ -67,16 +74,20 @@ def evaluate(model, dataloader):
 
     with torch.no_grad():
         for sample in tqdm(dataloader):
-            src = sample['img_seq']
+            img = sample['img_seq']
+            src = torch.tensor([x for s in sample['sentence'] for x in s])
             res = sample['res']
             trg = torch.tensor(res2seq(res.numpy()))
             expr = sample['expr']
             dep = sample['head']
-            inp_len = sample['len']
+            src_len = sample['len']
+            tgt_len = [len(str(x)) for x in res.numpy()]
+
+            img = img.to(DEVICE)
             src = src.to(DEVICE)
             trg = trg.to(DEVICE)
 
-            output = model(src, trg, inp_len, 0) #turn off teacher forcing
+            output = model(img, src, trg, src_len, tgt_len)
             pred = torch.argmax(output, -1).detach().cpu().numpy()
             res_pred = [seq2res(x) for x in pred]
             res_pred_all.append(res_pred)
@@ -144,12 +155,15 @@ def evaluate(model, dataloader):
 def train(model, args, st_epoch=0):
     best_acc = 0.0
     batch_size = 64
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    criterion = nn.CrossEntropyLoss(ignore_index=-1)
     train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,
                          shuffle=True, num_workers=4, collate_fn=HINT_collate)
     eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=32,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
+
+    optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=0.02)
+    lr_scheduler = WarmupLinearSchedule(optimizer, warmup_steps=5 * len(train_dataloader), t_total=args.epochs*len(train_dataloader),
+                     last_epoch=st_epoch*len(train_dataloader)-1)
+    criterion = nn.CrossEntropyLoss(ignore_index=RES_VOCAB.index(NULL))
     
     max_len = float("inf")
     if args.curriculum:
@@ -185,26 +199,30 @@ def train(model, args, st_epoch=0):
 
         since = time.time()
         print('-' * 30)
-        print('Epoch {}/{} (max_len={}, data={})'.format(epoch, args.epochs - 1, max_len, len(train_set)))
+        print('Epoch {}/{} (max_len={}, data={}, lr={})'.format(epoch, args.epochs - 1, max_len, len(train_set), lr_scheduler.get_lr()[0]))
 
         model.train()
         train_acc = []
         train_loss = []
         for sample in tqdm(train_dataloader):
-            src = sample['img_seq']
+            img = sample['img_seq']
+            src = torch.tensor([x for s in sample['sentence'] for x in s])
             res = sample['res']
             trg = torch.tensor(res2seq(res.numpy()))
-            inp_len = sample['len']
+            src_len = sample['len']
+            tgt_len = [len(str(x)) for x in res.numpy()]
 
+            img = img.to(DEVICE)
             src = src.to(DEVICE)
             trg = trg.to(DEVICE)
-            output = model(src, trg, inp_len, 1.)
+            output = model(img, src, trg[:, :-1], src_len, tgt_len)
             loss = criterion(output.contiguous().view(-1, output.shape[-1]), trg[:, 1:].contiguous().view(-1))
 
             optimizer.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
+            lr_scheduler.step()
             train_loss.append(loss.cpu().item())
 
             pred = torch.argmax(output, -1).detach().cpu().numpy()
@@ -260,7 +278,7 @@ if __name__ == "__main__":
     model.to(DEVICE)
 
     if args.perception_pretrain and not args.perception:
-        model.encoder.image_encoder.load_state_dict(torch.load(args.perception_pretrain))
+        model.embedding_in.image_encoder.load_state_dict(torch.load(args.perception_pretrain))
 
     st_epoch = 0
     if args.resume:

@@ -6,6 +6,8 @@ from dataset import HINT, HINT_collate
 INP_VOCAB = SYMBOLS + [START, END, NULL]
 RES_VOCAB = DIGITS + [START, END, NULL]
 
+RES_MAX_LEN = 10
+
 reverse = True
 def res2seq(res, pad=True):
     seq = [list(str(r)) for r in res]
