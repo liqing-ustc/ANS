@@ -15,14 +15,14 @@ from model import make_model
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 import numpy as np
 import random
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 import argparse
 import sys
-from optimization import AdamW, WarmupLinearSchedule
+from torch.optim import Adam
+from optimization import AdamW, WarmupLinearSchedule, ConstantLRSchedule
 from baseline_utils import SYMBOLS, INP_VOCAB, RES_VOCAB, DEVICE, NULL, END, RES_MAX_LEN
 
 def parse_args():
@@ -160,9 +160,11 @@ def train(model, args, st_epoch=0):
     eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=32,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
 
-    optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=0.02)
-    lr_scheduler = WarmupLinearSchedule(optimizer, warmup_steps=5 * len(train_dataloader), t_total=args.epochs*len(train_dataloader),
-                     last_epoch=st_epoch*len(train_dataloader)-1)
+    # optimizer = AdamW(model.parameters(), lr=1e-3, weight_decay=0.02)
+    # lr_scheduler = WarmupLinearSchedule(optimizer, warmup_steps=10 * len(train_dataloader), t_total=args.epochs*len(train_dataloader),
+    #                  last_epoch=st_epoch*len(train_dataloader)-1)
+    optimizer = Adam(model.parameters(), lr=1e-3)
+    lr_scheduler = ConstantLRSchedule(optimizer)
     criterion = nn.CrossEntropyLoss(ignore_index=RES_VOCAB.index(NULL))
     
     max_len = float("inf")

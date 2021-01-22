@@ -98,7 +98,7 @@ class RNNModel(nn.Module):
         return output
 
 
-class PositionalEncoding(nn.Module):
+class SinePositionalEncoding(nn.Module):
     r"""Inject some information about the relative or absolute position of the tokens
         in the sequence. The positional encodings have the same dimension as
         the embeddings, so that the two can be summed. Here, we use sine and cosine
@@ -141,6 +141,26 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
+class LearnedPositionalEncoding(nn.Module):
+    def __init__(self, d_model, dropout=0.1, max_len=100):
+        super(LearnedPositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+        self.pe = nn.Embedding(max_len, d_model)
+
+    def forward(self, x):
+        r"""Inputs of forward function
+        Args:
+            x: the sequence fed to the positional encoder model (required).
+        Shape:
+            x: [sequence length, batch size, embed dim]
+            output: [sequence length, batch size, embed dim]
+        """
+
+        seq_len, batch_size = x.shape[:2]
+        pos = torch.arange(0, seq_len).unsqueeze(1).to(DEVICE)
+        x = x + self.pe(pos)
+        return self.dropout(x)
+
 def create_padding_mask(lens):
     # 1, pos is masked and not allowed to attend;
     max_len = max(lens)
@@ -164,24 +184,27 @@ class TransformerModel(nn.Module):
         hid_dim = config.hid_dim
         enc_layers = config.enc_layers
         dec_layers = config.dec_layers
-        dropout = 0.1
+        dropout = config.dropout
 
         self.d_model = emb_dim
-        self.pos_encoder = PositionalEncoding(emb_dim, dropout)
+        # self.enc_pos_embedding = SinePositionalEncoding(emb_dim, dropout)
+        # self.dec_pos_embedding = SinePositionalEncoding(emb_dim, dropout)
+        self.enc_pos_embedding = LearnedPositionalEncoding(emb_dim, dropout)
+        self.dec_pos_embedding = LearnedPositionalEncoding(emb_dim, dropout)
         self.transformer = nn.Transformer(emb_dim, nhead, enc_layers, dec_layers, hid_dim, dropout)
 
-        self.embedding_out = nn.Embedding(len(RES_VOCAB), config.emb_dim)
+        self.embedding_out = nn.Embedding(len(RES_VOCAB), emb_dim)
         self.classifier_out = nn.Linear(emb_dim, len(RES_VOCAB))
 
 
     def forward(self, src, tgt, src_len, tgt_len):
         src_padding_mask = torch.from_numpy(create_padding_mask(src_len)).to(DEVICE)
-        src = self.pos_encoder(src * math.sqrt(self.d_model))
+        src = self.enc_pos_embedding(src * math.sqrt(self.d_model))
         if self.training:
             tgt_padding_mask = create_padding_mask_tgt(tgt).transpose(0, 1)
             tgt_mask = self.transformer.generate_square_subsequent_mask(len(tgt)).to(DEVICE)
             tgt_emb = self.embedding_out(tgt)
-            tgt_emb = self.pos_encoder(tgt_emb * math.sqrt(self.d_model))
+            tgt_emb = self.dec_pos_embedding(tgt_emb * math.sqrt(self.d_model))
             output = self.transformer(src, tgt_emb, tgt_mask=tgt_mask, tgt_key_padding_mask=tgt_padding_mask,
                             src_key_padding_mask=src_padding_mask, memory_key_padding_mask=src_padding_mask)
             output = self.classifier_out(F.relu(output))
@@ -193,7 +216,7 @@ class TransformerModel(nn.Module):
                 tgt_padding_mask = create_padding_mask_tgt(tgt).transpose(0, 1)
                 tgt_mask = self.transformer.generate_square_subsequent_mask(len(tgt)).to(DEVICE)
                 tgt_emb = self.embedding_out(tgt)
-                tgt_emb = self.pos_encoder(tgt_emb * math.sqrt(tgt.shape[-1]))
+                tgt_emb = self.dec_pos_embedding(tgt_emb * math.sqrt(self.d_model))
                 output = self.transformer(src, tgt_emb, tgt_mask=tgt_mask, tgt_key_padding_mask=tgt_padding_mask,
                             src_key_padding_mask=src_padding_mask, memory_key_padding_mask=src_padding_mask)
                 output = output[-1]
@@ -219,19 +242,12 @@ class NeuralArithmetic(nn.Module):
             self.seq2seq = RNNModel(config)
         elif config.seq2seq == 'TRAN':
             self.seq2seq = TransformerModel(config)
-            self.init_embedding_weights()
 
     
     def forward(self, img, src, tgt, src_len, tgt_len):
         src = self.embedding_in(src if self.config.perception else img, src_len)
         output = self.seq2seq(src.transpose(0,1), tgt.transpose(0,1), src_len, tgt_len)
         return output.transpose(0, 1)
-
-    def init_embedding_weights(self):
-        initrange = 0.1
-        nn.init.uniform_(self.embedding_in.embedding.weight, -initrange, initrange)
-        nn.init.zeros_(self.seq2seq.embedding_out.weight)
-        nn.init.uniform_(self.seq2seq.embedding_out.weight, -initrange, initrange)
 
 def make_model(config):
     model = NeuralArithmetic(config)
