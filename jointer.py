@@ -178,6 +178,11 @@ class Jointer:
         self.semantics.load(model['semantics'])
         return model['epoch']
 
+    def extend(self, n=1): # extend n new concepts
+        self.perception.extend(n)
+        self.syntax.extend(n)
+        self.semantics.extend(n)
+
     def print(self):
         if self.config.perception:
             print('use ground-truth perception.')

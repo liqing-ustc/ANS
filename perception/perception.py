@@ -13,11 +13,12 @@ from . import resnet_scan, lenet_scan
 from torchvision import transforms
 import random
 
+tok_convert = {'*': 'times', '/': 'div', 'a': 'alpha', 'b': 'beta', 'g': 'gamma', 't': 'theta', 'p': 'phi'}
+tok_convert = {v:k for k, v in tok_convert.items()}
 def check_accuarcy(dataset):
     from utils import SYM2ID
     symbols = [x[0].split('/')[0] for x in dataset]
-    symbols = ['/' if x == 'div' else x for x in symbols]
-    symbols = ['*' if x == 'times' else x for x in symbols]
+    symbols = [tok_convert.get(x, x) for x in symbols]
     symbols = [SYM2ID(x) for x in symbols]
     labels = [x[1] for x in dataset]
     acc = np.mean(np.array(symbols) == np.array(labels))
@@ -59,6 +60,11 @@ class Perception(object):
         self.model.load_state_dict(loaded['model'])
         if 'optimizer' in loaded:
             self.optimizer.load_state_dict(loaded['optimizer'])
+
+    def extend(self, n):
+        self.n_class += n
+        self.model.extend(n)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4)
 
     def selflabel(self, symbols):
         dataloader = torch.utils.data.DataLoader(ImageSet(symbols), batch_size=512,

@@ -94,16 +94,18 @@ def compute_likelihood(program=None, examples=None):
         return np.mean(res), np.array(res)
 
 class Semantics(object):
-    def __init__(self, idx, program=None):
+    def __init__(self, idx, program=None, fewshot=False, learnable=True):
         self.idx = idx
         self.examples = []
         self.program = program
         self.arity = None
         self.solved = False
         self.likelihood = 0.
+        self.fewshot = fewshot
+        self.learnable = learnable
 
     def update_examples(self, examples):
-        if len(examples) < 10:
+        if len(examples) < 10 and not self.fewshot:
             self.clear()
             return
 
@@ -148,6 +150,7 @@ class Semantics(object):
 
     def make_task(self):
         min_examples = 30 if self.arity is not None and self.arity > 0 else 10
+        min_examples = min_examples if not self.fewshot else 0
         max_examples = 100
         examples = self.examples
         if len(examples) < min_examples or self.solved or None in [x[1] for x in examples]:
@@ -236,6 +239,13 @@ class DreamCoder(object):
         assert len(self.semantics) == len(model)
         for i in range(len(self.semantics)):
             self.semantics[i].load(model[i])
+    
+    def extend(self, n):
+        for smt in self.semantics:
+            smt.learnable = False
+        idx = len(SYMBOLS) - 1
+        self.semantics.append(Semantics(idx, fewshot=True))
+        self.primitives.extend([Invented(smt.program.prog) for smt in self.semantics if not smt.learnable and smt.arity > 0])
 
     def rescore_frontiers(self, tasks):
         if self.allFrontiers is None:
@@ -265,6 +275,8 @@ class DreamCoder(object):
         tasks = []
         max_arity = 0
         for smt, exps in zip(self.semantics, dataset):
+            if not smt.learnable:
+                continue
             smt.update_examples(exps)
             t = smt.make_task()
             if t is not None:
@@ -309,7 +321,7 @@ class DreamCoder(object):
 
     def update_grammar(self):
         programs = [Invented(smt.program.prog) for smt in self.semantics 
-            if smt.solved and smt.program is not None and smt.program.arity > 0 and '#' not in str(smt.program)]
+            if smt.learnable and smt.solved and smt.program is not None and smt.program.arity > 0 and '#' not in str(smt.program)]
             # if '#' in the program, the program uses a invented primitive, it is very likely to have a high computation cost.
             # Therefore we don't add this program into primitives, since it might slow the enumeration a lot.
             # it might be resolved by increasing the enumeration time

@@ -23,6 +23,7 @@ import sys
 def parse_args():
     parser = argparse.ArgumentParser('Give Me A HINT')
     parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
+    parser.add_argument('--fewshot', type=int, default=-1, help="fewshot concept index. -1 means no fewshot concept.")
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
                         default='data/perception-pretrain/model.pth.tar_78.2_match')
@@ -193,6 +194,8 @@ def train(model, args, st_epoch=0):
             train_set.filter_by_len(max_len=max_len)
             train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
                                 shuffle=False, num_workers=4, collate_fn=HINT_collate)
+            if len(train_dataloader) == 0:
+                continue
 
         since = time.time()
         print('-' * 30)
@@ -248,16 +251,24 @@ if __name__ == "__main__":
     torch.manual_seed(args.seed)
 
     # train_set = HINT('train', numSamples=5000)
-    train_set = HINT('train')
-    val_set = HINT('val')
+    train_set = HINT('train', fewshot=args.fewshot)
+    val_set = HINT('val', fewshot=args.fewshot)
     # test_set = HINT('val')
-    test_set = HINT('test')
+    test_set = HINT('test', fewshot=args.fewshot)
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     model = Jointer(args)
-    model.to(DEVICE)
 
-    if args.perception_pretrain and not args.perception:
+    if args.fewshot != -1:
+        pretrained = 'bak/model_100.p'
+        model.load(pretrained)
+
+        fewshot_concepts = list('abgtp')
+        concept = fewshot_concepts[args.fewshot]
+        SYMBOLS.append(concept)
+        model.extend()
+
+    elif args.perception_pretrain and not args.perception:
         model.perception.load({'model': torch.load(args.perception_pretrain)})
         model.perception.selflabel(train_set.all_symbols())
 
@@ -274,5 +285,6 @@ if __name__ == "__main__":
     args.val_set = val_set
     args.test_set = test_set
 
+    model.to(DEVICE)
     train(model, args, st_epoch=st_epoch)
 

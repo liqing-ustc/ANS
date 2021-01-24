@@ -130,6 +130,7 @@ class ClusteringModel(nn.Module):
         self.backbone = backbone['backbone']
         self.backbone_dim = backbone['dim']
         self.nheads = nheads
+        self.nclusters = nclusters
         assert(isinstance(self.nheads, int))
         assert(self.nheads > 0)
         self.cluster_head = nn.ModuleList([nn.Linear(self.backbone_dim, nclusters) for _ in range(self.nheads)])
@@ -139,6 +140,13 @@ class ClusteringModel(nn.Module):
         out = [cluster_head(features) for cluster_head in self.cluster_head]
         return out[0]
 
+    def extend(self, n):
+        old_classifier = self.cluster_head[0]
+        classifier = nn.Linear(self.backbone_dim, self.nclusters + n)
+        classifier.weight.data[:self.nclusters] = old_classifier.weight.data
+        classifier.bias.data[:self.nclusters] = old_classifier.bias.data
+        self.nclusters += n
+        self.cluster_head = nn.ModuleList([classifier])
 
 def make_model(n_class):
     backbone = resnet18(in_channel=1)

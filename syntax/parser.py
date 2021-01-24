@@ -38,6 +38,8 @@ class ParserModel(nn.Module):
         @param dropout_prob (float): dropout probability
         """
         super(ParserModel, self).__init__()
+        self.n_tokens = n_tokens
+        self.embed_size = embed_size
         self.embeddings = nn.Embedding(n_tokens, embed_size)
         self.model = nn.Sequential(
             nn.Linear(embed_size * n_features, hidden_size),
@@ -45,6 +47,14 @@ class ParserModel(nn.Module):
             nn.Dropout(p=dropout_prob),
             nn.Linear(hidden_size, n_classes),
         )
+
+    def extend(self, n):
+        old_embeddings = self.embeddings
+        embeddings = nn.Embedding(self.n_tokens+n, self.embed_size)
+        embeddings.weight.data[:self.n_tokens-1] = old_embeddings.weight.data[:self.n_tokens-1]
+        embeddings.weight.data[-1] = old_embeddings.weight.data[-1] # the last token is always NULL for padding
+        self.embeddings = embeddings
+        self.n_tokens += n
 
     def forward(self, t):
         """ Run the model forward.
@@ -69,7 +79,6 @@ class Parser(object):
         self.device = torch.device('cpu')
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, amsgrad=True)
         self.criterion = nn.CrossEntropyLoss(ignore_index=-1)
-        self.null_idx = self.tok2id[NULL]
     
     def train(self):
         self.model.train()
@@ -91,6 +100,13 @@ class Parser(object):
         self.model.load_state_dict(loaded['model'])
         if 'optimizer' in loaded:
             self.optimizer.load_state_dict(loaded['optimizer'])
+
+    def extend(self, n):
+        self.model.extend(n)
+        TOKENS = SYMBOLS + [NULL]
+        self.n_tokens = len(TOKENS)
+        self.tok2id = {v: k for (k, v) in enumerate(TOKENS)}
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, amsgrad=True)
 
     def __call__(self, sentences):
         return self.parse(sentences)
