@@ -169,11 +169,10 @@ def train(model, args, st_epoch=0):
             # (0, 7)
             (0, 1),
             (1, 3),
-            (3, float('inf'))
-            # (20, 7),
-            # (40, 11),
-            # (60, 15),
-            # (80, float('inf')),
+            (20, 7),
+            (40, 11),
+            (60, 15),
+            (80, float('inf')),
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -281,7 +280,14 @@ if __name__ == "__main__":
         model.extend()
         model.to(DEVICE)
 
-    elif args.perception_pretrain and not args.perception:
+    # train_set = HINT('train', numSamples=5000)
+    train_set = HINT('train', fewshot=args.fewshot)
+    val_set = HINT('val', fewshot=args.fewshot)
+    # test_set = HINT('val')
+    test_set = HINT('test', fewshot=args.fewshot)
+    print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
+
+    if args.fewshot == -1 and args.perception_pretrain and not args.perception:
         model.perception.load({'model': torch.load(args.perception_pretrain)})
         model.perception.selflabel(train_set.all_symbols())
 
@@ -295,12 +301,6 @@ if __name__ == "__main__":
     print(args)
     model.print()
 
-    # train_set = HINT('train', numSamples=5000)
-    train_set = HINT('train', fewshot=args.fewshot)
-    val_set = HINT('val', fewshot=args.fewshot)
-    # test_set = HINT('val')
-    test_set = HINT('test', fewshot=args.fewshot)
-    print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     args.train_set = train_set
     args.val_set = val_set

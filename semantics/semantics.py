@@ -76,7 +76,7 @@ class ProgramWrapper(object):
         for exp in examples:
             try:
                 y = self(*exp)
-            except TypeError:
+            except (TypeError, RecursionError) as e:
                 y = None
             ys.append(y)
         return ys
