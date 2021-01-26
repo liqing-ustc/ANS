@@ -159,7 +159,7 @@ def train(model, args, st_epoch=0):
     best_acc = 0.0
     batch_size = 128
     train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,
-                         shuffle=True, num_workers=4, collate_fn=HINT_collate)
+                         shuffle=False, num_workers=4, collate_fn=HINT_collate)
     eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=32,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
@@ -169,10 +169,11 @@ def train(model, args, st_epoch=0):
             # (0, 7)
             (0, 1),
             (1, 3),
-            (20, 7),
-            (40, 11),
-            (60, 15),
-            (80, float('inf')),
+            (3, float('inf'))
+            # (20, 7),
+            # (40, 11),
+            # (60, 15),
+            # (80, float('inf')),
         ])
         print("Curriculum:", sorted(curriculum_strategy.items()))
         for e, l in sorted(curriculum_strategy.items(), reverse=True):
@@ -250,23 +251,35 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
-    # train_set = HINT('train', numSamples=5000)
-    train_set = HINT('train', fewshot=args.fewshot)
-    val_set = HINT('val', fewshot=args.fewshot)
-    # test_set = HINT('val')
-    test_set = HINT('test', fewshot=args.fewshot)
-    print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     model = Jointer(args)
+    model.to(DEVICE)
 
     if args.fewshot != -1:
         pretrained = 'bak/model_100.p'
         model.load(pretrained)
+    
+        train_set = HINT('train')
+        train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=32,
+                            shuffle=False, num_workers=4, collate_fn=HINT_collate)
+        model.eval() 
+        model.buffer_augment = []
+        with torch.no_grad():
+            for sample in tqdm(train_dataloader):
+                model.deduce(sample)
+                model.buffer_augment.extend([ast for ast, y in zip(model.ASTs, sample['res']) if ast.res() == y])
+                for et, y, img_paths in zip(model.ASTs, sample['res'].numpy(), sample['img_paths']):
+                    if et.res() == y:
+                        et.img_paths = img_paths
+                        model.buffer_augment.append(et)
+            print("Number of augment examples: ", len(model.buffer_augment))
 
-        fewshot_concepts = list('abgtp')
+        fewshot_concepts = list('abcde')
         concept = fewshot_concepts[args.fewshot]
         SYMBOLS.append(concept)
+        model.to('cpu')
         model.extend()
+        model.to(DEVICE)
 
     elif args.perception_pretrain and not args.perception:
         model.perception.load({'model': torch.load(args.perception_pretrain)})
@@ -281,10 +294,17 @@ if __name__ == "__main__":
 
     print(args)
     model.print()
+
+    # train_set = HINT('train', numSamples=5000)
+    train_set = HINT('train', fewshot=args.fewshot)
+    val_set = HINT('val', fewshot=args.fewshot)
+    # test_set = HINT('val')
+    test_set = HINT('test', fewshot=args.fewshot)
+    print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
+
     args.train_set = train_set
     args.val_set = val_set
     args.test_set = test_set
 
-    model.to(DEVICE)
     train(model, args, st_epoch=st_epoch)
 

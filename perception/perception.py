@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from PIL import Image, ImageOps
 from tqdm import trange, tqdm
 import math
@@ -13,7 +13,7 @@ from . import resnet_scan, lenet_scan
 from torchvision import transforms
 import random
 
-tok_convert = {'*': 'times', '/': 'div', 'a': 'alpha', 'b': 'beta', 'g': 'gamma', 't': 'theta', 'p': 'phi'}
+tok_convert = {'*': 'times', '/': 'div', 'a': 'alpha', 'b': 'beta', 'c': 'gamma', 'd': 'phi', 'e': 'theta'}
 tok_convert = {v:k for k, v in tok_convert.items()}
 def check_accuarcy(dataset):
     from utils import SYM2ID
@@ -126,20 +126,16 @@ class Perception(object):
 
         labels = [l for i, l in dataset]
         counts = Counter(labels)
-        max_count = counts.most_common(1)[0][1]
-        total_count = len(labels)
-        class_weights = np.array([(total_count - counts[i])/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
-        class_weights = np.array([max_count/ max(counts[i],1) for i in range(self.n_class)], dtype=np.float32)
-        class_weights = torch.from_numpy(class_weights).to(self.device)
-
-        criterion = nn.CrossEntropyLoss(weight=class_weights)
+        sample_weights = np.array([1. / counts[l] for i, l in dataset])
+        sampler = WeightedRandomSampler(torch.from_numpy(sample_weights), len(sample_weights))
+        criterion = nn.CrossEntropyLoss()
         # criterion = nn.BCEWithLogitsLoss(pos_weight=class_weights, reduction='none')
 
         n_epochs = int(math.ceil(batch_size * n_iters / len(dataset)))
         print(n_epochs, "epochs, ", end='')
         dataset = ImageSet(dataset)
         train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                         shuffle=True, num_workers=8)
+                         sampler=sampler, num_workers=8)
         self.model.train()
         for epoch in range(n_epochs):
             for img, label in train_dataloader:

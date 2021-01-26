@@ -75,10 +75,10 @@ class AST: # Abstract Syntax Tree
             et = self.abduce_perception(y)
             if et is not None:
                 return et
-        # elif module == 'syntax':
-        #     et = self.abduce_syntax(y)
-        #     if et is not None:
-        #         return et
+        elif module == 'syntax':
+            et = self.abduce_syntax(y)
+            if et is not None:
+                return et
         
         return None
 
@@ -269,6 +269,9 @@ class Jointer:
         print("Symbols: ", len(pred_symbols), sorted(pred_symbols.items()))
         pred_heads = Counter([tuple(ast.pt.head) for ast in self.buffer])
         print("Head: ", sorted(pred_heads.most_common(10), key=lambda x: len(x[0])))
+
+        if self.config.fewshot != -1:
+            self.buffer = self.buffer + random.sample(self.buffer_augment, k=1000)
 
         if self.learned_module == 'perception':
             dataset = [(img, label) for x in self.buffer for img, label in zip(x.img_paths, x.pt.sentence)]

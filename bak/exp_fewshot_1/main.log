@@ -1,0 +1,1417 @@
+CUDA is available?: True
+using cuda?: True
+Number of augment examples:  21564
+Namespace(curriculum=False, epochs=10, epochs_eval=5, excludes='!', fewshot=1, output_dir='outputs/exp_fewshot_1/', perception=False, perception_pretrain='data/perception-pretrain/model.pth.tar_78.2_match', resume=None, seed=0, semantics=False, syntax=False)
+ClusteringModel(
+  (backbone): ResNet(
+    (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (layer1): Sequential(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential()
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential()
+      )
+    )
+    (layer2): Sequential(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential(
+          (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+          (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential()
+      )
+    )
+    (layer3): Sequential(
+      (0): BasicBlock(
+        (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential(
+          (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+          (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential()
+      )
+    )
+    (layer4): Sequential(
+      (0): BasicBlock(
+        (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential(
+          (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+          (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (shortcut): Sequential()
+      )
+    )
+    (avgpool): AdaptiveAvgPool2d(output_size=(1, 1))
+  )
+  (cluster_head): ModuleList(
+    (0): Linear(in_features=512, out_features=17, bias=True)
+  )
+)
+ParserModel(
+  (embeddings): Embedding(18, 50)
+  (model): Sequential(
+    (0): Linear(in_features=900, out_features=200, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.5, inplace=False)
+    (3): Linear(in_features=200, out_features=3, bias=True)
+  )
+)
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: None 0.00
+train: 110 val: 480 test: 490
+              precision    recall  f1-score   support
+
+           0       0.92      0.99      0.96       364
+           1       0.96      0.97      0.97       500
+           2       1.00      0.97      0.98       509
+           3       0.59      0.96      0.73       568
+           4       1.00      0.98      0.99       516
+           5       0.97      0.99      0.98       520
+           6       0.98      0.97      0.98       553
+           7       0.99      0.97      0.98       578
+           8       0.86      0.98      0.92       529
+           9       0.99      0.98      0.98       563
+           +       1.00      0.98      0.99       971
+           -       1.00      0.99      1.00       830
+           *       1.00      1.00      1.00      1162
+           /       0.98      1.00      0.99       720
+           (       0.77      0.98      0.86      2100
+           )       0.98      0.70      0.82      2100
+           b       0.99      0.57      0.72      1037
+
+    accuracy                           0.91     14120
+   macro avg       0.94      0.94      0.93     14120
+weighted avg       0.93      0.91      0.91     14120
+
+     0    1    2    3    4    5    6    7    8    9    +    -    *    /     (     )    b
+0  255    0    0    0    0    1    0    0    0    0    0    0    0    0     0     0    0
+1    2  344    1    0    0    0    0    0    0    1    0    0    0    0     0     0    2
+2    1    4  350    1    0    0    0    0    0    0    0    0    0    0     0     0    0
+3    6    3    0  386    0    2    0    0    1    0    0    0    0    0     0     0    0
+4    2    1    0    0  356    1    2    0    0    0    0    0    0    0     0     0    0
+5    0    2    0    0    0  364    0    0    2    0    0    0    0    0     0     0    0
+6    0    2    0    7    0    0  381    0    0    0    0    0    0    0     0     0    0
+7    2    0    0    0    0    2    0  398    3    2    0    0    0    0     0     0    0
+8    4    0    0    0    0    0    2    0  366    0    0    0    0    0     0     0    0
+9    2    0    0    0    0    2    0    4    0  390    0    0    0    0     0     0    0
++    0    0    0    0    0    0    0    0    0    0  676    2    2    7     0     0    0
+-    0    0    0    0    0    0    0    0    0    0    1  584    0    1     0     0    0
+*    0    0    0    0    0    0    0    0    0    0    0    0  822    0     0     0    0
+/    0    0    0    0    0    0    0    0    0    0    0    0    0  509     0     0    0
+(    0    0    0    0    0    0    0    0    0    0    0    0    0    0  1463    23    0
+)    0    0    0    0    0    0    0    0    0    0    0    0    0    0   444  1043    0
+b    0    0    0  262    0    0    0    0   52    0    0    0    0    0     0     0  419
+result accuracy by length:
+3 ( 4%)  0.00
+5 ( 2%)  0.00
+7 ( 3%)  0.00
+9 ( 3%)  0.00
+11 ( 3%)  0.00
+13 ( 5%)  0.00
+15 ( 4%)  0.00
+17 ( 2%)  0.00
+19 ( 5%)  0.00
+21 ( 3%)  0.00
+23 ( 4%)  0.00
+25 ( 3%)  0.00
+27 ( 3%)  0.00
+29 ( 5%)  0.00
+31 ( 3%)  0.00
+33 ( 2%)  0.00
+35 ( 1%)  0.00
+37 ( 2%)  0.00
+39 ( 3%)  0.00
+41 ( 3%)  0.00
+43 ( 2%)  0.00
+45 ( 2%)  0.00
+47 ( 5%)  0.00
+49 ( 2%)  0.00
+51 ( 2%)  0.00
+53 ( 3%)  0.00
+55 ( 2%)  0.00
+57 ( 2%)  0.00
+59 ( 2%)  0.00
+61 ( 1%)  0.00
+63 ( 1%)  0.00
+result accuracy by symbol:
+( (91%)  0.00
+) (91%)  0.00
+* (82%)  0.00
++ (76%)  0.00
+- (70%)  0.00
+/ (67%)  0.00
+0 (47%)  0.00
+1 (59%)  0.00
+2 (62%)  0.00
+3 (64%)  0.00
+4 (62%)  0.00
+5 (63%)  0.00
+6 (63%)  0.00
+7 (67%)  0.00
+8 (62%)  0.00
+9 (65%)  0.00
+b (100%)  0.00
+result accuracy by digit:
+result accuracy by result:
+0 (23%)  0.00
+1 (14%)  0.00
+2 ( 9%)  0.00
+3 ( 3%)  0.00
+4 ( 3%)  0.00
+5 ( 3%)  0.00
+6 ( 3%)  0.00
+7 ( 1%)  0.00
+8 ( 2%)  0.00
+9 ( 1%)  0.00
+result accuracy by generalization:
+1 (20.83%)  0.00
+2 (23.33%)  0.00
+3 (18.33%)  0.00
+4 (18.33%)  0.00
+5 (19.17%)  0.00
+error cases:
+4b2 4b2 [1, -1, 1] [1, -1, 1] 2 None
+5b2 532 [1, -1, 1] [1, -1, 1] 2 None
+7b3 783 [1, -1, 1] [1, -1, 1] 3 None
+8b8 8b8 [1, -1, 1] [1, -1, 1] 8 None
+8b6 836 [1, -1, 1] [1, -1, 1] 6 None
+3b7 337 [1, -1, 1] [1, -1, 1] 3 None
+8b1 831 [1, -1, 1] [1, -1, 1] 1 None
+9b8 9b8 [1, -1, 1] [1, -1, 1] 8 None
+3b8 338 [1, -1, 1] [1, -1, 1] 3 None
+1b0 1b0 [1, -1, 1] [1, -1, 1] 0 None
+val (Perception Acc=91.17, Head Acc=83.72, Result Acc=0.00)
+------------------------------
+Epoch 0/9 (max_len=inf, data=110)
+Train acc: 0.00 (abduce 19.09)
+Hit samples:  21  Ave length:  4.71
+Symbols:  17 [(0, 8), (1, 5), (2, 4), (3, 7), (4, 6), (5, 3), (6, 3), (7, 7), (8, 12), (9, 6), (10, 3), (11, 2), (12, 5), (13, 3), (14, 7), (15, 3), (16, 15)]
+Head:  [((1, -1, 1), 17), ((1, 3, 1, -1, 3), 2), ((4, 2, 4, 2, 7, 4, 4, 17, 7, 10, 7, 13, 13, 10, 13, 13, 7, -1, 17), 1), ((1, -1, 3, 10, 5, 6, 8, 6, 3, 8, 1, 12, 10, 15, 15, 12, 15, 16, 16), 1)]
+Semantics: 17/14/1 (total/solved/learn).
+Symbol-16 (int -> int -> int), Samples:  15,  [(((4, 2), 2), 1), (((8, 8), 8), 1), (((7, 6), 6), 1), (((3, 7), 3), 1), (((3, 8), 3), 1), (((1, 0), 0), 1), (((0, 9), 0), 1), (((0, 8), 0), 1), (((7, 8), 7), 1), (((6, 8), 6), 1)]
+Update grammar with invented programs and set frontiers to none.
+0.000000	t0	$_
+0.000000	int	0
+0.000000	int -> int	incr
+0.000000	int -> int	decr0
+0.000000	t0 -> t0 -> t0 -> t0	if0
+0.000000	t0 -> t1 -> ((t0 -> t1 -> t2) -> t0 -> t1 -> t2) -> t2	fix2
+0.000000	int -> int -> int	#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0))))))))))
+0.000000	int -> int -> int	#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0))))))))))
+0.000000	int -> int -> int	#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1))))))))))
+0.000000	int -> int -> int	#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0))))))))))
+failed to execute ['dot', '-Tpdf', '-O', 'hint_primitives_0_depth.pdf'], make sure the Graphviz executables are on your systems' PATH
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 0.87
+Train acc: 27.27 (abduce 51.82)
+Hit samples:  57  Ave length:  13.74
+Symbols:  17 [(0, 21), (1, 40), (2, 35), (3, 39), (4, 27), (5, 27), (6, 23), (7, 29), (8, 45), (9, 32), (10, 56), (11, 52), (12, 42), (13, 47), (14, 133), (15, 71), (16, 64)]
+Head:  [((1, -1, 1), 15), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 5), 1), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 6, 7), 1), ((1, 5, 3, 1, 3, -1, 8, 8, 5, 8, 9), 1), ((2, 2, 4, 2, 6, 4, 9, 6, 9, -1, 9), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 8), 1), ((2, 2, 9, 2, 5, 2, 5, 5, 2, -1, 9, 12, 9, 12, 9), 1)]
+Learn perception with 1057 samples for 100 iterations, 0.9439475253428742, 4 epochs, take 24 sec.
+Train acc: 50.91 (abduce 50.91)
+Hit samples:  56  Ave length:  12.61
+Symbols:  17 [(0, 24), (1, 35), (2, 28), (3, 37), (4, 21), (5, 25), (6, 19), (7, 35), (8, 42), (9, 23), (10, 46), (11, 44), (12, 37), (13, 37), (14, 116), (15, 68), (16, 69)]
+Head:  [((1, -1, 1), 17), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, -1, 3, 4, 1, 4, 1), 1), ((5, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 3, 4, 1, 4, 7, 4, 7, 8, 9), 1)]
+Learn syntax with 1056 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 71.82 (abduce 71.82)
+Hit samples:  79  Ave length:  14.06
+Symbols:  17 [(0, 32), (1, 46), (2, 38), (3, 50), (4, 39), (5, 41), (6, 36), (7, 55), (8, 65), (9, 51), (10, 75), (11, 64), (12, 62), (13, 68), (14, 187), (15, 97), (16, 105)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 5, 6, 3, 6, 3), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 7), 1), ((1, -1, 3, 1, 3, 6, 3, 6, 3), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 4), 1)]
+Learn syntax with 1079 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 74.55 (abduce 74.55)
+Hit samples:  82  Ave length:  13.73
+Symbols:  17 [(0, 32), (1, 51), (2, 43), (3, 50), (4, 38), (5, 42), (6, 36), (7, 50), (8, 63), (9, 51), (10, 72), (11, 70), (12, 56), (13, 67), (14, 192), (15, 104), (16, 109)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 5, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1082 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 83.64 (abduce 83.64)
+Hit samples:  92  Ave length:  14.2
+Symbols:  17 [(0, 36), (1, 54), (2, 56), (3, 62), (4, 46), (5, 46), (6, 43), (7, 60), (8, 70), (9, 59), (10, 89), (11, 78), (12, 65), (13, 77), (14, 212), (15, 122), (16, 131)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 5, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1092 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 81.82 (abduce 81.82)
+Hit samples:  90  Ave length:  14.31
+Symbols:  17 [(0, 37), (1, 53), (2, 48), (3, 59), (4, 45), (5, 47), (6, 42), (7, 58), (8, 72), (9, 62), (10, 89), (11, 78), (12, 67), (13, 75), (14, 217), (15, 115), (16, 124)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 5, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1090 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 82.73 (abduce 82.73)
+Hit samples:  91  Ave length:  13.97
+Symbols:  17 [(0, 33), (1, 56), (2, 51), (3, 64), (4, 45), (5, 44), (6, 41), (7, 57), (8, 69), (9, 57), (10, 94), (11, 74), (12, 64), (13, 68), (14, 206), (15, 122), (16, 126)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 6), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1091 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 88.18 (abduce 88.18)
+Hit samples:  97  Ave length:  14.86
+Symbols:  17 [(0, 36), (1, 61), (2, 57), (3, 62), (4, 54), (5, 52), (6, 47), (7, 65), (8, 79), (9, 67), (10, 99), (11, 83), (12, 78), (13, 86), (14, 243), (15, 135), (16, 137)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 4), 1)]
+Learn syntax with 1097 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 86.36 (abduce 86.36)
+Hit samples:  95  Ave length:  14.45
+Symbols:  17 [(0, 35), (1, 62), (2, 54), (3, 62), (4, 51), (5, 50), (6, 47), (7, 64), (8, 72), (9, 61), (10, 98), (11, 75), (12, 74), (13, 83), (14, 229), (15, 123), (16, 133)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1095 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 90.91 (abduce 90.91)
+Hit samples:  100  Ave length:  14.56
+Symbols:  17 [(0, 35), (1, 65), (2, 60), (3, 67), (4, 55), (5, 54), (6, 47), (7, 70), (8, 73), (9, 64), (10, 101), (11, 85), (12, 78), (13, 86), (14, 242), (15, 134), (16, 140)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 3, 1, 3, 6, 3, 6, 1), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 4), 1)]
+Learn syntax with 1100 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 87.27 (abduce 87.27)
+Hit samples:  96  Ave length:  14.85
+Symbols:  17 [(0, 37), (1, 65), (2, 54), (3, 60), (4, 52), (5, 52), (6, 45), (7, 65), (8, 78), (9, 66), (10, 97), (11, 86), (12, 78), (13, 80), (14, 241), (15, 133), (16, 137)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn syntax with 1096 samples for 100 iterations, 5 epochs, take 0 sec.
+Epoch time: 11m 17s
+------------------------------
+Epoch 1/9 (max_len=inf, data=110)
+Train acc: 90.91 (abduce 90.91)
+Hit samples:  100  Ave length:  14.52
+Symbols:  17 [(0, 37), (1, 66), (2, 56), (3, 68), (4, 54), (5, 54), (6, 49), (7, 68), (8, 73), (9, 66), (10, 101), (11, 88), (12, 77), (13, 83), (14, 235), (15, 135), (16, 142)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 1.00
+Train acc: 89.09 (abduce 97.27)
+Hit samples:  107  Ave length:  14.78
+Symbols:  17 [(0, 39), (1, 74), (2, 61), (3, 70), (4, 59), (5, 58), (6, 54), (7, 77), (8, 80), (9, 70), (10, 108), (11, 97), (12, 86), (13, 91), (14, 256), (15, 148), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 7), 2), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn perception with 1107 samples for 100 iterations, 0.9480294777314963, 4 epochs, take 24 sec.
+Train acc: 89.09 (abduce 89.09)
+Hit samples:  98  Ave length:  14.69
+Symbols:  17 [(0, 37), (1, 62), (2, 59), (3, 67), (4, 56), (5, 48), (6, 49), (7, 68), (8, 73), (9, 65), (10, 104), (11, 86), (12, 73), (13, 80), (14, 236), (15, 134), (16, 143)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn syntax with 1098 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.77
+Symbols:  17 [(0, 39), (1, 66), (2, 63), (3, 70), (4, 60), (5, 58), (6, 48), (7, 69), (8, 77), (9, 66), (10, 108), (11, 89), (12, 80), (13, 89), (14, 252), (15, 140), (16, 147)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 90.00 (abduce 90.00)
+Hit samples:  99  Ave length:  14.54
+Symbols:  17 [(0, 39), (1, 64), (2, 57), (3, 61), (4, 55), (5, 53), (6, 48), (7, 63), (8, 76), (9, 67), (10, 103), (11, 83), (12, 78), (13, 79), (14, 242), (15, 130), (16, 141)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn syntax with 1099 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.63
+Symbols:  17 [(0, 39), (1, 65), (2, 61), (3, 68), (4, 58), (5, 56), (6, 47), (7, 66), (8, 79), (9, 67), (10, 104), (11, 85), (12, 80), (13, 91), (14, 246), (15, 136), (16, 144)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 4, 1, 1, -1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 91.82 (abduce 91.82)
+Hit samples:  101  Ave length:  14.94
+Symbols:  17 [(0, 40), (1, 65), (2, 61), (3, 64), (4, 56), (5, 56), (6, 50), (7, 65), (8, 82), (9, 69), (10, 103), (11, 88), (12, 81), (13, 89), (14, 256), (15, 138), (16, 146)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1101 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.71
+Symbols:  17 [(0, 39), (1, 63), (2, 61), (3, 67), (4, 58), (5, 56), (6, 52), (7, 66), (8, 78), (9, 66), (10, 103), (11, 86), (12, 79), (13, 90), (14, 249), (15, 141), (16, 146)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 89.09 (abduce 89.09)
+Hit samples:  98  Ave length:  14.53
+Symbols:  17 [(0, 38), (1, 64), (2, 55), (3, 64), (4, 56), (5, 53), (6, 47), (7, 62), (8, 76), (9, 64), (10, 96), (11, 83), (12, 78), (13, 84), (14, 233), (15, 131), (16, 140)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 6), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1098 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  15.0
+Symbols:  17 [(0, 40), (1, 68), (2, 62), (3, 67), (4, 57), (5, 59), (6, 52), (7, 67), (8, 80), (9, 70), (10, 106), (11, 91), (12, 83), (13, 91), (14, 259), (15, 145), (16, 148)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 89.09 (abduce 89.09)
+Hit samples:  98  Ave length:  14.65
+Symbols:  17 [(0, 40), (1, 61), (2, 58), (3, 64), (4, 59), (5, 50), (6, 46), (7, 63), (8, 76), (9, 64), (10, 103), (11, 79), (12, 75), (13, 86), (14, 240), (15, 132), (16, 140)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1098 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.57
+Symbols:  17 [(0, 38), (1, 67), (2, 64), (3, 67), (4, 61), (5, 56), (6, 45), (7, 64), (8, 75), (9, 65), (10, 102), (11, 83), (12, 80), (13, 88), (14, 246), (15, 138), (16, 147)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Epoch time: 0m 42s
+------------------------------
+Epoch 2/9 (max_len=inf, data=110)
+Train acc: 89.09 (abduce 90.91)
+Hit samples:  100  Ave length:  14.6
+Symbols:  17 [(0, 39), (1, 65), (2, 59), (3, 67), (4, 60), (5, 56), (6, 47), (7, 62), (8, 77), (9, 62), (10, 104), (11, 83), (12, 77), (13, 88), (14, 238), (15, 134), (16, 142)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 4), 1)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 0.99
+Train acc: 90.91 (abduce 96.36)
+Hit samples:  106  Ave length:  14.72
+Symbols:  17 [(0, 40), (1, 66), (2, 64), (3, 70), (4, 63), (5, 58), (6, 51), (7, 72), (8, 81), (9, 68), (10, 110), (11, 89), (12, 83), (13, 93), (14, 256), (15, 144), (16, 152)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn perception with 1106 samples for 100 iterations, 0.9419688457609806, 4 epochs, take 25 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.83
+Symbols:  17 [(0, 39), (1, 68), (2, 61), (3, 71), (4, 60), (5, 57), (6, 50), (7, 71), (8, 82), (9, 67), (10, 107), (11, 91), (12, 83), (13, 90), (14, 249), (15, 145), (16, 151)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.27
+Symbols:  17 [(0, 40), (1, 71), (2, 63), (3, 70), (4, 62), (5, 59), (6, 50), (7, 72), (8, 83), (9, 71), (10, 111), (11, 95), (12, 86), (13, 92), (14, 261), (15, 149), (16, 153)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  15.14
+Symbols:  17 [(0, 40), (1, 66), (2, 61), (3, 69), (4, 60), (5, 57), (6, 51), (7, 71), (8, 81), (9, 67), (10, 107), (11, 90), (12, 84), (13, 91), (14, 257), (15, 143), (16, 149)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.98
+Symbols:  17 [(0, 41), (1, 66), (2, 61), (3, 67), (4, 61), (5, 59), (6, 53), (7, 70), (8, 81), (9, 70), (10, 107), (11, 92), (12, 85), (13, 91), (14, 259), (15, 145), (16, 150)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.98
+Symbols:  17 [(0, 39), (1, 69), (2, 62), (3, 71), (4, 60), (5, 56), (6, 52), (7, 74), (8, 81), (9, 67), (10, 107), (11, 92), (12, 84), (13, 90), (14, 253), (15, 147), (16, 154)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.9
+Symbols:  17 [(0, 39), (1, 66), (2, 59), (3, 69), (4, 58), (5, 58), (6, 53), (7, 72), (8, 81), (9, 68), (10, 107), (11, 91), (12, 84), (13, 89), (14, 249), (15, 143), (16, 149)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.89
+Symbols:  17 [(0, 39), (1, 71), (2, 64), (3, 69), (4, 60), (5, 58), (6, 51), (7, 69), (8, 81), (9, 70), (10, 109), (11, 90), (12, 83), (13, 93), (14, 259), (15, 145), (16, 152)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.77
+Symbols:  17 [(0, 40), (1, 65), (2, 63), (3, 70), (4, 62), (5, 58), (6, 51), (7, 71), (8, 81), (9, 68), (10, 109), (11, 88), (12, 83), (13, 93), (14, 255), (15, 143), (16, 151)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 3, 4, 1, 4, 1), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.67
+Symbols:  17 [(0, 39), (1, 65), (2, 61), (3, 64), (4, 61), (5, 57), (6, 51), (7, 67), (8, 76), (9, 67), (10, 107), (11, 90), (12, 78), (13, 85), (14, 246), (15, 136), (16, 146)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.9
+Symbols:  17 [(0, 39), (1, 71), (2, 64), (3, 71), (4, 60), (5, 55), (6, 51), (7, 73), (8, 81), (9, 68), (10, 109), (11, 93), (12, 84), (13, 88), (14, 258), (15, 146), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Epoch time: 0m 44s
+------------------------------
+Epoch 3/9 (max_len=inf, data=110)
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.61
+Symbols:  17 [(0, 38), (1, 69), (2, 62), (3, 68), (4, 58), (5, 54), (6, 48), (7, 68), (8, 79), (9, 68), (10, 102), (11, 92), (12, 82), (13, 88), (14, 246), (15, 138), (16, 145)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 1.00
+Train acc: 94.55 (abduce 99.09)
+Hit samples:  109  Ave length:  15.06
+Symbols:  17 [(0, 41), (1, 73), (2, 66), (3, 71), (4, 63), (5, 60), (6, 55), (7, 78), (8, 83), (9, 73), (10, 114), (11, 97), (12, 88), (13, 95), (14, 270), (15, 154), (16, 160)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn perception with 1109 samples for 100 iterations, 0.9437188466149284, 4 epochs, take 26 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.08
+Symbols:  17 [(0, 40), (1, 69), (2, 61), (3, 68), (4, 61), (5, 58), (6, 50), (7, 73), (8, 83), (9, 70), (10, 109), (11, 91), (12, 84), (13, 91), (14, 259), (15, 147), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.94
+Symbols:  17 [(0, 41), (1, 70), (2, 63), (3, 67), (4, 59), (5, 58), (6, 54), (7, 72), (8, 79), (9, 72), (10, 110), (11, 94), (12, 86), (13, 89), (14, 259), (15, 145), (16, 151)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 3, 4, 1, 4, 1), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.02
+Symbols:  17 [(0, 40), (1, 70), (2, 63), (3, 69), (4, 61), (5, 59), (6, 53), (7, 73), (8, 83), (9, 71), (10, 108), (11, 94), (12, 86), (13, 93), (14, 265), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.98
+Symbols:  17 [(0, 40), (1, 69), (2, 61), (3, 67), (4, 59), (5, 54), (6, 51), (7, 67), (8, 80), (9, 68), (10, 104), (11, 89), (12, 81), (13, 90), (14, 254), (15, 144), (16, 150)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  15.0
+Symbols:  17 [(0, 40), (1, 65), (2, 59), (3, 66), (4, 59), (5, 58), (6, 53), (7, 71), (8, 82), (9, 70), (10, 106), (11, 89), (12, 85), (13, 90), (14, 257), (15, 145), (16, 150)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.19
+Symbols:  17 [(0, 40), (1, 70), (2, 61), (3, 68), (4, 61), (5, 57), (6, 53), (7, 72), (8, 83), (9, 71), (10, 108), (11, 94), (12, 85), (13, 92), (14, 263), (15, 149), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.69
+Symbols:  17 [(0, 38), (1, 66), (2, 59), (3, 67), (4, 57), (5, 55), (6, 49), (7, 72), (8, 80), (9, 63), (10, 101), (11, 87), (12, 82), (13, 87), (14, 251), (15, 137), (16, 147)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.96
+Symbols:  17 [(0, 38), (1, 70), (2, 64), (3, 67), (4, 63), (5, 56), (6, 51), (7, 76), (8, 82), (9, 69), (10, 111), (11, 92), (12, 85), (13, 88), (14, 260), (15, 144), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, -1, 3, 4, 1, 4, 1), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 91.82 (abduce 91.82)
+Hit samples:  101  Ave length:  15.04
+Symbols:  17 [(0, 39), (1, 65), (2, 58), (3, 68), (4, 57), (5, 52), (6, 51), (7, 70), (8, 79), (9, 69), (10, 104), (11, 89), (12, 84), (13, 85), (14, 258), (15, 146), (16, 145)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1101 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.84
+Symbols:  17 [(0, 38), (1, 69), (2, 61), (3, 66), (4, 59), (5, 55), (6, 51), (7, 69), (8, 77), (9, 65), (10, 103), (11, 90), (12, 79), (13, 88), (14, 255), (15, 141), (16, 148)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 1 sec.
+Epoch time: 0m 45s
+------------------------------
+Epoch 4/9 (max_len=inf, data=110)
+Train acc: 94.55 (abduce 97.27)
+Hit samples:  107  Ave length:  14.93
+Symbols:  17 [(0, 42), (1, 72), (2, 64), (3, 72), (4, 60), (5, 59), (6, 53), (7, 76), (8, 78), (9, 70), (10, 111), (11, 95), (12, 84), (13, 93), (14, 261), (15, 151), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 0.99
+Train acc: 93.64 (abduce 99.09)
+Hit samples:  109  Ave length:  15.06
+Symbols:  17 [(0, 41), (1, 73), (2, 66), (3, 71), (4, 63), (5, 60), (6, 55), (7, 78), (8, 83), (9, 73), (10, 115), (11, 96), (12, 89), (13, 95), (14, 270), (15, 154), (16, 159)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn perception with 1109 samples for 100 iterations, 0.9465233960142437, 4 epochs, take 33 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.9
+Symbols:  17 [(0, 40), (1, 71), (2, 64), (3, 69), (4, 58), (5, 57), (6, 53), (7, 70), (8, 80), (9, 70), (10, 109), (11, 90), (12, 82), (13, 92), (14, 258), (15, 148), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.02
+Symbols:  17 [(0, 40), (1, 68), (2, 63), (3, 70), (4, 60), (5, 56), (6, 53), (7, 76), (8, 81), (9, 69), (10, 109), (11, 92), (12, 83), (13, 92), (14, 261), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 68), (2, 62), (3, 71), (4, 61), (5, 52), (6, 55), (7, 76), (8, 80), (9, 70), (10, 114), (11, 90), (12, 81), (13, 91), (14, 262), (15, 148), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  14.57
+Symbols:  17 [(0, 38), (1, 61), (2, 58), (3, 69), (4, 54), (5, 55), (6, 51), (7, 73), (8, 81), (9, 64), (10, 102), (11, 86), (12, 80), (13, 86), (14, 241), (15, 139), (16, 148)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.04
+Symbols:  17 [(0, 40), (1, 69), (2, 63), (3, 70), (4, 59), (5, 56), (6, 54), (7, 75), (8, 81), (9, 71), (10, 108), (11, 91), (12, 85), (13, 93), (14, 259), (15, 149), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 69), (2, 64), (3, 71), (4, 60), (5, 55), (6, 53), (7, 73), (8, 82), (9, 69), (10, 111), (11, 89), (12, 83), (13, 93), (14, 259), (15, 149), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 90.91 (abduce 90.91)
+Hit samples:  100  Ave length:  14.94
+Symbols:  17 [(0, 39), (1, 61), (2, 59), (3, 66), (4, 57), (5, 54), (6, 51), (7, 70), (8, 79), (9, 67), (10, 98), (11, 89), (12, 80), (13, 91), (14, 249), (15, 139), (16, 145)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1100 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  14.87
+Symbols:  17 [(0, 39), (1, 70), (2, 66), (3, 72), (4, 61), (5, 57), (6, 51), (7, 75), (8, 79), (9, 67), (10, 112), (11, 90), (12, 82), (13, 92), (14, 260), (15, 148), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.94
+Symbols:  17 [(0, 40), (1, 70), (2, 61), (3, 71), (4, 59), (5, 53), (6, 51), (7, 73), (8, 79), (9, 69), (10, 109), (11, 90), (12, 83), (13, 90), (14, 260), (15, 146), (16, 150)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.13
+Symbols:  17 [(0, 41), (1, 71), (2, 64), (3, 71), (4, 61), (5, 56), (6, 55), (7, 76), (8, 81), (9, 71), (10, 111), (11, 94), (12, 85), (13, 94), (14, 265), (15, 151), (16, 157)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+              precision    recall  f1-score   support
+
+           0       0.93      0.99      0.96       364
+           1       0.96      0.97      0.97       500
+           2       1.00      0.98      0.99       509
+           3       0.86      0.96      0.91       568
+           4       1.00      0.98      0.99       516
+           5       0.97      0.99      0.98       520
+           6       0.99      0.97      0.98       553
+           7       0.99      0.97      0.98       578
+           8       0.98      0.98      0.98       529
+           9       0.99      0.98      0.98       563
+           +       1.00      0.98      0.99       971
+           -       1.00      0.99      0.99       830
+           *       1.00      1.00      1.00      1162
+           /       0.98      1.00      0.99       720
+           (       0.77      0.98      0.86      2100
+           )       0.98      0.70      0.82      2100
+           b       0.99      0.93      0.96      1037
+
+    accuracy                           0.94     14120
+   macro avg       0.96      0.96      0.96     14120
+weighted avg       0.95      0.94      0.94     14120
+
+     0    1    2    3    4    5    6    7    8    9    +    -    *    /     (     )    b
+0  255    0    0    0    0    1    0    0    0    0    0    0    0    0     0     0    0
+1    2  344    1    0    0    0    0    0    0    1    0    0    0    0     0     1    0
+2    1    3  352    1    0    0    0    0    0    0    0    0    0    0     0     0    0
+3    5    3    0  386    0    2    0    0    1    0    0    0    0    0     0     0    0
+4    2    1    0    0  358    1    1    0    0    0    0    0    0    0     0     0    0
+5    0    2    0    0    0  364    0    0    2    0    0    0    0    0     0     0    0
+6    0    2    0    7    0    0  381    0    0    0    0    0    0    0     0     0    0
+7    2    0    0    0    0    2    0  398    3    2    0    0    0    0     0     0    0
+8    2    0    0    0    0    0    2    0  366    0    0    0    0    0     0     0    2
+9    2    0    0    0    0    2    0    4    0  390    0    0    0    0     0     0    0
++    0    0    0    0    0    0    0    0    0    0  677    2    2    6     0     0    0
+-    0    0    0    0    0    0    0    0    0    0    1  583    0    1     0     0    0
+*    0    0    0    0    0    0    0    0    0    0    0    0  822    0     0     0    0
+/    0    0    0    0    0    0    0    0    0    0    0    0    0  509     0     0    0
+(    0    0    0    0    0    0    0    0    0    1    0    0    0    0  1462    23    0
+)    0    0    0    0    0    0    0    0    0    0    0    0    0    0   444  1043    0
+b    0    0    0   52    0    0    0    0    0    0    0    0    0    0     0     0  682
+result accuracy by length:
+3 ( 4%) 95.00
+5 ( 2%) 90.91
+7 ( 3%) 87.50
+9 ( 3%) 88.24
+11 ( 3%) 77.78
+13 ( 5%) 75.00
+15 ( 4%) 80.95
+17 ( 2%) 71.43
+19 ( 5%) 65.38
+21 ( 3%) 72.22
+23 ( 4%) 69.57
+25 ( 3%) 72.22
+27 ( 3%) 26.32
+29 ( 5%) 65.38
+31 ( 3%) 66.67
+33 ( 2%) 71.43
+35 ( 1%) 60.00
+37 ( 2%) 53.85
+39 ( 3%) 47.37
+41 ( 3%) 31.25
+43 ( 2%) 40.00
+45 ( 2%) 54.55
+47 ( 5%) 50.00
+49 ( 2%) 40.00
+51 ( 2%) 30.00
+53 ( 3%) 53.33
+55 ( 2%) 30.77
+57 ( 2%) 25.00
+59 ( 2%) 40.00
+61 ( 1%) 14.29
+63 ( 1%) 40.00
+result accuracy by symbol:
+( (91%) 58.18
+) (91%) 58.18
+* (82%) 56.57
++ (76%) 55.28
+- (70%) 54.87
+/ (67%) 57.28
+0 (47%) 54.39
+1 (59%) 55.59
+2 (62%) 57.28
+3 (64%) 55.34
+4 (62%) 54.30
+5 (63%) 56.35
+6 (63%) 56.77
+7 (67%) 55.21
+8 (62%) 56.62
+9 (65%) 57.59
+b (100%) 61.04
+result accuracy by digit:
+result accuracy by result:
+0 (23%) 73.91
+1 (14%) 68.12
+2 ( 9%) 62.22
+3 ( 3%) 62.50
+4 ( 3%) 72.22
+5 ( 3%) 87.50
+6 ( 3%) 58.82
+7 ( 1%) 50.00
+8 ( 2%) 70.00
+9 ( 1%) 37.50
+result accuracy by generalization:
+1 (20.83%) 75.00
+2 (23.33%) 79.46
+3 (18.33%) 61.36
+4 (18.33%) 53.41
+5 (19.17%) 30.43
+error cases:
+3b8 338 [1, -1, 1] [1, -1, 1] 3 None
+0b(1-2) 03(1-2( [1, -1, 4, 4, 1, 4, 4] [1, -1, 1, 4, 1, 4, 1] 0 None
+3b1b3 3b133 [1, 3, 1, -1, 3] [1, -1, 3, 1, 3] 1 None
+4b(4-7) 43(4-7) [1, -1, 4, 4, 1, 4, 4] [1, -1, 1, 4, 1, 4, 1] 0 None
+0-(5b2)b1 0-(532)b1 [1, 7, 4, 4, 1, 4, 4, -1, 7] [1, 7, 1, 4, 1, 4, 4, -1, 7] 0 None
+2*9*(6b6) 2*9*(6b6) [1, 3, 1, -1, 6, 6, 3, 6, 6] [1, 3, 1, 6, 3, 3, -1, 6, 6] 108 6
+(0+5-2b8)*9 (0+5-238)*9 [6, 2, 4, 2, 6, 4, 9, 6, 6, -1, 9] [1, 2, 4, 2, 9, 6, 4, 6, 4, -1, 9] 27 None
+(9b6+4)/(9*9) (9b6+4(/99*9) [4, 2, 4, 2, 7, 4, 4, -1, 10, 10, 7, 10, 10] [1, 2, 4, 2, 7, 4, 4, 10, 7, 7, -1, 10, 10] 1 None
+(5b4)*3*(2/8) (534)*3*(2/8( [2, 2, 5, 2, 2, 7, 5, -1, 10, 10, 7, 10, 10] [1, 2, 5, 2, 2, 7, 5, -1, 7, 10, 7, 10, 7] 12 None
+8+2b(8+(2+8)) 8+2b(8+(2/8(( [1, 3, 1, -1, 6, 6, 3, 9, 9, 6, 9, 9, 6] [1, 3, 1, -1, 3, 6, 3, 6, 9, 6, 9, 6, 3] 10 9
+val (Perception Acc=93.81, Head Acc=92.45, Result Acc=61.04)
+Epoch time: 1m 1s
+------------------------------
+Epoch 5/9 (max_len=inf, data=110)
+Train acc: 97.27 (abduce 98.18)
+Hit samples:  108  Ave length:  15.11
+Symbols:  17 [(0, 41), (1, 72), (2, 65), (3, 71), (4, 62), (5, 60), (6, 55), (7, 77), (8, 83), (9, 73), (10, 113), (11, 96), (12, 89), (13, 95), (14, 269), (15, 153), (16, 158)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 1.00
+Train acc: 92.73 (abduce 98.18)
+Hit samples:  108  Ave length:  15.07
+Symbols:  17 [(0, 41), (1, 71), (2, 67), (3, 72), (4, 64), (5, 57), (6, 53), (7, 77), (8, 84), (9, 71), (10, 117), (11, 92), (12, 86), (13, 96), (14, 268), (15, 154), (16, 158)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 7, 1, 4, 1, 4, 4, -1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn perception with 1108 samples for 100 iterations, 0.9436011353819573, 4 epochs, take 26 sec.
+Train acc: 90.91 (abduce 90.91)
+Hit samples:  100  Ave length:  15.0
+Symbols:  17 [(0, 39), (1, 65), (2, 58), (3, 68), (4, 56), (5, 53), (6, 52), (7, 70), (8, 77), (9, 67), (10, 104), (11, 87), (12, 79), (13, 88), (14, 249), (15, 141), (16, 147)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1100 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  15.04
+Symbols:  17 [(0, 40), (1, 68), (2, 59), (3, 70), (4, 58), (5, 52), (6, 52), (7, 73), (8, 80), (9, 67), (10, 111), (11, 86), (12, 78), (13, 90), (14, 254), (15, 144), (16, 152)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.0
+Symbols:  17 [(0, 40), (1, 69), (2, 62), (3, 71), (4, 59), (5, 55), (6, 54), (7, 72), (8, 81), (9, 68), (10, 112), (11, 90), (12, 81), (13, 90), (14, 256), (15, 146), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 90.91 (abduce 90.91)
+Hit samples:  100  Ave length:  14.88
+Symbols:  17 [(0, 40), (1, 64), (2, 57), (3, 70), (4, 56), (5, 53), (6, 52), (7, 69), (8, 75), (9, 67), (10, 107), (11, 84), (12, 78), (13, 88), (14, 246), (15, 136), (16, 146)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 2), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1100 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 91.82 (abduce 91.82)
+Hit samples:  101  Ave length:  15.16
+Symbols:  17 [(0, 39), (1, 62), (2, 61), (3, 69), (4, 60), (5, 56), (6, 55), (7, 73), (8, 75), (9, 68), (10, 107), (11, 90), (12, 79), (13, 91), (14, 252), (15, 144), (16, 150)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1101 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  15.06
+Symbols:  17 [(0, 39), (1, 64), (2, 62), (3, 70), (4, 58), (5, 54), (6, 53), (7, 72), (8, 81), (9, 67), (10, 110), (11, 87), (12, 81), (13, 90), (14, 255), (15, 143), (16, 150)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.88
+Symbols:  17 [(0, 40), (1, 64), (2, 59), (3, 71), (4, 59), (5, 53), (6, 53), (7, 73), (8, 80), (9, 68), (10, 110), (11, 87), (12, 79), (13, 90), (14, 255), (15, 141), (16, 151)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.02
+Symbols:  17 [(0, 40), (1, 69), (2, 61), (3, 71), (4, 60), (5, 53), (6, 53), (7, 73), (8, 82), (9, 69), (10, 113), (11, 89), (12, 81), (13, 90), (14, 258), (15, 146), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  15.14
+Symbols:  17 [(0, 39), (1, 69), (2, 62), (3, 71), (4, 62), (5, 53), (6, 52), (7, 73), (8, 80), (9, 68), (10, 110), (11, 93), (12, 83), (13, 88), (14, 258), (15, 146), (16, 152)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  15.08
+Symbols:  17 [(0, 41), (1, 65), (2, 59), (3, 70), (4, 59), (5, 54), (6, 55), (7, 74), (8, 80), (9, 70), (10, 112), (11, 89), (12, 81), (13, 90), (14, 257), (15, 145), (16, 152)]
+Head:  [((1, -1, 1), 20), ((1, -1, 3, 1, 3), 2), ((1, 3, 1, -1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, 3, 1, -1, 5, 6, 3, 6, 3), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Epoch time: 0m 47s
+------------------------------
+Epoch 6/9 (max_len=inf, data=110)
+Train acc: 94.55 (abduce 96.36)
+Hit samples:  106  Ave length:  14.75
+Symbols:  17 [(0, 40), (1, 66), (2, 61), (3, 71), (4, 59), (5, 57), (6, 53), (7, 77), (8, 83), (9, 68), (10, 110), (11, 91), (12, 83), (13, 91), (14, 255), (15, 145), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 0.99
+Train acc: 92.73 (abduce 99.09)
+Hit samples:  109  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 72), (2, 68), (3, 71), (4, 63), (5, 58), (6, 55), (7, 79), (8, 83), (9, 71), (10, 116), (11, 94), (12, 87), (13, 95), (14, 270), (15, 154), (16, 160)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 4), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 3, 4, 1, 4, 1), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn perception with 1109 samples for 100 iterations, 0.9466699284447434, 4 epochs, take 27 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.25
+Symbols:  17 [(0, 41), (1, 71), (2, 65), (3, 71), (4, 62), (5, 56), (6, 55), (7, 77), (8, 82), (9, 71), (10, 115), (11, 93), (12, 86), (13, 94), (14, 267), (15, 153), (16, 157)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.98
+Symbols:  17 [(0, 40), (1, 69), (2, 63), (3, 69), (4, 60), (5, 56), (6, 55), (7, 74), (8, 79), (9, 71), (10, 112), (11, 88), (12, 84), (13, 91), (14, 258), (15, 148), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.15
+Symbols:  17 [(0, 40), (1, 70), (2, 65), (3, 71), (4, 61), (5, 57), (6, 52), (7, 74), (8, 83), (9, 69), (10, 113), (11, 92), (12, 85), (13, 92), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.13
+Symbols:  17 [(0, 40), (1, 70), (2, 64), (3, 71), (4, 61), (5, 55), (6, 53), (7, 75), (8, 83), (9, 69), (10, 113), (11, 92), (12, 84), (13, 92), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 5, 3, 1, 3, -1, 5, 8, 5, 8, 5), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.04
+Symbols:  17 [(0, 40), (1, 70), (2, 63), (3, 68), (4, 60), (5, 54), (6, 54), (7, 75), (8, 82), (9, 66), (10, 111), (11, 89), (12, 82), (13, 93), (14, 259), (15, 145), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.81
+Symbols:  17 [(0, 40), (1, 64), (2, 64), (3, 70), (4, 60), (5, 56), (6, 51), (7, 71), (8, 82), (9, 66), (10, 109), (11, 87), (12, 82), (13, 91), (14, 253), (15, 143), (16, 151)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.04
+Symbols:  17 [(0, 40), (1, 70), (2, 65), (3, 71), (4, 62), (5, 57), (6, 53), (7, 75), (8, 82), (9, 69), (10, 113), (11, 92), (12, 85), (13, 92), (14, 263), (15, 149), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 4, 1), 1), ((1, 3, 1, 5, 3, -1, 5, 8, 5, 8, 5), 1)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.79
+Symbols:  17 [(0, 41), (1, 68), (2, 64), (3, 66), (4, 61), (5, 54), (6, 53), (7, 72), (8, 81), (9, 65), (10, 112), (11, 87), (12, 80), (13, 91), (14, 250), (15, 142), (16, 151)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.13
+Symbols:  17 [(0, 40), (1, 70), (2, 64), (3, 71), (4, 61), (5, 55), (6, 53), (7, 75), (8, 83), (9, 69), (10, 113), (11, 92), (12, 84), (13, 92), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.13
+Symbols:  17 [(0, 40), (1, 70), (2, 64), (3, 71), (4, 62), (5, 55), (6, 53), (7, 75), (8, 82), (9, 69), (10, 113), (11, 91), (12, 84), (13, 93), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 1 sec.
+Epoch time: 0m 46s
+------------------------------
+Epoch 7/9 (max_len=inf, data=110)
+Train acc: 96.36 (abduce 98.18)
+Hit samples:  108  Ave length:  15.04
+Symbols:  17 [(0, 41), (1, 71), (2, 66), (3, 72), (4, 62), (5, 58), (6, 53), (7, 77), (8, 85), (9, 71), (10, 115), (11, 94), (12, 87), (13, 94), (14, 269), (15, 151), (16, 158)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 5, 2, -1, 9, 12, 9, 12, 9), 2)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 0.99
+Train acc: 94.55 (abduce 99.09)
+Hit samples:  109  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 72), (2, 67), (3, 72), (4, 63), (5, 59), (6, 55), (7, 79), (8, 82), (9, 71), (10, 115), (11, 93), (12, 87), (13, 96), (14, 270), (15, 154), (16, 161)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn perception with 1109 samples for 100 iterations, 0.9446169444268424, 4 epochs, take 28 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  15.02
+Symbols:  17 [(0, 40), (1, 68), (2, 61), (3, 69), (4, 59), (5, 55), (6, 54), (7, 70), (8, 80), (9, 68), (10, 109), (11, 89), (12, 81), (13, 89), (14, 256), (15, 146), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  14.85
+Symbols:  17 [(0, 40), (1, 68), (2, 66), (3, 72), (4, 60), (5, 56), (6, 52), (7, 73), (8, 83), (9, 67), (10, 111), (11, 87), (12, 83), (13, 94), (14, 259), (15, 147), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, -1, 1, 4, 1, 4, 4), 1), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.79
+Symbols:  17 [(0, 39), (1, 63), (2, 61), (3, 69), (4, 57), (5, 53), (6, 54), (7, 70), (8, 80), (9, 68), (10, 107), (11, 86), (12, 80), (13, 89), (14, 256), (15, 142), (16, 149)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 2), ((1, 3, 1, -1, 3, 6, 3, 6, 6), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 91.82 (abduce 91.82)
+Hit samples:  101  Ave length:  14.82
+Symbols:  17 [(0, 39), (1, 64), (2, 61), (3, 69), (4, 56), (5, 52), (6, 52), (7, 66), (8, 80), (9, 65), (10, 107), (11, 80), (12, 79), (13, 89), (14, 248), (15, 142), (16, 148)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1101 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.71
+Symbols:  17 [(0, 39), (1, 66), (2, 61), (3, 65), (4, 59), (5, 54), (6, 53), (7, 71), (8, 78), (9, 67), (10, 105), (11, 86), (12, 81), (13, 85), (14, 252), (15, 140), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.06
+Symbols:  17 [(0, 40), (1, 69), (2, 64), (3, 69), (4, 60), (5, 57), (6, 54), (7, 73), (8, 82), (9, 69), (10, 109), (11, 91), (12, 85), (13, 92), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.85
+Symbols:  17 [(0, 40), (1, 67), (2, 62), (3, 70), (4, 60), (5, 54), (6, 52), (7, 72), (8, 81), (9, 68), (10, 109), (11, 88), (12, 81), (13, 91), (14, 252), (15, 144), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 4), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.89
+Symbols:  17 [(0, 39), (1, 69), (2, 63), (3, 69), (4, 59), (5, 57), (6, 53), (7, 74), (8, 80), (9, 68), (10, 109), (11, 90), (12, 83), (13, 91), (14, 261), (15, 145), (16, 153)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 9, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.06
+Symbols:  17 [(0, 40), (1, 69), (2, 64), (3, 69), (4, 59), (5, 57), (6, 54), (7, 73), (8, 83), (9, 69), (10, 109), (11, 91), (12, 85), (13, 92), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.92
+Symbols:  17 [(0, 40), (1, 69), (2, 62), (3, 71), (4, 61), (5, 55), (6, 53), (7, 73), (8, 81), (9, 69), (10, 112), (11, 88), (12, 82), (13, 91), (14, 258), (15, 146), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Epoch time: 0m 47s
+------------------------------
+Epoch 8/9 (max_len=inf, data=110)
+Train acc: 96.36 (abduce 98.18)
+Hit samples:  108  Ave length:  15.04
+Symbols:  17 [(0, 41), (1, 71), (2, 66), (3, 72), (4, 61), (5, 59), (6, 54), (7, 77), (8, 84), (9, 71), (10, 114), (11, 93), (12, 87), (13, 95), (14, 269), (15, 151), (16, 159)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 1.00
+Train acc: 93.64 (abduce 99.09)
+Hit samples:  109  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 73), (2, 67), (3, 72), (4, 62), (5, 58), (6, 56), (7, 79), (8, 82), (9, 71), (10, 115), (11, 93), (12, 87), (13, 96), (14, 270), (15, 154), (16, 161)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn perception with 1109 samples for 100 iterations, 0.9460507971146269, 4 epochs, take 28 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.25
+Symbols:  17 [(0, 40), (1, 70), (2, 64), (3, 71), (4, 62), (5, 55), (6, 52), (7, 74), (8, 82), (9, 69), (10, 111), (11, 92), (12, 84), (13, 93), (14, 263), (15, 149), (16, 155)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 93.64 (abduce 93.64)
+Hit samples:  103  Ave length:  14.71
+Symbols:  17 [(0, 37), (1, 69), (2, 59), (3, 71), (4, 57), (5, 51), (6, 53), (7, 75), (8, 78), (9, 64), (10, 110), (11, 84), (12, 77), (13, 90), (14, 252), (15, 138), (16, 150)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1103 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 91.82 (abduce 91.82)
+Hit samples:  101  Ave length:  14.88
+Symbols:  17 [(0, 38), (1, 67), (2, 59), (3, 68), (4, 58), (5, 53), (6, 49), (7, 69), (8, 78), (9, 66), (10, 105), (11, 89), (12, 76), (13, 86), (14, 250), (15, 144), (16, 148)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1101 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.96
+Symbols:  17 [(0, 39), (1, 71), (2, 61), (3, 71), (4, 60), (5, 53), (6, 54), (7, 75), (8, 82), (9, 69), (10, 112), (11, 90), (12, 81), (13, 92), (14, 259), (15, 147), (16, 155)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.96
+Symbols:  17 [(0, 39), (1, 71), (2, 61), (3, 71), (4, 62), (5, 53), (6, 53), (7, 75), (8, 81), (9, 69), (10, 112), (11, 90), (12, 81), (13, 91), (14, 259), (15, 147), (16, 156)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.0
+Symbols:  17 [(0, 39), (1, 70), (2, 61), (3, 69), (4, 60), (5, 55), (6, 53), (7, 72), (8, 81), (9, 69), (10, 109), (11, 88), (12, 82), (13, 91), (14, 259), (15, 147), (16, 155)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  14.9
+Symbols:  17 [(0, 39), (1, 70), (2, 60), (3, 70), (4, 61), (5, 55), (6, 54), (7, 75), (8, 81), (9, 68), (10, 112), (11, 89), (12, 81), (13, 92), (14, 257), (15, 147), (16, 154)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.19
+Symbols:  17 [(0, 41), (1, 72), (2, 62), (3, 71), (4, 62), (5, 54), (6, 54), (7, 75), (8, 81), (9, 71), (10, 115), (11, 90), (12, 83), (13, 93), (14, 263), (15, 151), (16, 157)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 92.73 (abduce 92.73)
+Hit samples:  102  Ave length:  15.04
+Symbols:  17 [(0, 38), (1, 68), (2, 60), (3, 69), (4, 60), (5, 51), (6, 53), (7, 74), (8, 79), (9, 67), (10, 109), (11, 88), (12, 78), (13, 90), (14, 254), (15, 144), (16, 152)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 3), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1102 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.0
+Symbols:  17 [(0, 40), (1, 71), (2, 62), (3, 72), (4, 61), (5, 53), (6, 53), (7, 74), (8, 81), (9, 69), (10, 112), (11, 90), (12, 81), (13, 92), (14, 261), (15, 147), (16, 156)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Epoch time: 0m 46s
+------------------------------
+Epoch 9/9 (max_len=inf, data=110)
+Train acc: 93.64 (abduce 97.27)
+Hit samples:  107  Ave length:  14.94
+Symbols:  17 [(0, 40), (1, 72), (2, 62), (3, 71), (4, 63), (5, 56), (6, 53), (7, 75), (8, 84), (9, 71), (10, 114), (11, 91), (12, 84), (13, 93), (14, 263), (15, 149), (16, 158)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2), ((1, 7, 1, 4, 1, 4, 4, -1, 9, 7, 9, 12, 9, 12, 7), 2)]
+Semantics: 17/15/0 (total/solved/learn).
+Symbol-00: 0 0 1.00
+Symbol-01: 1 (incr 0) 1.00
+Symbol-02: 2 (incr (incr 0)) 1.00
+Symbol-03: 3 (incr (incr (incr 0))) 1.00
+Symbol-04: 4 (incr (incr (incr (incr 0)))) 1.00
+Symbol-05: 5 (incr (incr (incr (incr (incr 0))))) 1.00
+Symbol-06: 6 (incr (incr (incr (incr (incr (incr 0)))))) 1.00
+Symbol-07: 7 (incr (incr (incr (incr (incr (incr (incr 0))))))) 1.00
+Symbol-08: 8 (incr (incr (incr (incr (incr (incr (incr (incr 0)))))))) 1.00
+Symbol-09: 9 (incr (incr (incr (incr (incr (incr (incr (incr (incr 0))))))))) 1.00
+Symbol-10: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-11: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) 0.99
+Symbol-12: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $0 ($2 $0 (decr0 $1)))))))))) 1.00
+Symbol-13: fn (lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 0 (incr (if0 $0 0 ($2 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0) $0)))))))))) 1.00
+Symbol-14: None 1.00
+Symbol-15: None 1.00
+Symbol-16: fn (lambda (lambda (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (decr0 ($2 $1 (decr0 $0)))))))))) $1 $0)))) 0.99
+Train acc: 97.27 (abduce 99.09)
+Hit samples:  109  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 73), (2, 67), (3, 72), (4, 62), (5, 58), (6, 55), (7, 79), (8, 83), (9, 71), (10, 114), (11, 94), (12, 87), (13, 96), (14, 270), (15, 154), (16, 161)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn perception with 1109 samples for 100 iterations, 0.9442620920294792, 4 epochs, take 27 sec.
+Train acc: 97.27 (abduce 97.27)
+Hit samples:  107  Ave length:  15.13
+Symbols:  17 [(0, 41), (1, 72), (2, 65), (3, 70), (4, 61), (5, 56), (6, 56), (7, 77), (8, 82), (9, 71), (10, 111), (11, 94), (12, 86), (13, 95), (14, 270), (15, 154), (16, 158)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1107 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.04
+Symbols:  17 [(0, 40), (1, 71), (2, 65), (3, 70), (4, 61), (5, 57), (6, 52), (7, 74), (8, 83), (9, 69), (10, 109), (11, 92), (12, 85), (13, 94), (14, 266), (15, 150), (16, 156)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.25
+Symbols:  17 [(0, 41), (1, 72), (2, 65), (3, 70), (4, 61), (5, 56), (6, 54), (7, 76), (8, 83), (9, 71), (10, 111), (11, 94), (12, 86), (13, 95), (14, 270), (15, 154), (16, 157)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.19
+Symbols:  17 [(0, 40), (1, 70), (2, 63), (3, 70), (4, 61), (5, 54), (6, 52), (7, 74), (8, 82), (9, 69), (10, 109), (11, 91), (12, 84), (13, 93), (14, 264), (15, 150), (16, 154)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 1), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  14.85
+Symbols:  17 [(0, 39), (1, 68), (2, 61), (3, 67), (4, 60), (5, 53), (6, 51), (7, 76), (8, 81), (9, 68), (10, 109), (11, 89), (12, 80), (13, 87), (14, 255), (15, 145), (16, 155)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 3), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, 7, 1, 4, 1, 4, 4, -1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 94.55 (abduce 94.55)
+Hit samples:  104  Ave length:  15.08
+Symbols:  17 [(0, 41), (1, 70), (2, 61), (3, 68), (4, 60), (5, 55), (6, 52), (7, 73), (8, 82), (9, 70), (10, 110), (11, 89), (12, 83), (13, 93), (14, 260), (15, 148), (16, 153)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 4), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1104 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 95.45 (abduce 95.45)
+Hit samples:  105  Ave length:  15.13
+Symbols:  17 [(0, 41), (1, 68), (2, 64), (3, 69), (4, 60), (5, 56), (6, 54), (7, 75), (8, 82), (9, 70), (10, 110), (11, 92), (12, 85), (13, 93), (14, 266), (15, 150), (16, 154)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1105 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  14.91
+Symbols:  17 [(0, 40), (1, 68), (2, 65), (3, 71), (4, 62), (5, 57), (6, 52), (7, 75), (8, 81), (9, 68), (10, 111), (11, 89), (12, 84), (13, 94), (14, 262), (15, 146), (16, 155)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 3), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 3, 1, 5, 3, -1, 5), 2), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, 2, 9, 2, 5, 2, 5, 2, 2, -1, 9, 12, 9, 12, 9), 2)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 1 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.25
+Symbols:  17 [(0, 41), (1, 72), (2, 65), (3, 70), (4, 62), (5, 56), (6, 54), (7, 76), (8, 82), (9, 71), (10, 111), (11, 94), (12, 86), (13, 95), (14, 270), (15, 154), (16, 157)]
+Head:  [((1, -1, 1), 19), ((1, 3, 1, -1, 3), 2), ((1, -1, 3, 1, 3), 1), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 2), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+Train acc: 96.36 (abduce 96.36)
+Hit samples:  106  Ave length:  15.02
+Symbols:  17 [(0, 41), (1, 71), (2, 62), (3, 70), (4, 60), (5, 54), (6, 55), (7, 74), (8, 83), (9, 71), (10, 111), (11, 91), (12, 83), (13, 93), (14, 265), (15, 151), (16, 157)]
+Head:  [((1, -1, 1), 20), ((1, 3, 1, -1, 3), 3), ((1, -1, 1, 4, 1, 4, 1), 5), ((1, 2, 5, 2, 2, -1, 5), 1), ((1, 3, 1, -1, 5, 3, 5), 1), ((1, 3, 1, 5, 3, -1, 5), 1), ((1, 3, 1, -1, 3, 6, 3, 6, 3), 3), ((1, -1, 1, 4, 7, 4, 4, 1, 7), 3), ((1, 3, 1, -1, 3, 6, 3, 8, 6, 8, 3), 2), ((1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1), 1)]
+Learn syntax with 1106 samples for 100 iterations, 5 epochs, take 0 sec.
+              precision    recall  f1-score   support
+
+           0       0.92      0.99      0.96       364
+           1       0.96      0.98      0.97       500
+           2       1.00      0.98      0.99       509
+           3       0.86      0.96      0.91       568
+           4       1.00      0.98      0.99       516
+           5       0.97      0.99      0.98       520
+           6       0.99      0.97      0.98       553
+           7       0.99      0.97      0.98       578
+           8       0.98      0.98      0.98       529
+           9       0.99      0.98      0.98       563
+           +       1.00      0.98      0.99       971
+           -       1.00      1.00      1.00       830
+           *       1.00      0.99      1.00      1162
+           /       0.98      1.00      0.99       720
+           (       0.77      0.98      0.86      2100
+           )       0.98      0.70      0.82      2100
+           b       0.99      0.93      0.96      1037
+
+    accuracy                           0.94     14120
+   macro avg       0.96      0.96      0.96     14120
+weighted avg       0.95      0.94      0.94     14120
+
+     0    1    2    3    4    5    6    7    8    9    +    -    *    /     (     )    b
+0  255    0    0    0    0    1    0    0    0    0    0    0    0    0     0     0    0
+1    2  345    1    0    0    0    0    0    0    1    0    0    0    0     0     1    0
+2    1    3  351    1    0    0    0    0    0    0    0    0    0    0     0     0    0
+3    5    3    0  386    0    2    0    0    1    0    0    0    0    0     0     0    0
+4    2    1    0    0  358    1    1    0    0    0    0    0    0    0     0     0    0
+5    0    2    0    0    0  364    0    0    2    0    0    0    0    0     0     0    0
+6    0    2    0    7    0    0  381    0    0    0    0    0    0    0     0     0    0
+7    2    0    0    0    0    2    0  398    3    2    0    0    0    0     0     0    0
+8    4    0    0    0    0    0    2    0  366    0    0    0    0    0     0     0    0
+9    2    0    0    0    0    2    0    4    0  390    0    0    0    0     0     0    0
++    0    0    0    0    0    0    0    0    0    0  676    2    2    7     0     0    0
+-    0    0    0    0    0    0    0    0    0    0    1  584    0    1     0     0    0
+*    0    0    0    0    0    0    0    0    0    0    0    0  817    0     0     0    5
+/    0    0    0    0    0    0    0    0    0    0    0    0    0  509     0     0    0
+(    0    0    0    0    0    0    0    0    0    0    0    0    0    0  1463    23    0
+)    0    0    0    0    0    0    0    0    0    0    0    0    0    0   444  1043    0
+b    0    0    0   52    0    0    0    0    0    0    0    0    0    0     0     0  682
+result accuracy by length:
+3 ( 4%) 95.00
+5 ( 2%) 90.91
+7 ( 3%) 87.50
+9 ( 3%) 88.24
+11 ( 3%) 77.78
+13 ( 5%) 75.00
+15 ( 4%) 80.95
+17 ( 2%) 71.43
+19 ( 5%) 61.54
+21 ( 3%) 77.78
+23 ( 4%) 69.57
+25 ( 3%) 72.22
+27 ( 3%) 36.84
+29 ( 5%) 65.38
+31 ( 3%) 66.67
+33 ( 2%) 71.43
+35 ( 1%) 60.00
+37 ( 2%) 46.15
+39 ( 3%) 52.63
+41 ( 3%) 31.25
+43 ( 2%) 40.00
+45 ( 2%) 45.45
+47 ( 5%) 50.00
+49 ( 2%) 40.00
+51 ( 2%) 50.00
+53 ( 3%) 60.00
+55 ( 2%) 38.46
+57 ( 2%) 33.33
+59 ( 2%) 40.00
+61 ( 1%) 14.29
+63 ( 1%) 20.00
+result accuracy by symbol:
+( (91%) 59.32
+) (91%) 59.32
+* (82%) 57.32
++ (76%) 56.64
+- (70%) 56.64
+/ (67%) 58.20
+0 (47%) 57.02
+1 (59%) 56.64
+2 (62%) 58.28
+3 (64%) 56.63
+4 (62%) 54.97
+5 (63%) 57.98
+6 (63%) 58.09
+7 (67%) 57.36
+8 (62%) 56.62
+9 (65%) 58.23
+b (100%) 62.08
+result accuracy by digit:
+result accuracy by result:
+0 (23%) 77.39
+1 (14%) 66.67
+2 ( 9%) 66.67
+3 ( 3%) 62.50
+4 ( 3%) 72.22
+5 ( 3%) 87.50
+6 ( 3%) 58.82
+7 ( 1%) 50.00
+8 ( 2%) 90.00
+9 ( 1%) 37.50
+result accuracy by generalization:
+1 (20.83%) 77.00
+2 (23.33%) 79.46
+3 (18.33%) 61.36
+4 (18.33%) 57.95
+5 (19.17%) 29.35
+error cases:
+3b8 338 [1, -1, 1] [1, -1, 1] 3 None
+0b(1-2) 03(1-2( [1, -1, 4, 4, 1, 4, 4] [1, -1, 1, 4, 1, 4, 1] 0 None
+3b1b3 3b133 [1, 3, 1, -1, 3] [1, -1, 3, 1, 3] 1 None
+4b(4-7) 43(4-7) [1, -1, 4, 4, 1, 4, 4] [1, -1, 1, 4, 1, 4, 1] 0 None
+0-(5b2)b1 0-(532)b1 [1, 7, 4, 4, 1, 4, 4, -1, 7] [1, 7, 1, 4, 1, 4, 4, -1, 7] 0 None
+2*9*(6b6) 2*9*(6b6) [1, 3, 1, -1, 6, 6, 3, 6, 6] [1, 3, 1, 6, 3, 3, -1, 6, 6] 108 6
+(0+5-2b8)*9 (0+5-238)*9 [6, 2, 4, 2, 6, 4, 9, 6, 6, -1, 9] [1, 2, 4, 2, 9, 6, 4, 6, 4, -1, 9] 27 None
+(9b6+4)/(9*9) (9b6+4(/(9b9) [4, 2, 4, 2, 7, 4, 4, -1, 10, 10, 7, 10, 10] [1, 2, 4, 2, 7, 4, 4, -1, 7, 10, 7, 10, 7] 1 2
+(5b4)*3*(2/8) (534)*3*(2/8( [2, 2, 5, 2, 2, 7, 5, -1, 10, 10, 7, 10, 10] [1, 2, 5, 2, 2, 7, 5, -1, 7, 10, 7, 10, 7] 12 None
+8+2b(8+(2+8)) 8+2b(8+(2/8(( [1, 3, 1, -1, 6, 6, 3, 9, 9, 6, 9, 9, 6] [1, 3, 1, -1, 3, 6, 3, 6, 9, 6, 9, 3, 3] 10 9
+val (Perception Acc=93.77, Head Acc=93.44, Result Acc=62.08)
+Epoch time: 0m 51s
+------------------------------
+Evaluate on test set...
+              precision    recall  f1-score   support
+
+           0       0.93      0.99      0.96       366
+           1       0.95      0.97      0.96       503
+           2       0.97      0.97      0.97       511
+           3       0.99      0.96      0.98       568
+           4       0.98      0.97      0.98       517
+           5       0.99      0.98      0.99       520
+           6       0.99      0.98      0.98       555
+           7       0.97      0.98      0.98       581
+           8       0.92      0.99      0.95       534
+           9       0.99      0.98      0.98       565
+           +       1.00      0.98      0.99       971
+           -       0.99      0.99      0.99       830
+           *       0.99      1.00      1.00      1162
+           /       0.99      1.00      0.99       720
+           (       0.75      0.98      0.85      2100
+           )       0.98      0.67      0.80      2100
+           b       1.00      0.97      0.98      1047
+
+    accuracy                           0.94     14150
+   macro avg       0.96      0.96      0.96     14150
+weighted avg       0.95      0.94      0.93     14150
+
+     0    1    2    3    4    5    6    7    8    9    +    -    *    /     (    )    b
+0  257    0    0    0    0    0    0    0    0    0    0    0    0    0     0    0    0
+1    3  343    0    0    0    0    0    2    1    1    0    0    0    0     1    0    0
+2    2    0  349    1    0    0    1    1    0    1    0    0    0    0     0    0    0
+3    3    4    1  386    0    2    0    1    0    0    0    0    0    0     0    0    0
+4    2    1    0    0  355    0    0    4    0    0    0    0    0    0     0    0    0
+5    0    0    1    1    0  360    2    0    1    0    0    0    0    0     0    0    0
+6    3    0    0    0    2    0  383    0    1    0    0    0    0    0     0    0    0
+7    2    2    0    0    1    0    0  402    0    0    0    0    0    0     0    0    0
+8    0    0    2    0    0    0    0    0  372    0    0    0    0    0     0    0    0
+9    0    3    2    0    0    0    0    0    0  392    0    0    0    0     0    0    0
++    0    0    0    0    0    0    0    0    0    0  669    7    4    4     0    0    0
+-    0    0    0    0    0    0    0    0    0    0    1  583    0    1     0    0    0
+*    0    0    0    0    0    0    0    0    0    0    0    0  819    0     0    0    1
+/    0    0    0    0    0    0    0    0    0    0    0    0    0  508     0    0    0
+(    0    0    0    0    0    0    0    0    0    0    0    0    0    0  1460   23    0
+)    0    1    0    0    0    0    0    0    0    0    0    0    0    0   485  997    0
+b    0    0    0    0    0    0    0    0   24    0    0    0    0    0     0    0  715
+result accuracy by length:
+3 ( 6%) 96.67
+5 ( 2%) 81.82
+7 ( 3%) 93.75
+9 ( 3%) 94.12
+11 ( 3%) 83.33
+13 ( 4%) 79.17
+15 ( 4%) 90.48
+17 ( 2%) 85.71
+19 ( 5%) 88.46
+21 ( 3%) 88.89
+23 ( 4%) 82.61
+25 ( 3%) 66.67
+27 ( 3%) 63.16
+29 ( 5%) 65.38
+31 ( 3%) 100.00
+33 ( 2%) 85.71
+35 ( 1%) 60.00
+37 ( 2%) 69.23
+39 ( 3%) 47.37
+41 ( 3%) 62.50
+43 ( 2%) 40.00
+45 ( 2%) 90.91
+47 ( 4%) 45.83
+49 ( 2%) 60.00
+51 ( 2%) 60.00
+53 ( 3%) 53.33
+55 ( 2%) 46.15
+57 ( 2%) 50.00
+59 ( 2%) 30.00
+61 ( 1%) 14.29
+63 ( 1%) 60.00
+result accuracy by symbol:
+( (89%) 70.23
+) (89%) 70.23
+* (80%) 69.44
++ (75%) 66.40
+- (69%) 66.37
+/ (65%) 67.80
+0 (46%) 69.57
+1 (58%) 67.13
+2 (62%) 68.75
+3 (63%) 66.34
+4 (61%) 66.34
+5 (62%) 68.40
+6 (62%) 65.57
+7 (67%) 68.39
+8 (62%) 68.73
+9 (64%) 68.24
+b (100%) 72.45
+result accuracy by digit:
+result accuracy by result:
+0 (23%) 89.74
+1 (14%) 69.44
+2 ( 9%) 82.61
+3 ( 3%) 81.25
+4 ( 3%) 66.67
+5 ( 3%) 87.50
+6 ( 3%) 68.42
+7 ( 1%) 66.67
+8 ( 2%) 100.00
+9 ( 1%) 37.50
+result accuracy by generalization:
+1 (22.45%) 85.45
+2 (22.86%) 83.93
+3 (17.96%) 81.82
+4 (17.96%) 65.91
+5 (18.78%) 40.22
+error cases:
+7b6 0b6 [1, -1, 1] [1, -1, 1] 6 0
+3+9b7 3+2b7 [1, 3, 1, -1, 3] [1, 3, 1, -1, 3] 7 5
+3b8/1 388/1 [1, -1, 3, 1, 3] [1, 3, 1, -1, 3] 3 None
+1*6b(1b6) 1*6b(186) [1, 3, 1, -1, 6, 6, 3, 6, 6] [1, 3, 1, -1, 3, 6, 3, 6, 3] 1 None
+3b5b5-2 0b5b5-2 [1, 3, 1, 5, 3, -1, 5] [1, 3, 1, 5, 3, -1, 5] 1 0
+3*(8*(8b8)) 3*(8*(888() [1, -1, 4, 4, 1, 7, 7, 4, 7, 7, 4] [1, -1, 1, 4, 1, 4, 7, 4, 7, 1, 1] 192 None
+1+3b6+(0+8) 1+386+(0+8) [1, 3, 1, 5, 3, -1, 8, 8, 5, 8, 8] [1, 5, 3, 1, 3, -1, 5, 8, 5, 8, 5] 12 None
+4/((3/7b2)/8) 7/((3/7b2)/8) [1, -1, 10, 7, 5, 7, 5, 10, 7, 7, 1, 10, 10] [1, -1, 1, 1, 5, 7, 5, 10, 7, 7, 1, 10, 1] 4 7
+4*(2b4-3/7) 4*(2b4-3/7) [1, -1, 6, 4, 6, 4, 1, 8, 6, 8, 6] [1, 4, 1, 1, 6, 4, -1, 8, 6, 8, 6] 4 3
+3*(4b6)*(4*7) 3*(4b6)*(4*7) [1, 7, 4, 4, 1, 4, 4, -1, 10, 10, 7, 10, 10] [1, 4, 1, 1, 7, 4, 4, -1, 7, 10, 7, 10, 7] 336 168
+test (Perception Acc=93.57, Head Acc=94.05, Result Acc=72.45)

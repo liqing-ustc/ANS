@@ -136,9 +136,11 @@ class Semantics(object):
     def check_solved(self):
         if self.arity == 0 and self.likelihood > 0. and self.program is not None:
             self.solved = True
-        elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80 and '#' not in str(self.program):
+        elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80 and '#' not in str(self.program): # for + -
             self.solved = True
         elif self.arity > 0 and self.likelihood >= 0.95 and len(set(self.examples)) >= 80 and '#' in str(self.program):
+            self.solved = True
+        elif self.fewshot and self.likelihood >= 0.95 and len(set(self.examples)) >= 10:
             self.solved = True
         else:
             self.solved = False
