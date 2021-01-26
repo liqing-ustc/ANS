@@ -6,20 +6,16 @@ export CUDA_VISIBLE_DEVICES=0
 # mkdir -p $OUTPUT
 # python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
-export OUTPUT=./outputs/exp_curriculum/seed_${seed}/
-mkdir -p $OUTPUT
-python train.py --curriculum --output-dir=$OUTPUT --seed=$seed --resume=$OUTPUT/model_005.p >>$OUTPUT/main.log
-
 # # Learn 1 meaning
 # # Learn syntax
 # export OUTPUT=./outputs/exp_perception_semantics_curriculum/seed_${seed}/
 # mkdir -p $OUTPUT
 # python train.py --perception --semantics --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
-# # Learn perception
-# export OUTPUT=./outputs/exp_syntax_semantics_curriculum/seed_${seed}/
-# mkdir -p $OUTPUT
-# python train.py --syntax --semantics --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
+# Learn perception
+export OUTPUT=./outputs/exp_syntax_semantics_curriculum/seed_${seed}/
+mkdir -p $OUTPUT
+python train.py --syntax --semantics --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
 # # Learn semantics
 # export OUTPUT=./outputs/exp_perception_syntax_curriculum/seed_${seed}/
