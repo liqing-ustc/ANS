@@ -79,7 +79,7 @@ def evaluate(model, dataloader):
     res_pred_all = np.concatenate(res_pred_all, axis=0)
     res_all = np.concatenate(res_all, axis=0)
     result_acc = (res_pred_all == res_all).mean()
-    print("Percentage of None res: %.2f"%(np.mean(res_pred_all == None) * 100))
+    print("Percentage of None result: %.2f"%(np.mean(res_pred_all == None) * 100))
     
 
     pred = [y for x in expr_pred_all for y in x]
