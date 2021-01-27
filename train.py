@@ -147,7 +147,7 @@ def evaluate(model, dataloader):
     
     print("error cases:")
     errors = np.arange(len(res_all))[res_all != res_pred_all]
-    for i in errors[:10]:
+    for i in errors[:20]:
         expr_pred = ''.join(map(ID2SYM, expr_pred_all[i]))
         print(expr_all[i], expr_pred, dep_all[i], dep_pred_all[i], res_all[i], res_pred_all[i])
         # tree = draw_parse(expr_pred, dep_pred_all[i])
