@@ -75,10 +75,10 @@ class AST: # Abstract Syntax Tree
             et = self.abduce_perception(y)
             if et is not None:
                 return et
-        elif module == 'syntax':
-            et = self.abduce_syntax(y)
-            if et is not None:
-                return et
+        # elif module == 'syntax':
+        #     et = self.abduce_syntax(y)
+        #     if et is not None:
+        #         return et
         
         return None
 
