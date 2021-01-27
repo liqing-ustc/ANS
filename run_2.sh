@@ -2,9 +2,9 @@ export seed=2
 export CUDA_VISIBLE_DEVICES=2
 
 # # Learn 3 meanings
-# export OUTPUT=./outputs/exp_curriculum/seed_${seed}/
-# mkdir -p $OUTPUT
-# python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
+export OUTPUT=./outputs/exp_curriculum/seed_${seed}/
+mkdir -p $OUTPUT
+python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
 # # Learn 1 meaning
 # # Learn syntax
@@ -25,9 +25,9 @@ export CUDA_VISIBLE_DEVICES=2
 
 # Learn 2 meanings
 # Learn perception and syntax
-export OUTPUT=./outputs/exp_semantics_curriculum/seed_${seed}/
-mkdir -p $OUTPUT
-python train.py --semantics --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
+# export OUTPUT=./outputs/exp_semantics_curriculum/seed_${seed}/
+# mkdir -p $OUTPUT
+# python train.py --semantics --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
 # # Learn syntax and semantics
 # export OUTPUT=./outputs/exp_perception_curriculum/seed_${seed}/

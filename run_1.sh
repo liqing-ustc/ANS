@@ -2,9 +2,9 @@ export seed=1
 export CUDA_VISIBLE_DEVICES=1
 
 # # Learn 3 meanings
-# export OUTPUT=./outputs/exp_curriculum/seed_${seed}/
-# mkdir -p $OUTPUT
-# python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
+export OUTPUT=./outputs/exp_curriculum/seed_${seed}/
+mkdir -p $OUTPUT
+python train.py --curriculum --output-dir=$OUTPUT --seed=$seed >$OUTPUT/main.log
 
 # # Learn 1 meaning
 # # Learn syntax
