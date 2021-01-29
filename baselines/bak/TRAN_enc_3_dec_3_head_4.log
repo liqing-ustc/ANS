@@ -1,0 +1,5218 @@
+train: 11170 val: 4900 test: 48910
+Namespace(curriculum=True, dec_layers=3, dropout=0.1, emb_dim=128, enc_layers=3, epochs=1000, epochs_eval=100, hid_dim=128, nhead=4, output_dir='outputs/', perception=False, perception_pretrain='data/perception-pretrain/model.pth.tar_78.2_match', resume=None, seed=0, semantics=False, seq2seq='TRAN', syntax=False)
+NeuralArithmetic(
+  (embedding_in): EmbeddingIn(
+    (image_encoder): ClusteringModel(
+      (backbone): ResNet(
+        (conv1): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (layer1): Sequential(
+          (0): BasicBlock(
+            (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential()
+          )
+          (1): BasicBlock(
+            (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential()
+          )
+        )
+        (layer2): Sequential(
+          (0): BasicBlock(
+            (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential(
+              (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+              (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (1): BasicBlock(
+            (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential()
+          )
+        )
+        (layer3): Sequential(
+          (0): BasicBlock(
+            (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential(
+              (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+              (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (1): BasicBlock(
+            (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential()
+          )
+        )
+        (layer4): Sequential(
+          (0): BasicBlock(
+            (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential(
+              (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+              (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            )
+          )
+          (1): BasicBlock(
+            (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+            (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            (shortcut): Sequential()
+          )
+        )
+        (avgpool): AdaptiveAvgPool2d(output_size=(1, 1))
+      )
+      (cluster_head): ModuleList(
+        (0): Linear(in_features=512, out_features=16, bias=True)
+      )
+    )
+    (embedding): Embedding(19, 128)
+  )
+  (seq2seq): TransformerModel(
+    (enc_pos_embedding): LearnedPositionalEncoding(
+      (dropout): Dropout(p=0.1, inplace=False)
+      (pe): Embedding(100, 128)
+    )
+    (dec_pos_embedding): LearnedPositionalEncoding(
+      (dropout): Dropout(p=0.1, inplace=False)
+      (pe): Embedding(100, 128)
+    )
+    (transformer): Transformer(
+      (encoder): TransformerEncoder(
+        (layers): ModuleList(
+          (0): TransformerEncoderLayer(
+            (self_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (linear1): Linear(in_features=128, out_features=128, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+            (linear2): Linear(in_features=128, out_features=128, bias=True)
+            (norm1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (dropout1): Dropout(p=0.1, inplace=False)
+            (dropout2): Dropout(p=0.1, inplace=False)
+          )
+          (1): TransformerEncoderLayer(
+            (self_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (linear1): Linear(in_features=128, out_features=128, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+            (linear2): Linear(in_features=128, out_features=128, bias=True)
+            (norm1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (dropout1): Dropout(p=0.1, inplace=False)
+            (dropout2): Dropout(p=0.1, inplace=False)
+          )
+          (2): TransformerEncoderLayer(
+            (self_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (linear1): Linear(in_features=128, out_features=128, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+            (linear2): Linear(in_features=128, out_features=128, bias=True)
+            (norm1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (dropout1): Dropout(p=0.1, inplace=False)
+            (dropout2): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (norm): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+      )
+      (decoder): TransformerDecoder(
+        (layers): ModuleList(
+          (0): TransformerDecoderLayer(
+            (self_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (multihead_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (linear1): Linear(in_features=128, out_features=128, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+            (linear2): Linear(in_features=128, out_features=128, bias=True)
+            (norm1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm3): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (dropout1): Dropout(p=0.1, inplace=False)
+            (dropout2): Dropout(p=0.1, inplace=False)
+            (dropout3): Dropout(p=0.1, inplace=False)
+          )
+          (1): TransformerDecoderLayer(
+            (self_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (multihead_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (linear1): Linear(in_features=128, out_features=128, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+            (linear2): Linear(in_features=128, out_features=128, bias=True)
+            (norm1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm3): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (dropout1): Dropout(p=0.1, inplace=False)
+            (dropout2): Dropout(p=0.1, inplace=False)
+            (dropout3): Dropout(p=0.1, inplace=False)
+          )
+          (2): TransformerDecoderLayer(
+            (self_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (multihead_attn): MultiheadAttention(
+              (out_proj): _LinearWithBias(in_features=128, out_features=128, bias=True)
+            )
+            (linear1): Linear(in_features=128, out_features=128, bias=True)
+            (dropout): Dropout(p=0.1, inplace=False)
+            (linear2): Linear(in_features=128, out_features=128, bias=True)
+            (norm1): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (norm3): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+            (dropout1): Dropout(p=0.1, inplace=False)
+            (dropout2): Dropout(p=0.1, inplace=False)
+            (dropout3): Dropout(p=0.1, inplace=False)
+          )
+        )
+        (norm): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (embedding_out): Embedding(13, 128)
+    (classifier_out): Linear(in_features=128, out_features=13, bias=True)
+  )
+)
+Curriculum: [(0, 1), (1, 3), (20, 7), (40, 11), (60, 15), (80, inf)]
+------------------------------
+Epoch 0/999 (max_len=1, data=1000, lr=0.001)
+Train acc: 9.45, loss: 1.692 
+Epoch time: 0m 2s
+------------------------------
+Epoch 1/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 34.00, loss: 1.252 
+Epoch time: 0m 4s
+------------------------------
+Epoch 2/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 40.98, loss: 1.092 
+Epoch time: 0m 4s
+------------------------------
+Epoch 3/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 45.62, loss: 0.985 
+Epoch time: 0m 4s
+------------------------------
+Epoch 4/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 49.94, loss: 0.900 
+Epoch time: 0m 4s
+------------------------------
+Epoch 5/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 50.33, loss: 0.869 
+Epoch time: 0m 4s
+------------------------------
+Epoch 6/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 55.45, loss: 0.780 
+Epoch time: 0m 4s
+------------------------------
+Epoch 7/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 56.82, loss: 0.754 
+Epoch time: 0m 4s
+------------------------------
+Epoch 8/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 56.91, loss: 0.726 
+Epoch time: 0m 4s
+------------------------------
+Epoch 9/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 58.43, loss: 0.701 
+Epoch time: 0m 4s
+------------------------------
+Epoch 10/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 55.28, loss: 0.712 
+Epoch time: 0m 4s
+------------------------------
+Epoch 11/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 55.75, loss: 0.695 
+Epoch time: 0m 4s
+------------------------------
+Epoch 12/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 58.60, loss: 0.681 
+Epoch time: 0m 4s
+------------------------------
+Epoch 13/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 58.44, loss: 0.652 
+Epoch time: 0m 4s
+------------------------------
+Epoch 14/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 59.05, loss: 0.655 
+Epoch time: 0m 4s
+------------------------------
+Epoch 15/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 61.00, loss: 0.605 
+Epoch time: 0m 4s
+------------------------------
+Epoch 16/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 61.03, loss: 0.603 
+Epoch time: 0m 4s
+------------------------------
+Epoch 17/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 61.95, loss: 0.587 
+Epoch time: 0m 4s
+------------------------------
+Epoch 18/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 61.58, loss: 0.592 
+Epoch time: 0m 4s
+------------------------------
+Epoch 19/999 (max_len=3, data=2170, lr=0.001)
+Train acc: 61.28, loss: 0.567 
+Epoch time: 0m 4s
+------------------------------
+Epoch 20/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 50.25, loss: 0.913 
+Epoch time: 0m 9s
+------------------------------
+Epoch 21/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 50.85, loss: 0.863 
+Epoch time: 0m 9s
+------------------------------
+Epoch 22/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 51.22, loss: 0.864 
+Epoch time: 0m 9s
+------------------------------
+Epoch 23/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 49.88, loss: 0.882 
+Epoch time: 0m 9s
+------------------------------
+Epoch 24/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 50.32, loss: 0.860 
+Epoch time: 0m 9s
+------------------------------
+Epoch 25/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 52.78, loss: 0.831 
+Epoch time: 0m 8s
+------------------------------
+Epoch 26/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 52.35, loss: 0.805 
+Epoch time: 0m 9s
+------------------------------
+Epoch 27/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 51.06, loss: 0.823 
+Epoch time: 0m 9s
+------------------------------
+Epoch 28/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 50.51, loss: 0.862 
+Epoch time: 0m 9s
+------------------------------
+Epoch 29/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 52.76, loss: 0.794 
+Epoch time: 0m 9s
+------------------------------
+Epoch 30/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 52.64, loss: 0.782 
+Epoch time: 0m 9s
+------------------------------
+Epoch 31/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 52.47, loss: 0.789 
+Epoch time: 0m 9s
+------------------------------
+Epoch 32/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 52.72, loss: 0.780 
+Epoch time: 0m 9s
+------------------------------
+Epoch 33/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 53.00, loss: 0.774 
+Epoch time: 0m 9s
+------------------------------
+Epoch 34/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 53.16, loss: 0.766 
+Epoch time: 0m 9s
+------------------------------
+Epoch 35/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 53.99, loss: 0.755 
+Epoch time: 0m 9s
+------------------------------
+Epoch 36/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 54.04, loss: 0.746 
+Epoch time: 0m 9s
+------------------------------
+Epoch 37/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 53.02, loss: 0.759 
+Epoch time: 0m 9s
+------------------------------
+Epoch 38/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 54.03, loss: 0.747 
+Epoch time: 0m 9s
+------------------------------
+Epoch 39/999 (max_len=7, data=3387, lr=0.001)
+Train acc: 54.13, loss: 0.738 
+Epoch time: 0m 9s
+------------------------------
+Epoch 40/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 45.48, loss: 0.960 
+Epoch time: 0m 16s
+------------------------------
+Epoch 41/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 44.54, loss: 0.963 
+Epoch time: 0m 15s
+------------------------------
+Epoch 42/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 47.12, loss: 0.906 
+Epoch time: 0m 16s
+------------------------------
+Epoch 43/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 48.14, loss: 0.887 
+Epoch time: 0m 15s
+------------------------------
+Epoch 44/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 48.69, loss: 0.884 
+Epoch time: 0m 15s
+------------------------------
+Epoch 45/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 47.63, loss: 0.905 
+Epoch time: 0m 15s
+------------------------------
+Epoch 46/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 45.57, loss: 0.941 
+Epoch time: 0m 15s
+------------------------------
+Epoch 47/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 47.17, loss: 0.904 
+Epoch time: 0m 15s
+------------------------------
+Epoch 48/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 47.29, loss: 0.898 
+Epoch time: 0m 15s
+------------------------------
+Epoch 49/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 48.54, loss: 0.859 
+Epoch time: 0m 16s
+------------------------------
+Epoch 50/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 48.80, loss: 0.868 
+Epoch time: 0m 16s
+------------------------------
+Epoch 51/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 47.94, loss: 0.866 
+Epoch time: 0m 15s
+------------------------------
+Epoch 52/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 48.76, loss: 0.847 
+Epoch time: 0m 16s
+------------------------------
+Epoch 53/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 50.19, loss: 0.835 
+Epoch time: 0m 15s
+------------------------------
+Epoch 54/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 49.84, loss: 0.838 
+Epoch time: 0m 16s
+------------------------------
+Epoch 55/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 49.46, loss: 0.825 
+Epoch time: 0m 15s
+------------------------------
+Epoch 56/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 50.47, loss: 0.816 
+Epoch time: 0m 16s
+------------------------------
+Epoch 57/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 49.99, loss: 0.824 
+Epoch time: 0m 16s
+------------------------------
+Epoch 58/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 51.24, loss: 0.801 
+Epoch time: 0m 15s
+------------------------------
+Epoch 59/999 (max_len=11, data=4683, lr=0.001)
+Train acc: 50.09, loss: 0.815 
+Epoch time: 0m 16s
+------------------------------
+Epoch 60/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 46.28, loss: 0.933 
+Epoch time: 0m 25s
+------------------------------
+Epoch 61/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 46.23, loss: 0.933 
+Epoch time: 0m 25s
+------------------------------
+Epoch 62/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 47.39, loss: 0.916 
+Epoch time: 0m 25s
+------------------------------
+Epoch 63/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 46.75, loss: 0.922 
+Epoch time: 0m 25s
+------------------------------
+Epoch 64/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 46.63, loss: 0.923 
+Epoch time: 0m 25s
+------------------------------
+Epoch 65/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 46.41, loss: 0.937 
+Epoch time: 0m 25s
+------------------------------
+Epoch 66/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 46.71, loss: 0.919 
+Epoch time: 0m 25s
+------------------------------
+Epoch 67/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 45.69, loss: 0.926 
+Epoch time: 0m 25s
+------------------------------
+Epoch 68/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 47.17, loss: 0.924 
+Epoch time: 0m 25s
+------------------------------
+Epoch 69/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 47.05, loss: 0.911 
+Epoch time: 0m 25s
+------------------------------
+Epoch 70/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 48.23, loss: 0.901 
+Epoch time: 0m 25s
+------------------------------
+Epoch 71/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 48.76, loss: 0.879 
+Epoch time: 0m 25s
+------------------------------
+Epoch 72/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 48.16, loss: 0.884 
+Epoch time: 0m 25s
+------------------------------
+Epoch 73/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.00, loss: 0.863 
+Epoch time: 0m 25s
+------------------------------
+Epoch 74/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.14, loss: 0.866 
+Epoch time: 0m 25s
+------------------------------
+Epoch 75/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.25, loss: 0.873 
+Epoch time: 0m 25s
+------------------------------
+Epoch 76/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.19, loss: 0.861 
+Epoch time: 0m 25s
+------------------------------
+Epoch 77/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.46, loss: 0.849 
+Epoch time: 0m 25s
+------------------------------
+Epoch 78/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.56, loss: 0.844 
+Epoch time: 0m 25s
+------------------------------
+Epoch 79/999 (max_len=15, data=6058, lr=0.001)
+Train acc: 49.51, loss: 0.849 
+Epoch time: 0m 25s
+------------------------------
+Epoch 80/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 43.02, loss: 1.061 
+Epoch time: 1m 25s
+------------------------------
+Epoch 81/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.39, loss: 1.037 
+Epoch time: 1m 24s
+------------------------------
+Epoch 82/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 43.99, loss: 1.045 
+Epoch time: 1m 25s
+------------------------------
+Epoch 83/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.46, loss: 1.025 
+Epoch time: 1m 25s
+------------------------------
+Epoch 84/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.22, loss: 1.037 
+Epoch time: 1m 24s
+------------------------------
+Epoch 85/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 43.82, loss: 1.034 
+Epoch time: 1m 25s
+------------------------------
+Epoch 86/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.72, loss: 1.019 
+Epoch time: 1m 24s
+------------------------------
+Epoch 87/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.24, loss: 1.031 
+Epoch time: 1m 25s
+------------------------------
+Epoch 88/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 43.92, loss: 1.030 
+Epoch time: 1m 25s
+------------------------------
+Epoch 89/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 43.57, loss: 1.037 
+Epoch time: 1m 24s
+------------------------------
+Epoch 90/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.03, loss: 1.033 
+Epoch time: 1m 25s
+------------------------------
+Epoch 91/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.84, loss: 1.011 
+Epoch time: 1m 25s
+------------------------------
+Epoch 92/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.70, loss: 1.009 
+Epoch time: 1m 25s
+------------------------------
+Epoch 93/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.13, loss: 1.024 
+Epoch time: 1m 25s
+------------------------------
+Epoch 94/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.19, loss: 1.020 
+Epoch time: 1m 24s
+------------------------------
+Epoch 95/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.18, loss: 1.020 
+Epoch time: 1m 24s
+------------------------------
+Epoch 96/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.22, loss: 1.000 
+Epoch time: 1m 24s
+------------------------------
+Epoch 97/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.46, loss: 1.021 
+Epoch time: 1m 25s
+------------------------------
+Epoch 98/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.88, loss: 1.006 
+Epoch time: 1m 24s
+------------------------------
+Epoch 99/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.65, loss: 1.004 
+result accuracy by length:
+1 ( 2%) 85.00
+3 ( 2%) 69.00
+5 ( 2%) 31.78
+7 ( 4%) 25.33
+9 ( 4%) 29.15
+11 ( 3%) 27.27
+13 ( 4%) 23.15
+15 ( 4%) 26.73
+17 ( 4%) 20.39
+19 ( 4%) 27.94
+21 ( 4%) 27.78
+23 ( 4%) 28.78
+25 ( 4%) 19.00
+27 ( 4%) 32.02
+29 ( 3%) 28.80
+31 ( 3%) 23.21
+33 ( 2%) 19.29
+35 ( 2%) 23.29
+37 ( 2%) 23.93
+39 ( 3%) 19.74
+41 ( 3%) 26.85
+43 ( 2%) 21.01
+45 ( 2%) 19.64
+47 ( 2%) 27.27
+49 ( 2%) 23.24
+51 ( 2%) 26.52
+53 ( 2%) 23.13
+55 ( 2%) 16.81
+57 ( 2%) 21.68
+59 ( 2%) 17.76
+61 ( 1%) 26.56
+63 ( 0%) 28.57
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 24.65
+) (91%) 24.65
+* (87%) 23.72
++ (84%) 23.42
+- (77%) 26.98
+/ (76%) 25.94
+0 (52%) 28.63
+1 (60%) 26.00
+2 (61%) 25.15
+3 (62%) 24.85
+4 (61%) 24.08
+5 (62%) 24.22
+6 (62%) 23.88
+7 (63%) 23.99
+8 (64%) 23.15
+9 (63%) 22.70
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 90.00
+4 ( 0%) 100.00
+5 ( 0%) 100.00
+6 ( 0%)  0.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 60.00
+result accuracy by result:
+0 (21%) 95.52
+1 (10%) 34.08
+2 ( 4%)  7.58
+3 ( 2%)  8.89
+4 ( 2%)  9.02
+5 ( 2%) 18.00
+6 ( 2%)  5.22
+7 ( 2%)  9.73
+8 ( 2%)  9.40
+9 ( 1%) 18.60
+result accuracy by generalization:
+1 (22.45%) 45.27
+2 (22.96%) 39.02
+3 (22.53%)  2.26
+4 (15.82%) 44.90
+5 (16.24%)  1.13
+error cases:
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=26.92)
+Epoch time: 1m 40s
+------------------------------
+Epoch 100/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.30, loss: 0.989 
+Epoch time: 1m 24s
+------------------------------
+Epoch 101/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.82, loss: 0.999 
+Epoch time: 1m 24s
+------------------------------
+Epoch 102/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.44, loss: 0.990 
+Epoch time: 1m 25s
+------------------------------
+Epoch 103/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.11, loss: 0.993 
+Epoch time: 1m 25s
+------------------------------
+Epoch 104/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.99, loss: 0.986 
+Epoch time: 1m 25s
+------------------------------
+Epoch 105/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.35, loss: 0.987 
+Epoch time: 1m 24s
+------------------------------
+Epoch 106/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.43, loss: 0.983 
+Epoch time: 1m 25s
+------------------------------
+Epoch 107/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.31, loss: 0.989 
+Epoch time: 1m 24s
+------------------------------
+Epoch 108/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.62, loss: 0.979 
+Epoch time: 1m 25s
+------------------------------
+Epoch 109/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.76, loss: 0.975 
+Epoch time: 1m 24s
+------------------------------
+Epoch 110/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.87, loss: 0.965 
+Epoch time: 1m 25s
+------------------------------
+Epoch 111/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.33, loss: 0.975 
+Epoch time: 1m 25s
+------------------------------
+Epoch 112/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.68, loss: 0.991 
+Epoch time: 1m 24s
+------------------------------
+Epoch 113/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.06, loss: 0.987 
+Epoch time: 1m 25s
+------------------------------
+Epoch 114/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.83, loss: 0.967 
+Epoch time: 1m 24s
+------------------------------
+Epoch 115/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.02, loss: 0.964 
+Epoch time: 1m 24s
+------------------------------
+Epoch 116/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.99, loss: 0.960 
+Epoch time: 1m 23s
+------------------------------
+Epoch 117/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.97, loss: 0.959 
+Epoch time: 1m 24s
+------------------------------
+Epoch 118/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.00, loss: 0.959 
+Epoch time: 1m 25s
+------------------------------
+Epoch 119/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 44.46, loss: 1.006 
+Epoch time: 1m 24s
+------------------------------
+Epoch 120/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 45.82, loss: 0.970 
+Epoch time: 1m 25s
+------------------------------
+Epoch 121/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.39, loss: 0.956 
+Epoch time: 1m 25s
+------------------------------
+Epoch 122/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.37, loss: 0.945 
+Epoch time: 1m 25s
+------------------------------
+Epoch 123/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.13, loss: 0.948 
+Epoch time: 1m 24s
+------------------------------
+Epoch 124/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.55, loss: 0.946 
+Epoch time: 1m 25s
+------------------------------
+Epoch 125/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.89, loss: 0.936 
+Epoch time: 1m 24s
+------------------------------
+Epoch 126/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.75, loss: 0.944 
+Epoch time: 1m 24s
+------------------------------
+Epoch 127/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.82, loss: 0.942 
+Epoch time: 1m 25s
+------------------------------
+Epoch 128/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.49, loss: 0.952 
+Epoch time: 1m 25s
+------------------------------
+Epoch 129/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.89, loss: 0.939 
+Epoch time: 1m 25s
+------------------------------
+Epoch 130/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.90, loss: 0.930 
+Epoch time: 1m 24s
+------------------------------
+Epoch 131/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.62, loss: 0.936 
+Epoch time: 1m 24s
+------------------------------
+Epoch 132/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.28, loss: 0.930 
+Epoch time: 1m 25s
+------------------------------
+Epoch 133/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.93, loss: 0.926 
+Epoch time: 1m 25s
+------------------------------
+Epoch 134/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 46.99, loss: 0.930 
+Epoch time: 1m 25s
+------------------------------
+Epoch 135/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.11, loss: 0.927 
+Epoch time: 1m 25s
+------------------------------
+Epoch 136/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.26, loss: 0.917 
+Epoch time: 1m 25s
+------------------------------
+Epoch 137/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.47, loss: 0.914 
+Epoch time: 1m 25s
+------------------------------
+Epoch 138/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.77, loss: 0.913 
+Epoch time: 1m 25s
+------------------------------
+Epoch 139/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.64, loss: 0.917 
+Epoch time: 1m 24s
+------------------------------
+Epoch 140/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.52, loss: 0.915 
+Epoch time: 1m 24s
+------------------------------
+Epoch 141/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 47.76, loss: 0.910 
+Epoch time: 1m 25s
+------------------------------
+Epoch 142/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.04, loss: 0.900 
+Epoch time: 1m 25s
+------------------------------
+Epoch 143/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.14, loss: 0.902 
+Epoch time: 1m 25s
+------------------------------
+Epoch 144/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.04, loss: 0.898 
+Epoch time: 1m 25s
+------------------------------
+Epoch 145/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.44, loss: 0.890 
+Epoch time: 1m 24s
+------------------------------
+Epoch 146/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.45, loss: 0.897 
+Epoch time: 1m 24s
+------------------------------
+Epoch 147/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.87, loss: 0.886 
+Epoch time: 1m 25s
+------------------------------
+Epoch 148/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.64, loss: 0.885 
+Epoch time: 1m 24s
+------------------------------
+Epoch 149/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.68, loss: 0.889 
+Epoch time: 1m 24s
+------------------------------
+Epoch 150/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.59, loss: 0.895 
+Epoch time: 1m 25s
+------------------------------
+Epoch 151/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.81, loss: 0.893 
+Epoch time: 1m 24s
+------------------------------
+Epoch 152/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.57, loss: 0.882 
+Epoch time: 1m 24s
+------------------------------
+Epoch 153/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.92, loss: 0.884 
+Epoch time: 1m 24s
+------------------------------
+Epoch 154/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 48.87, loss: 0.872 
+Epoch time: 1m 24s
+------------------------------
+Epoch 155/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.51, loss: 0.869 
+Epoch time: 1m 24s
+------------------------------
+Epoch 156/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.42, loss: 0.870 
+Epoch time: 1m 25s
+------------------------------
+Epoch 157/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.78, loss: 0.859 
+Epoch time: 1m 24s
+------------------------------
+Epoch 158/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.36, loss: 0.870 
+Epoch time: 1m 25s
+------------------------------
+Epoch 159/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.34, loss: 0.874 
+Epoch time: 1m 24s
+------------------------------
+Epoch 160/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.37, loss: 0.872 
+Epoch time: 1m 24s
+------------------------------
+Epoch 161/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.43, loss: 0.874 
+Epoch time: 1m 24s
+------------------------------
+Epoch 162/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.74, loss: 0.853 
+Epoch time: 1m 24s
+------------------------------
+Epoch 163/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.90, loss: 0.861 
+Epoch time: 1m 25s
+------------------------------
+Epoch 164/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.69, loss: 0.858 
+Epoch time: 1m 24s
+------------------------------
+Epoch 165/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.23, loss: 0.853 
+Epoch time: 1m 25s
+------------------------------
+Epoch 166/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.77, loss: 0.846 
+Epoch time: 1m 25s
+------------------------------
+Epoch 167/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.19, loss: 0.846 
+Epoch time: 1m 24s
+------------------------------
+Epoch 168/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 49.62, loss: 0.847 
+Epoch time: 1m 24s
+------------------------------
+Epoch 169/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.12, loss: 0.842 
+Epoch time: 1m 24s
+------------------------------
+Epoch 170/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.59, loss: 0.834 
+Epoch time: 1m 24s
+------------------------------
+Epoch 171/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.52, loss: 0.842 
+Epoch time: 1m 24s
+------------------------------
+Epoch 172/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.48, loss: 0.836 
+Epoch time: 1m 24s
+------------------------------
+Epoch 173/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.26, loss: 0.839 
+Epoch time: 1m 24s
+------------------------------
+Epoch 174/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.54, loss: 0.837 
+Epoch time: 1m 24s
+------------------------------
+Epoch 175/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.90, loss: 0.830 
+Epoch time: 1m 24s
+------------------------------
+Epoch 176/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.98, loss: 0.825 
+Epoch time: 1m 25s
+------------------------------
+Epoch 177/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.46, loss: 0.830 
+Epoch time: 1m 25s
+------------------------------
+Epoch 178/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.98, loss: 0.822 
+Epoch time: 1m 24s
+------------------------------
+Epoch 179/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.91, loss: 0.819 
+Epoch time: 1m 24s
+------------------------------
+Epoch 180/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.59, loss: 0.829 
+Epoch time: 1m 25s
+------------------------------
+Epoch 181/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.20, loss: 0.812 
+Epoch time: 1m 24s
+------------------------------
+Epoch 182/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.72, loss: 0.823 
+Epoch time: 1m 25s
+------------------------------
+Epoch 183/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.38, loss: 0.817 
+Epoch time: 1m 24s
+------------------------------
+Epoch 184/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.26, loss: 0.815 
+Epoch time: 1m 25s
+------------------------------
+Epoch 185/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 50.60, loss: 0.830 
+Epoch time: 1m 24s
+------------------------------
+Epoch 186/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.29, loss: 0.807 
+Epoch time: 1m 25s
+------------------------------
+Epoch 187/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.39, loss: 0.810 
+Epoch time: 1m 25s
+------------------------------
+Epoch 188/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.15, loss: 0.799 
+Epoch time: 1m 24s
+------------------------------
+Epoch 189/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.56, loss: 0.803 
+Epoch time: 1m 24s
+------------------------------
+Epoch 190/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.01, loss: 0.799 
+Epoch time: 1m 25s
+------------------------------
+Epoch 191/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.56, loss: 0.804 
+Epoch time: 1m 25s
+------------------------------
+Epoch 192/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.00, loss: 0.796 
+Epoch time: 1m 25s
+------------------------------
+Epoch 193/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.05, loss: 0.801 
+Epoch time: 1m 25s
+------------------------------
+Epoch 194/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.81, loss: 0.808 
+Epoch time: 1m 24s
+------------------------------
+Epoch 195/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.06, loss: 0.793 
+Epoch time: 1m 24s
+------------------------------
+Epoch 196/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.03, loss: 0.785 
+Epoch time: 1m 25s
+------------------------------
+Epoch 197/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 51.85, loss: 0.795 
+Epoch time: 1m 25s
+------------------------------
+Epoch 198/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.33, loss: 0.789 
+Epoch time: 1m 25s
+------------------------------
+Epoch 199/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.69, loss: 0.784 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 89.00
+5 ( 2%) 40.31
+7 ( 4%) 31.88
+9 ( 4%) 32.16
+11 ( 3%) 32.95
+13 ( 4%) 23.15
+15 ( 4%) 30.20
+17 ( 4%) 21.36
+19 ( 4%) 31.86
+21 ( 4%) 26.26
+23 ( 4%) 28.78
+25 ( 4%) 20.50
+27 ( 4%) 33.00
+29 ( 3%) 32.46
+31 ( 3%) 26.19
+33 ( 2%) 21.43
+35 ( 2%) 22.60
+37 ( 2%) 24.79
+39 ( 3%) 18.42
+41 ( 3%) 24.83
+43 ( 2%) 21.74
+45 ( 2%) 20.54
+47 ( 2%) 25.76
+49 ( 2%) 21.83
+51 ( 2%) 25.76
+53 ( 2%) 24.63
+55 ( 2%) 15.13
+57 ( 2%) 23.78
+59 ( 2%) 17.76
+61 ( 1%) 26.56
+63 ( 0%) 28.57
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 25.88
+) (91%) 25.88
+* (87%) 24.99
++ (84%) 24.81
+- (77%) 28.69
+/ (76%) 27.11
+0 (52%) 29.73
+1 (60%) 27.68
+2 (61%) 26.38
+3 (62%) 26.03
+4 (61%) 25.67
+5 (62%) 25.52
+6 (62%) 24.83
+7 (63%) 25.09
+8 (64%) 23.89
+9 (63%) 23.75
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 90.00
+3 ( 0%) 100.00
+4 ( 0%) 100.00
+5 ( 0%) 100.00
+6 ( 0%)  0.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 94.48
+1 (10%) 28.46
+2 ( 4%) 18.69
+3 ( 2%) 19.26
+4 ( 2%) 14.29
+5 ( 2%) 25.00
+6 ( 2%) 12.17
+7 ( 2%) 31.86
+8 ( 2%) 17.09
+9 ( 1%) 36.05
+result accuracy by generalization:
+1 (22.45%) 54.73
+2 (22.96%) 38.67
+3 (22.53%)  2.26
+4 (15.82%) 43.87
+5 (16.24%)  1.51
+error cases:
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=28.86)
+Epoch time: 1m 40s
+------------------------------
+Epoch 200/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.51, loss: 0.780 
+Epoch time: 1m 24s
+------------------------------
+Epoch 201/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.75, loss: 0.778 
+Epoch time: 1m 24s
+------------------------------
+Epoch 202/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.92, loss: 0.777 
+Epoch time: 1m 25s
+------------------------------
+Epoch 203/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.06, loss: 0.771 
+Epoch time: 1m 24s
+------------------------------
+Epoch 204/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.68, loss: 0.779 
+Epoch time: 1m 24s
+------------------------------
+Epoch 205/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.18, loss: 0.768 
+Epoch time: 1m 25s
+------------------------------
+Epoch 206/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.84, loss: 0.771 
+Epoch time: 1m 25s
+------------------------------
+Epoch 207/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.74, loss: 0.772 
+Epoch time: 1m 25s
+------------------------------
+Epoch 208/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.05, loss: 0.775 
+Epoch time: 1m 25s
+------------------------------
+Epoch 209/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 52.46, loss: 0.769 
+Epoch time: 1m 25s
+------------------------------
+Epoch 210/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.23, loss: 0.757 
+Epoch time: 1m 25s
+------------------------------
+Epoch 211/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.19, loss: 0.758 
+Epoch time: 1m 25s
+------------------------------
+Epoch 212/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.27, loss: 0.751 
+Epoch time: 1m 24s
+------------------------------
+Epoch 213/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.66, loss: 0.751 
+Epoch time: 1m 24s
+------------------------------
+Epoch 214/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.78, loss: 0.753 
+Epoch time: 1m 24s
+------------------------------
+Epoch 215/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.35, loss: 0.752 
+Epoch time: 1m 25s
+------------------------------
+Epoch 216/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.35, loss: 0.752 
+Epoch time: 1m 25s
+------------------------------
+Epoch 217/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.68, loss: 0.745 
+Epoch time: 1m 24s
+------------------------------
+Epoch 218/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.85, loss: 0.750 
+Epoch time: 1m 24s
+------------------------------
+Epoch 219/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.72, loss: 0.741 
+Epoch time: 1m 25s
+------------------------------
+Epoch 220/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.80, loss: 0.745 
+Epoch time: 1m 25s
+------------------------------
+Epoch 221/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.78, loss: 0.746 
+Epoch time: 1m 24s
+------------------------------
+Epoch 222/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.62, loss: 0.740 
+Epoch time: 1m 25s
+------------------------------
+Epoch 223/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.94, loss: 0.734 
+Epoch time: 1m 25s
+------------------------------
+Epoch 224/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.90, loss: 0.734 
+Epoch time: 1m 25s
+------------------------------
+Epoch 225/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.79, loss: 0.750 
+Epoch time: 1m 25s
+------------------------------
+Epoch 226/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.80, loss: 0.752 
+Epoch time: 1m 25s
+------------------------------
+Epoch 227/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.36, loss: 0.734 
+Epoch time: 1m 24s
+------------------------------
+Epoch 228/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.10, loss: 0.735 
+Epoch time: 1m 24s
+------------------------------
+Epoch 229/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.94, loss: 0.737 
+Epoch time: 1m 25s
+------------------------------
+Epoch 230/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 53.97, loss: 0.741 
+Epoch time: 1m 25s
+------------------------------
+Epoch 231/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.49, loss: 0.732 
+Epoch time: 1m 25s
+------------------------------
+Epoch 232/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.51, loss: 0.723 
+Epoch time: 1m 24s
+------------------------------
+Epoch 233/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.77, loss: 0.723 
+Epoch time: 1m 25s
+------------------------------
+Epoch 234/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.73, loss: 0.717 
+Epoch time: 1m 24s
+------------------------------
+Epoch 235/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.88, loss: 0.714 
+Epoch time: 1m 25s
+------------------------------
+Epoch 236/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.83, loss: 0.717 
+Epoch time: 1m 25s
+------------------------------
+Epoch 237/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.77, loss: 0.723 
+Epoch time: 1m 25s
+------------------------------
+Epoch 238/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.19, loss: 0.711 
+Epoch time: 1m 25s
+------------------------------
+Epoch 239/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.37, loss: 0.710 
+Epoch time: 1m 25s
+------------------------------
+Epoch 240/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.14, loss: 0.713 
+Epoch time: 1m 25s
+------------------------------
+Epoch 241/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.79, loss: 0.721 
+Epoch time: 1m 25s
+------------------------------
+Epoch 242/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.14, loss: 0.713 
+Epoch time: 1m 24s
+------------------------------
+Epoch 243/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.53, loss: 0.703 
+Epoch time: 1m 25s
+------------------------------
+Epoch 244/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.25, loss: 0.717 
+Epoch time: 1m 25s
+------------------------------
+Epoch 245/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 54.44, loss: 0.727 
+Epoch time: 1m 26s
+------------------------------
+Epoch 246/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.52, loss: 0.704 
+Epoch time: 1m 25s
+------------------------------
+Epoch 247/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.09, loss: 0.707 
+Epoch time: 1m 25s
+------------------------------
+Epoch 248/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.04, loss: 0.694 
+Epoch time: 1m 25s
+------------------------------
+Epoch 249/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.06, loss: 0.689 
+Epoch time: 1m 24s
+------------------------------
+Epoch 250/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.03, loss: 0.694 
+Epoch time: 1m 24s
+------------------------------
+Epoch 251/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.75, loss: 0.687 
+Epoch time: 1m 25s
+------------------------------
+Epoch 252/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.96, loss: 0.686 
+Epoch time: 1m 25s
+------------------------------
+Epoch 253/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 55.97, loss: 0.687 
+Epoch time: 1m 25s
+------------------------------
+Epoch 254/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.08, loss: 0.684 
+Epoch time: 1m 24s
+------------------------------
+Epoch 255/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.36, loss: 0.684 
+Epoch time: 1m 25s
+------------------------------
+Epoch 256/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.01, loss: 0.684 
+Epoch time: 1m 25s
+------------------------------
+Epoch 257/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.37, loss: 0.683 
+Epoch time: 1m 25s
+------------------------------
+Epoch 258/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.40, loss: 0.681 
+Epoch time: 1m 25s
+------------------------------
+Epoch 259/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.53, loss: 0.683 
+Epoch time: 1m 25s
+------------------------------
+Epoch 260/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.81, loss: 0.679 
+Epoch time: 1m 25s
+------------------------------
+Epoch 261/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.69, loss: 0.675 
+Epoch time: 1m 25s
+------------------------------
+Epoch 262/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.61, loss: 0.672 
+Epoch time: 1m 25s
+------------------------------
+Epoch 263/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.46, loss: 0.679 
+Epoch time: 1m 25s
+------------------------------
+Epoch 264/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.68, loss: 0.675 
+Epoch time: 1m 24s
+------------------------------
+Epoch 265/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.80, loss: 0.667 
+Epoch time: 1m 25s
+------------------------------
+Epoch 266/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.13, loss: 0.657 
+Epoch time: 1m 25s
+------------------------------
+Epoch 267/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.50, loss: 0.667 
+Epoch time: 1m 25s
+------------------------------
+Epoch 268/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.19, loss: 0.655 
+Epoch time: 1m 25s
+------------------------------
+Epoch 269/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.65, loss: 0.662 
+Epoch time: 1m 24s
+------------------------------
+Epoch 270/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 56.95, loss: 0.657 
+Epoch time: 1m 25s
+------------------------------
+Epoch 271/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.69, loss: 0.651 
+Epoch time: 1m 25s
+------------------------------
+Epoch 272/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.57, loss: 0.655 
+Epoch time: 1m 25s
+------------------------------
+Epoch 273/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.72, loss: 0.647 
+Epoch time: 1m 25s
+------------------------------
+Epoch 274/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.61, loss: 0.644 
+Epoch time: 1m 25s
+------------------------------
+Epoch 275/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.38, loss: 0.652 
+Epoch time: 1m 25s
+------------------------------
+Epoch 276/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.88, loss: 0.646 
+Epoch time: 1m 25s
+------------------------------
+Epoch 277/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.75, loss: 0.648 
+Epoch time: 1m 25s
+------------------------------
+Epoch 278/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.11, loss: 0.642 
+Epoch time: 1m 25s
+------------------------------
+Epoch 279/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 57.51, loss: 0.652 
+Epoch time: 1m 25s
+------------------------------
+Epoch 280/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.11, loss: 0.638 
+Epoch time: 1m 25s
+------------------------------
+Epoch 281/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.10, loss: 0.638 
+Epoch time: 1m 25s
+------------------------------
+Epoch 282/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.43, loss: 0.634 
+Epoch time: 1m 25s
+------------------------------
+Epoch 283/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.24, loss: 0.633 
+Epoch time: 1m 25s
+------------------------------
+Epoch 284/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.19, loss: 0.629 
+Epoch time: 1m 25s
+------------------------------
+Epoch 285/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.47, loss: 0.631 
+Epoch time: 1m 25s
+------------------------------
+Epoch 286/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.04, loss: 0.630 
+Epoch time: 1m 25s
+------------------------------
+Epoch 287/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.84, loss: 0.628 
+Epoch time: 1m 25s
+------------------------------
+Epoch 288/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.04, loss: 0.615 
+Epoch time: 1m 25s
+------------------------------
+Epoch 289/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.40, loss: 0.631 
+Epoch time: 1m 25s
+------------------------------
+Epoch 290/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.73, loss: 0.623 
+Epoch time: 1m 25s
+------------------------------
+Epoch 291/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.35, loss: 0.623 
+Epoch time: 1m 25s
+------------------------------
+Epoch 292/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.19, loss: 0.629 
+Epoch time: 1m 25s
+------------------------------
+Epoch 293/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.29, loss: 0.619 
+Epoch time: 1m 25s
+------------------------------
+Epoch 294/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.74, loss: 0.620 
+Epoch time: 1m 25s
+------------------------------
+Epoch 295/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.50, loss: 0.624 
+Epoch time: 1m 25s
+------------------------------
+Epoch 296/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.88, loss: 0.629 
+Epoch time: 1m 25s
+------------------------------
+Epoch 297/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.26, loss: 0.629 
+Epoch time: 1m 25s
+------------------------------
+Epoch 298/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.93, loss: 0.614 
+Epoch time: 1m 24s
+------------------------------
+Epoch 299/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.24, loss: 0.608 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 89.00
+5 ( 2%) 41.09
+7 ( 4%) 35.81
+9 ( 4%) 36.18
+11 ( 3%) 30.11
+13 ( 4%) 33.33
+15 ( 4%) 33.17
+17 ( 4%) 28.64
+19 ( 4%) 31.37
+21 ( 4%) 27.78
+23 ( 4%) 31.22
+25 ( 4%) 23.50
+27 ( 4%) 35.96
+29 ( 3%) 31.41
+31 ( 3%) 26.79
+33 ( 2%) 18.57
+35 ( 2%) 19.86
+37 ( 2%) 24.79
+39 ( 3%) 17.76
+41 ( 3%) 26.17
+43 ( 2%) 21.01
+45 ( 2%) 21.43
+47 ( 2%) 25.76
+49 ( 2%) 21.83
+51 ( 2%) 25.76
+53 ( 2%) 22.39
+55 ( 2%) 14.29
+57 ( 2%) 23.08
+59 ( 2%) 17.76
+61 ( 1%) 23.44
+63 ( 0%) 22.86
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 26.93
+) (91%) 26.93
+* (87%) 25.92
++ (84%) 25.58
+- (77%) 29.50
+/ (76%) 28.36
+0 (52%) 31.02
+1 (60%) 28.25
+2 (61%) 27.08
+3 (62%) 27.02
+4 (61%) 25.94
+5 (62%) 26.04
+6 (62%) 25.74
+7 (63%) 26.28
+8 (64%) 24.11
+9 (63%) 24.74
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%) 100.00
+5 ( 0%) 100.00
+6 ( 0%)  0.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 90.00
+result accuracy by result:
+0 (21%) 90.95
+1 (10%) 32.58
+2 ( 4%) 25.25
+3 ( 2%) 30.37
+4 ( 2%) 18.80
+5 ( 2%) 24.00
+6 ( 2%) 14.78
+7 ( 2%) 30.97
+8 ( 2%) 20.51
+9 ( 1%) 37.21
+result accuracy by generalization:
+1 (22.45%) 62.27
+2 (22.96%) 37.16
+3 (22.53%)  2.26
+4 (15.82%) 42.71
+5 (16.24%)  1.63
+error cases:
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=30.04)
+Epoch time: 1m 41s
+------------------------------
+Epoch 300/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.51, loss: 0.620 
+Epoch time: 1m 25s
+------------------------------
+Epoch 301/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.44, loss: 0.606 
+Epoch time: 1m 25s
+------------------------------
+Epoch 302/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.70, loss: 0.609 
+Epoch time: 1m 25s
+------------------------------
+Epoch 303/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.25, loss: 0.608 
+Epoch time: 1m 25s
+------------------------------
+Epoch 304/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.49, loss: 0.608 
+Epoch time: 1m 25s
+------------------------------
+Epoch 305/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.57, loss: 0.605 
+Epoch time: 1m 25s
+------------------------------
+Epoch 306/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.64, loss: 0.606 
+Epoch time: 1m 25s
+------------------------------
+Epoch 307/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.45, loss: 0.607 
+Epoch time: 1m 25s
+------------------------------
+Epoch 308/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.99, loss: 0.600 
+Epoch time: 1m 25s
+------------------------------
+Epoch 309/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.55, loss: 0.611 
+Epoch time: 1m 25s
+------------------------------
+Epoch 310/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 58.92, loss: 0.615 
+Epoch time: 1m 25s
+------------------------------
+Epoch 311/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.15, loss: 0.607 
+Epoch time: 1m 25s
+------------------------------
+Epoch 312/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.45, loss: 0.602 
+Epoch time: 1m 25s
+------------------------------
+Epoch 313/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.37, loss: 0.590 
+Epoch time: 1m 25s
+------------------------------
+Epoch 314/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.10, loss: 0.602 
+Epoch time: 1m 24s
+------------------------------
+Epoch 315/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.63, loss: 0.594 
+Epoch time: 1m 25s
+------------------------------
+Epoch 316/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.05, loss: 0.595 
+Epoch time: 1m 25s
+------------------------------
+Epoch 317/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.69, loss: 0.599 
+Epoch time: 1m 25s
+------------------------------
+Epoch 318/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.40, loss: 0.608 
+Epoch time: 1m 25s
+------------------------------
+Epoch 319/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.88, loss: 0.603 
+Epoch time: 1m 25s
+------------------------------
+Epoch 320/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.95, loss: 0.587 
+Epoch time: 1m 25s
+------------------------------
+Epoch 321/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.18, loss: 0.590 
+Epoch time: 1m 25s
+------------------------------
+Epoch 322/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.11, loss: 0.587 
+Epoch time: 1m 25s
+------------------------------
+Epoch 323/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 59.97, loss: 0.585 
+Epoch time: 1m 25s
+------------------------------
+Epoch 324/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.01, loss: 0.585 
+Epoch time: 1m 25s
+------------------------------
+Epoch 325/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.03, loss: 0.579 
+Epoch time: 1m 25s
+------------------------------
+Epoch 326/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.22, loss: 0.587 
+Epoch time: 1m 25s
+------------------------------
+Epoch 327/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.84, loss: 0.581 
+Epoch time: 1m 24s
+------------------------------
+Epoch 328/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.80, loss: 0.587 
+Epoch time: 1m 25s
+------------------------------
+Epoch 329/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.24, loss: 0.588 
+Epoch time: 1m 25s
+------------------------------
+Epoch 330/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.44, loss: 0.578 
+Epoch time: 1m 25s
+------------------------------
+Epoch 331/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.88, loss: 0.571 
+Epoch time: 1m 25s
+------------------------------
+Epoch 332/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.13, loss: 0.570 
+Epoch time: 1m 24s
+------------------------------
+Epoch 333/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.20, loss: 0.567 
+Epoch time: 1m 24s
+------------------------------
+Epoch 334/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.86, loss: 0.557 
+Epoch time: 1m 25s
+------------------------------
+Epoch 335/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.72, loss: 0.559 
+Epoch time: 1m 25s
+------------------------------
+Epoch 336/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.70, loss: 0.560 
+Epoch time: 1m 25s
+------------------------------
+Epoch 337/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.62, loss: 0.551 
+Epoch time: 1m 25s
+------------------------------
+Epoch 338/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.03, loss: 0.565 
+Epoch time: 1m 25s
+------------------------------
+Epoch 339/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.77, loss: 0.562 
+Epoch time: 1m 25s
+------------------------------
+Epoch 340/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 60.79, loss: 0.575 
+Epoch time: 1m 25s
+------------------------------
+Epoch 341/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.04, loss: 0.557 
+Epoch time: 1m 25s
+------------------------------
+Epoch 342/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.02, loss: 0.555 
+Epoch time: 1m 25s
+------------------------------
+Epoch 343/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.88, loss: 0.557 
+Epoch time: 1m 25s
+------------------------------
+Epoch 344/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.47, loss: 0.580 
+Epoch time: 1m 25s
+------------------------------
+Epoch 345/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.84, loss: 0.562 
+Epoch time: 1m 25s
+------------------------------
+Epoch 346/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.72, loss: 0.556 
+Epoch time: 1m 25s
+------------------------------
+Epoch 347/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.76, loss: 0.559 
+Epoch time: 1m 25s
+------------------------------
+Epoch 348/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.37, loss: 0.548 
+Epoch time: 1m 25s
+------------------------------
+Epoch 349/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.30, loss: 0.545 
+Epoch time: 1m 25s
+------------------------------
+Epoch 350/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 61.90, loss: 0.545 
+Epoch time: 1m 25s
+------------------------------
+Epoch 351/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.88, loss: 0.540 
+Epoch time: 1m 24s
+------------------------------
+Epoch 352/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.30, loss: 0.539 
+Epoch time: 1m 25s
+------------------------------
+Epoch 353/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.84, loss: 0.537 
+Epoch time: 1m 24s
+------------------------------
+Epoch 354/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.82, loss: 0.533 
+Epoch time: 1m 25s
+------------------------------
+Epoch 355/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.35, loss: 0.535 
+Epoch time: 1m 25s
+------------------------------
+Epoch 356/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.84, loss: 0.534 
+Epoch time: 1m 25s
+------------------------------
+Epoch 357/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.74, loss: 0.536 
+Epoch time: 1m 25s
+------------------------------
+Epoch 358/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.80, loss: 0.543 
+Epoch time: 1m 25s
+------------------------------
+Epoch 359/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.00, loss: 0.536 
+Epoch time: 1m 25s
+------------------------------
+Epoch 360/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.00, loss: 0.539 
+Epoch time: 1m 25s
+------------------------------
+Epoch 361/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.75, loss: 0.542 
+Epoch time: 1m 25s
+------------------------------
+Epoch 362/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.08, loss: 0.533 
+Epoch time: 1m 25s
+------------------------------
+Epoch 363/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.78, loss: 0.537 
+Epoch time: 1m 25s
+------------------------------
+Epoch 364/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.73, loss: 0.537 
+Epoch time: 1m 24s
+------------------------------
+Epoch 365/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.78, loss: 0.541 
+Epoch time: 1m 25s
+------------------------------
+Epoch 366/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.96, loss: 0.533 
+Epoch time: 1m 25s
+------------------------------
+Epoch 367/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.18, loss: 0.530 
+Epoch time: 1m 25s
+------------------------------
+Epoch 368/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.76, loss: 0.526 
+Epoch time: 1m 25s
+------------------------------
+Epoch 369/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.15, loss: 0.524 
+Epoch time: 1m 25s
+------------------------------
+Epoch 370/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 62.87, loss: 0.522 
+Epoch time: 1m 25s
+------------------------------
+Epoch 371/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.36, loss: 0.521 
+Epoch time: 1m 25s
+------------------------------
+Epoch 372/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.39, loss: 0.523 
+Epoch time: 1m 25s
+------------------------------
+Epoch 373/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.36, loss: 0.511 
+Epoch time: 1m 25s
+------------------------------
+Epoch 374/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.93, loss: 0.517 
+Epoch time: 1m 24s
+------------------------------
+Epoch 375/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.60, loss: 0.514 
+Epoch time: 1m 25s
+------------------------------
+Epoch 376/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.35, loss: 0.511 
+Epoch time: 1m 25s
+------------------------------
+Epoch 377/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.00, loss: 0.516 
+Epoch time: 1m 25s
+------------------------------
+Epoch 378/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.88, loss: 0.512 
+Epoch time: 1m 25s
+------------------------------
+Epoch 379/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 63.59, loss: 0.523 
+Epoch time: 1m 25s
+------------------------------
+Epoch 380/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.08, loss: 0.507 
+Epoch time: 1m 24s
+------------------------------
+Epoch 381/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.45, loss: 0.509 
+Epoch time: 1m 25s
+------------------------------
+Epoch 382/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.37, loss: 0.510 
+Epoch time: 1m 25s
+------------------------------
+Epoch 383/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.79, loss: 0.506 
+Epoch time: 1m 25s
+------------------------------
+Epoch 384/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.87, loss: 0.498 
+Epoch time: 1m 25s
+------------------------------
+Epoch 385/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.16, loss: 0.495 
+Epoch time: 1m 25s
+------------------------------
+Epoch 386/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.16, loss: 0.507 
+Epoch time: 1m 25s
+------------------------------
+Epoch 387/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.82, loss: 0.505 
+Epoch time: 1m 25s
+------------------------------
+Epoch 388/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.11, loss: 0.515 
+Epoch time: 1m 25s
+------------------------------
+Epoch 389/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.64, loss: 0.497 
+Epoch time: 1m 25s
+------------------------------
+Epoch 390/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.93, loss: 0.499 
+Epoch time: 1m 25s
+------------------------------
+Epoch 391/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.91, loss: 0.490 
+Epoch time: 1m 25s
+------------------------------
+Epoch 392/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.42, loss: 0.504 
+Epoch time: 1m 25s
+------------------------------
+Epoch 393/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.82, loss: 0.493 
+Epoch time: 1m 25s
+------------------------------
+Epoch 394/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.10, loss: 0.493 
+Epoch time: 1m 25s
+------------------------------
+Epoch 395/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 64.98, loss: 0.492 
+Epoch time: 1m 25s
+------------------------------
+Epoch 396/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.13, loss: 0.495 
+Epoch time: 1m 25s
+------------------------------
+Epoch 397/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.06, loss: 0.495 
+Epoch time: 1m 25s
+------------------------------
+Epoch 398/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.54, loss: 0.484 
+Epoch time: 1m 25s
+------------------------------
+Epoch 399/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.09, loss: 0.488 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 88.00
+5 ( 2%) 43.41
+7 ( 4%) 34.50
+9 ( 4%) 41.71
+11 ( 3%) 32.95
+13 ( 4%) 35.65
+15 ( 4%) 39.60
+17 ( 4%) 31.55
+19 ( 4%) 34.80
+21 ( 4%) 31.31
+23 ( 4%) 31.22
+25 ( 4%) 27.00
+27 ( 4%) 40.39
+29 ( 3%) 27.75
+31 ( 3%) 25.60
+33 ( 2%) 15.00
+35 ( 2%) 14.38
+37 ( 2%) 25.64
+39 ( 3%) 15.13
+41 ( 3%) 23.49
+43 ( 2%) 18.84
+45 ( 2%) 17.86
+47 ( 2%) 22.73
+49 ( 2%) 16.90
+51 ( 2%) 22.73
+53 ( 2%) 20.90
+55 ( 2%) 14.29
+57 ( 2%) 22.38
+59 ( 2%) 17.76
+61 ( 1%) 18.75
+63 ( 0%) 20.00
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 27.15
+) (91%) 27.15
+* (87%) 25.65
++ (84%) 25.99
+- (77%) 29.53
+/ (76%) 28.36
+0 (52%) 30.23
+1 (60%) 28.15
+2 (61%) 26.88
+3 (62%) 26.56
+4 (61%) 25.61
+5 (62%) 25.78
+6 (62%) 25.32
+7 (63%) 25.73
+8 (64%) 24.30
+9 (63%) 24.58
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 90.00
+4 ( 0%) 100.00
+5 ( 0%) 100.00
+6 ( 0%)  0.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 80.76
+1 (10%) 34.83
+2 ( 4%) 30.30
+3 ( 2%) 37.78
+4 ( 2%) 23.31
+5 ( 2%) 32.00
+6 ( 2%) 16.52
+7 ( 2%) 38.94
+8 ( 2%) 24.79
+9 ( 1%) 41.86
+result accuracy by generalization:
+1 (22.45%) 71.09
+2 (22.96%) 33.07
+3 (22.53%)  1.99
+4 (15.82%) 37.68
+5 (16.24%)  1.88
+error cases:
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=30.27)
+Epoch time: 1m 41s
+------------------------------
+Epoch 400/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.29, loss: 0.490 
+Epoch time: 1m 25s
+------------------------------
+Epoch 401/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.18, loss: 0.489 
+Epoch time: 1m 25s
+------------------------------
+Epoch 402/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.06, loss: 0.480 
+Epoch time: 1m 25s
+------------------------------
+Epoch 403/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.52, loss: 0.482 
+Epoch time: 1m 25s
+------------------------------
+Epoch 404/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.13, loss: 0.477 
+Epoch time: 1m 25s
+------------------------------
+Epoch 405/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.26, loss: 0.479 
+Epoch time: 1m 25s
+------------------------------
+Epoch 406/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.33, loss: 0.477 
+Epoch time: 1m 25s
+------------------------------
+Epoch 407/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.65, loss: 0.484 
+Epoch time: 1m 25s
+------------------------------
+Epoch 408/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.78, loss: 0.481 
+Epoch time: 1m 25s
+------------------------------
+Epoch 409/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.56, loss: 0.481 
+Epoch time: 1m 25s
+------------------------------
+Epoch 410/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.86, loss: 0.478 
+Epoch time: 1m 25s
+------------------------------
+Epoch 411/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.22, loss: 0.473 
+Epoch time: 1m 25s
+------------------------------
+Epoch 412/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.02, loss: 0.476 
+Epoch time: 1m 25s
+------------------------------
+Epoch 413/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.28, loss: 0.469 
+Epoch time: 1m 25s
+------------------------------
+Epoch 414/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.30, loss: 0.473 
+Epoch time: 1m 24s
+------------------------------
+Epoch 415/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.04, loss: 0.470 
+Epoch time: 1m 24s
+------------------------------
+Epoch 416/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.61, loss: 0.473 
+Epoch time: 1m 25s
+------------------------------
+Epoch 417/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.66, loss: 0.470 
+Epoch time: 1m 25s
+------------------------------
+Epoch 418/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.48, loss: 0.478 
+Epoch time: 1m 25s
+------------------------------
+Epoch 419/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 65.54, loss: 0.497 
+Epoch time: 1m 25s
+------------------------------
+Epoch 420/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.78, loss: 0.468 
+Epoch time: 1m 25s
+------------------------------
+Epoch 421/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.76, loss: 0.470 
+Epoch time: 1m 25s
+------------------------------
+Epoch 422/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.98, loss: 0.465 
+Epoch time: 1m 25s
+------------------------------
+Epoch 423/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.44, loss: 0.467 
+Epoch time: 1m 25s
+------------------------------
+Epoch 424/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.27, loss: 0.459 
+Epoch time: 1m 25s
+------------------------------
+Epoch 425/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.59, loss: 0.452 
+Epoch time: 1m 25s
+------------------------------
+Epoch 426/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.20, loss: 0.455 
+Epoch time: 1m 25s
+------------------------------
+Epoch 427/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.18, loss: 0.469 
+Epoch time: 1m 24s
+------------------------------
+Epoch 428/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.65, loss: 0.461 
+Epoch time: 1m 24s
+------------------------------
+Epoch 429/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.96, loss: 0.458 
+Epoch time: 1m 25s
+------------------------------
+Epoch 430/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.96, loss: 0.460 
+Epoch time: 1m 25s
+------------------------------
+Epoch 431/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.04, loss: 0.451 
+Epoch time: 1m 25s
+------------------------------
+Epoch 432/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.67, loss: 0.462 
+Epoch time: 1m 25s
+------------------------------
+Epoch 433/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.57, loss: 0.452 
+Epoch time: 1m 25s
+------------------------------
+Epoch 434/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.65, loss: 0.454 
+Epoch time: 1m 25s
+------------------------------
+Epoch 435/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.53, loss: 0.457 
+Epoch time: 1m 25s
+------------------------------
+Epoch 436/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.20, loss: 0.459 
+Epoch time: 1m 25s
+------------------------------
+Epoch 437/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.62, loss: 0.448 
+Epoch time: 1m 25s
+------------------------------
+Epoch 438/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.65, loss: 0.446 
+Epoch time: 1m 25s
+------------------------------
+Epoch 439/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.66, loss: 0.461 
+Epoch time: 1m 25s
+------------------------------
+Epoch 440/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.15, loss: 0.455 
+Epoch time: 1m 25s
+------------------------------
+Epoch 441/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.25, loss: 0.447 
+Epoch time: 1m 25s
+------------------------------
+Epoch 442/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.44, loss: 0.468 
+Epoch time: 1m 25s
+------------------------------
+Epoch 443/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 66.93, loss: 0.459 
+Epoch time: 1m 25s
+------------------------------
+Epoch 444/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.89, loss: 0.451 
+Epoch time: 1m 25s
+------------------------------
+Epoch 445/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.64, loss: 0.454 
+Epoch time: 1m 25s
+------------------------------
+Epoch 446/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.30, loss: 0.447 
+Epoch time: 1m 25s
+------------------------------
+Epoch 447/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.05, loss: 0.445 
+Epoch time: 1m 25s
+------------------------------
+Epoch 448/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.97, loss: 0.441 
+Epoch time: 1m 25s
+------------------------------
+Epoch 449/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.23, loss: 0.439 
+Epoch time: 1m 25s
+------------------------------
+Epoch 450/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.29, loss: 0.429 
+Epoch time: 1m 25s
+------------------------------
+Epoch 451/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.31, loss: 0.430 
+Epoch time: 1m 25s
+------------------------------
+Epoch 452/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.05, loss: 0.431 
+Epoch time: 1m 25s
+------------------------------
+Epoch 453/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.39, loss: 0.441 
+Epoch time: 1m 24s
+------------------------------
+Epoch 454/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.55, loss: 0.434 
+Epoch time: 1m 25s
+------------------------------
+Epoch 455/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.91, loss: 0.443 
+Epoch time: 1m 25s
+------------------------------
+Epoch 456/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.53, loss: 0.435 
+Epoch time: 1m 25s
+------------------------------
+Epoch 457/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.59, loss: 0.443 
+Epoch time: 1m 25s
+------------------------------
+Epoch 458/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.16, loss: 0.455 
+Epoch time: 1m 25s
+------------------------------
+Epoch 459/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.37, loss: 0.429 
+Epoch time: 1m 25s
+------------------------------
+Epoch 460/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.43, loss: 0.432 
+Epoch time: 1m 24s
+------------------------------
+Epoch 461/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 67.76, loss: 0.462 
+Epoch time: 1m 25s
+------------------------------
+Epoch 462/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.58, loss: 0.430 
+Epoch time: 1m 25s
+------------------------------
+Epoch 463/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.72, loss: 0.433 
+Epoch time: 1m 25s
+------------------------------
+Epoch 464/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.80, loss: 0.423 
+Epoch time: 1m 25s
+------------------------------
+Epoch 465/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.39, loss: 0.432 
+Epoch time: 1m 25s
+------------------------------
+Epoch 466/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.07, loss: 0.439 
+Epoch time: 1m 25s
+------------------------------
+Epoch 467/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.71, loss: 0.430 
+Epoch time: 1m 25s
+------------------------------
+Epoch 468/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.09, loss: 0.428 
+Epoch time: 1m 25s
+------------------------------
+Epoch 469/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.89, loss: 0.418 
+Epoch time: 1m 25s
+------------------------------
+Epoch 470/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.04, loss: 0.429 
+Epoch time: 1m 25s
+------------------------------
+Epoch 471/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.21, loss: 0.419 
+Epoch time: 1m 25s
+------------------------------
+Epoch 472/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.33, loss: 0.412 
+Epoch time: 1m 24s
+------------------------------
+Epoch 473/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.68, loss: 0.415 
+Epoch time: 1m 25s
+------------------------------
+Epoch 474/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.03, loss: 0.422 
+Epoch time: 1m 25s
+------------------------------
+Epoch 475/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.25, loss: 0.421 
+Epoch time: 1m 25s
+------------------------------
+Epoch 476/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.38, loss: 0.416 
+Epoch time: 1m 25s
+------------------------------
+Epoch 477/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.69, loss: 0.416 
+Epoch time: 1m 25s
+------------------------------
+Epoch 478/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.96, loss: 0.411 
+Epoch time: 1m 25s
+------------------------------
+Epoch 479/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.82, loss: 0.409 
+Epoch time: 1m 25s
+------------------------------
+Epoch 480/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.29, loss: 0.416 
+Epoch time: 1m 25s
+------------------------------
+Epoch 481/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.75, loss: 0.413 
+Epoch time: 1m 25s
+------------------------------
+Epoch 482/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.25, loss: 0.406 
+Epoch time: 1m 25s
+------------------------------
+Epoch 483/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.28, loss: 0.415 
+Epoch time: 1m 25s
+------------------------------
+Epoch 484/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.76, loss: 0.425 
+Epoch time: 1m 25s
+------------------------------
+Epoch 485/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 68.63, loss: 0.448 
+Epoch time: 1m 25s
+------------------------------
+Epoch 486/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.02, loss: 0.427 
+Epoch time: 1m 24s
+------------------------------
+Epoch 487/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.82, loss: 0.412 
+Epoch time: 1m 25s
+------------------------------
+Epoch 488/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.24, loss: 0.408 
+Epoch time: 1m 25s
+------------------------------
+Epoch 489/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.85, loss: 0.411 
+Epoch time: 1m 25s
+------------------------------
+Epoch 490/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.02, loss: 0.412 
+Epoch time: 1m 25s
+------------------------------
+Epoch 491/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.15, loss: 0.404 
+Epoch time: 1m 25s
+------------------------------
+Epoch 492/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.75, loss: 0.398 
+Epoch time: 1m 25s
+------------------------------
+Epoch 493/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.83, loss: 0.399 
+Epoch time: 1m 25s
+------------------------------
+Epoch 494/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 69.63, loss: 0.407 
+Epoch time: 1m 25s
+------------------------------
+Epoch 495/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.35, loss: 0.403 
+Epoch time: 1m 25s
+------------------------------
+Epoch 496/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.80, loss: 0.395 
+Epoch time: 1m 25s
+------------------------------
+Epoch 497/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.20, loss: 0.399 
+Epoch time: 1m 25s
+------------------------------
+Epoch 498/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.96, loss: 0.393 
+Epoch time: 1m 25s
+------------------------------
+Epoch 499/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.00, loss: 0.393 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 92.00
+5 ( 2%) 48.84
+7 ( 4%) 40.61
+9 ( 4%) 43.22
+11 ( 3%) 40.34
+13 ( 4%) 41.20
+15 ( 4%) 40.10
+17 ( 4%) 35.92
+19 ( 4%) 41.18
+21 ( 4%) 36.36
+23 ( 4%) 36.59
+25 ( 4%) 31.50
+27 ( 4%) 37.44
+29 ( 3%) 34.03
+31 ( 3%) 31.55
+33 ( 2%) 17.86
+35 ( 2%) 17.12
+37 ( 2%) 23.93
+39 ( 3%) 15.13
+41 ( 3%) 21.48
+43 ( 2%) 19.57
+45 ( 2%) 16.07
+47 ( 2%) 23.48
+49 ( 2%) 14.08
+51 ( 2%) 24.24
+53 ( 2%) 20.90
+55 ( 2%) 14.29
+57 ( 2%) 19.58
+59 ( 2%) 16.82
+61 ( 1%) 23.44
+63 ( 0%) 25.71
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 29.56
+) (91%) 29.56
+* (87%) 28.11
++ (84%) 28.28
+- (77%) 31.94
+/ (76%) 30.49
+0 (52%) 32.46
+1 (60%) 30.15
+2 (61%) 28.70
+3 (62%) 28.72
+4 (61%) 27.50
+5 (62%) 27.64
+6 (62%) 27.57
+7 (63%) 27.74
+8 (64%) 25.89
+9 (63%) 26.56
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%)  0.00
+5 ( 0%) 90.00
+6 ( 0%) 100.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 82.48
+1 (10%) 39.33
+2 ( 4%) 33.33
+3 ( 2%) 37.78
+4 ( 2%) 17.29
+5 ( 2%) 33.00
+6 ( 2%) 28.70
+7 ( 2%) 43.36
+8 ( 2%) 35.04
+9 ( 1%) 41.86
+result accuracy by generalization:
+1 (22.45%) 80.64
+2 (22.96%) 34.93
+3 (22.53%)  2.17
+4 (15.82%) 36.90
+5 (16.24%)  2.01
+error cases:
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=32.78)
+Epoch time: 1m 41s
+------------------------------
+Epoch 500/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.60, loss: 0.401 
+Epoch time: 1m 24s
+------------------------------
+Epoch 501/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.10, loss: 0.389 
+Epoch time: 1m 25s
+------------------------------
+Epoch 502/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.49, loss: 0.390 
+Epoch time: 1m 25s
+------------------------------
+Epoch 503/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.80, loss: 0.397 
+Epoch time: 1m 24s
+------------------------------
+Epoch 504/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.69, loss: 0.406 
+Epoch time: 1m 25s
+------------------------------
+Epoch 505/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.55, loss: 0.401 
+Epoch time: 1m 25s
+------------------------------
+Epoch 506/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.74, loss: 0.389 
+Epoch time: 1m 25s
+------------------------------
+Epoch 507/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.67, loss: 0.393 
+Epoch time: 1m 25s
+------------------------------
+Epoch 508/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.41, loss: 0.394 
+Epoch time: 1m 25s
+------------------------------
+Epoch 509/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.10, loss: 0.401 
+Epoch time: 1m 25s
+------------------------------
+Epoch 510/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.71, loss: 0.403 
+Epoch time: 1m 25s
+------------------------------
+Epoch 511/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.33, loss: 0.413 
+Epoch time: 1m 25s
+------------------------------
+Epoch 512/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.72, loss: 0.392 
+Epoch time: 1m 25s
+------------------------------
+Epoch 513/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.71, loss: 0.401 
+Epoch time: 1m 25s
+------------------------------
+Epoch 514/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.56, loss: 0.404 
+Epoch time: 1m 25s
+------------------------------
+Epoch 515/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.22, loss: 0.398 
+Epoch time: 1m 25s
+------------------------------
+Epoch 516/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.99, loss: 0.397 
+Epoch time: 1m 25s
+------------------------------
+Epoch 517/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.45, loss: 0.396 
+Epoch time: 1m 25s
+------------------------------
+Epoch 518/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.85, loss: 0.407 
+Epoch time: 1m 25s
+------------------------------
+Epoch 519/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.14, loss: 0.387 
+Epoch time: 1m 25s
+------------------------------
+Epoch 520/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 70.86, loss: 0.392 
+Epoch time: 1m 25s
+------------------------------
+Epoch 521/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.18, loss: 0.394 
+Epoch time: 1m 25s
+------------------------------
+Epoch 522/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.55, loss: 0.389 
+Epoch time: 1m 25s
+------------------------------
+Epoch 523/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.56, loss: 0.389 
+Epoch time: 1m 25s
+------------------------------
+Epoch 524/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.73, loss: 0.387 
+Epoch time: 1m 25s
+------------------------------
+Epoch 525/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.25, loss: 0.385 
+Epoch time: 1m 25s
+------------------------------
+Epoch 526/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.83, loss: 0.386 
+Epoch time: 1m 25s
+------------------------------
+Epoch 527/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.20, loss: 0.397 
+Epoch time: 1m 25s
+------------------------------
+Epoch 528/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.77, loss: 0.381 
+Epoch time: 1m 25s
+------------------------------
+Epoch 529/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.52, loss: 0.386 
+Epoch time: 1m 25s
+------------------------------
+Epoch 530/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.41, loss: 0.388 
+Epoch time: 1m 25s
+------------------------------
+Epoch 531/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.27, loss: 0.391 
+Epoch time: 1m 25s
+------------------------------
+Epoch 532/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.07, loss: 0.381 
+Epoch time: 1m 25s
+------------------------------
+Epoch 533/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.36, loss: 0.389 
+Epoch time: 1m 24s
+------------------------------
+Epoch 534/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.38, loss: 0.375 
+Epoch time: 1m 25s
+------------------------------
+Epoch 535/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.20, loss: 0.378 
+Epoch time: 1m 25s
+------------------------------
+Epoch 536/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.26, loss: 0.374 
+Epoch time: 1m 25s
+------------------------------
+Epoch 537/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.20, loss: 0.371 
+Epoch time: 1m 25s
+------------------------------
+Epoch 538/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.41, loss: 0.375 
+Epoch time: 1m 25s
+------------------------------
+Epoch 539/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.18, loss: 0.371 
+Epoch time: 1m 25s
+------------------------------
+Epoch 540/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.56, loss: 0.376 
+Epoch time: 1m 25s
+------------------------------
+Epoch 541/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.01, loss: 0.376 
+Epoch time: 1m 25s
+------------------------------
+Epoch 542/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.50, loss: 0.368 
+Epoch time: 1m 25s
+------------------------------
+Epoch 543/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.21, loss: 0.381 
+Epoch time: 1m 24s
+------------------------------
+Epoch 544/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.38, loss: 0.358 
+Epoch time: 1m 25s
+------------------------------
+Epoch 545/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.05, loss: 0.364 
+Epoch time: 1m 24s
+------------------------------
+Epoch 546/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.23, loss: 0.376 
+Epoch time: 1m 25s
+------------------------------
+Epoch 547/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.98, loss: 0.368 
+Epoch time: 1m 25s
+------------------------------
+Epoch 548/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.65, loss: 0.375 
+Epoch time: 1m 25s
+------------------------------
+Epoch 549/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.78, loss: 0.367 
+Epoch time: 1m 25s
+------------------------------
+Epoch 550/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.06, loss: 0.359 
+Epoch time: 1m 25s
+------------------------------
+Epoch 551/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.56, loss: 0.383 
+Epoch time: 1m 24s
+------------------------------
+Epoch 552/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 71.80, loss: 0.378 
+Epoch time: 1m 25s
+------------------------------
+Epoch 553/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.87, loss: 0.366 
+Epoch time: 1m 25s
+------------------------------
+Epoch 554/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.25, loss: 0.364 
+Epoch time: 1m 25s
+------------------------------
+Epoch 555/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.73, loss: 0.366 
+Epoch time: 1m 25s
+------------------------------
+Epoch 556/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.45, loss: 0.361 
+Epoch time: 1m 25s
+------------------------------
+Epoch 557/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.25, loss: 0.375 
+Epoch time: 1m 25s
+------------------------------
+Epoch 558/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.22, loss: 0.360 
+Epoch time: 1m 25s
+------------------------------
+Epoch 559/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.73, loss: 0.361 
+Epoch time: 1m 25s
+------------------------------
+Epoch 560/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.02, loss: 0.351 
+Epoch time: 1m 25s
+------------------------------
+Epoch 561/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.46, loss: 0.360 
+Epoch time: 1m 25s
+------------------------------
+Epoch 562/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.29, loss: 0.352 
+Epoch time: 1m 25s
+------------------------------
+Epoch 563/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.86, loss: 0.351 
+Epoch time: 1m 24s
+------------------------------
+Epoch 564/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.36, loss: 0.359 
+Epoch time: 1m 25s
+------------------------------
+Epoch 565/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.86, loss: 0.345 
+Epoch time: 1m 25s
+------------------------------
+Epoch 566/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.26, loss: 0.362 
+Epoch time: 1m 25s
+------------------------------
+Epoch 567/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.54, loss: 0.354 
+Epoch time: 1m 25s
+------------------------------
+Epoch 568/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.58, loss: 0.355 
+Epoch time: 1m 25s
+------------------------------
+Epoch 569/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.87, loss: 0.353 
+Epoch time: 1m 25s
+------------------------------
+Epoch 570/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.35, loss: 0.365 
+Epoch time: 1m 25s
+------------------------------
+Epoch 571/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.61, loss: 0.356 
+Epoch time: 1m 25s
+------------------------------
+Epoch 572/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.30, loss: 0.361 
+Epoch time: 1m 25s
+------------------------------
+Epoch 573/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.74, loss: 0.351 
+Epoch time: 1m 24s
+------------------------------
+Epoch 574/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.62, loss: 0.352 
+Epoch time: 1m 25s
+------------------------------
+Epoch 575/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.62, loss: 0.348 
+Epoch time: 1m 25s
+------------------------------
+Epoch 576/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.48, loss: 0.352 
+Epoch time: 1m 25s
+------------------------------
+Epoch 577/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.50, loss: 0.345 
+Epoch time: 1m 25s
+------------------------------
+Epoch 578/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.66, loss: 0.346 
+Epoch time: 1m 25s
+------------------------------
+Epoch 579/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.69, loss: 0.361 
+Epoch time: 1m 25s
+------------------------------
+Epoch 580/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.27, loss: 0.353 
+Epoch time: 1m 25s
+------------------------------
+Epoch 581/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.85, loss: 0.346 
+Epoch time: 1m 25s
+------------------------------
+Epoch 582/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.64, loss: 0.341 
+Epoch time: 1m 25s
+------------------------------
+Epoch 583/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.95, loss: 0.349 
+Epoch time: 1m 25s
+------------------------------
+Epoch 584/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.04, loss: 0.351 
+Epoch time: 1m 25s
+------------------------------
+Epoch 585/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.19, loss: 0.346 
+Epoch time: 1m 25s
+------------------------------
+Epoch 586/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 72.32, loss: 0.389 
+Epoch time: 1m 25s
+------------------------------
+Epoch 587/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.72, loss: 0.357 
+Epoch time: 1m 25s
+------------------------------
+Epoch 588/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.87, loss: 0.351 
+Epoch time: 1m 25s
+------------------------------
+Epoch 589/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 73.74, loss: 0.345 
+Epoch time: 1m 25s
+------------------------------
+Epoch 590/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.16, loss: 0.338 
+Epoch time: 1m 25s
+------------------------------
+Epoch 591/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.04, loss: 0.347 
+Epoch time: 1m 25s
+------------------------------
+Epoch 592/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.38, loss: 0.342 
+Epoch time: 1m 25s
+------------------------------
+Epoch 593/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.68, loss: 0.335 
+Epoch time: 1m 25s
+------------------------------
+Epoch 594/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.31, loss: 0.335 
+Epoch time: 1m 25s
+------------------------------
+Epoch 595/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.81, loss: 0.341 
+Epoch time: 1m 24s
+------------------------------
+Epoch 596/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.85, loss: 0.341 
+Epoch time: 1m 25s
+------------------------------
+Epoch 597/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.23, loss: 0.334 
+Epoch time: 1m 25s
+------------------------------
+Epoch 598/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.42, loss: 0.346 
+Epoch time: 1m 24s
+------------------------------
+Epoch 599/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.18, loss: 0.334 
+result accuracy by length:
+1 ( 2%) 90.00
+3 ( 2%) 92.00
+5 ( 2%) 47.29
+7 ( 4%) 40.61
+9 ( 4%) 45.23
+11 ( 3%) 40.34
+13 ( 4%) 42.59
+15 ( 4%) 40.59
+17 ( 4%) 33.01
+19 ( 4%) 40.20
+21 ( 4%) 39.39
+23 ( 4%) 35.61
+25 ( 4%) 33.00
+27 ( 4%) 39.41
+29 ( 3%) 38.74
+31 ( 3%) 30.95
+33 ( 2%) 17.86
+35 ( 2%) 17.81
+37 ( 2%) 24.79
+39 ( 3%) 17.11
+41 ( 3%) 18.79
+43 ( 2%) 18.12
+45 ( 2%) 15.18
+47 ( 2%) 19.70
+49 ( 2%) 15.49
+51 ( 2%) 23.48
+53 ( 2%) 21.64
+55 ( 2%) 13.45
+57 ( 2%) 17.48
+59 ( 2%) 15.89
+61 ( 1%) 20.31
+63 ( 0%) 25.71
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 29.67
+) (91%) 29.67
+* (87%) 27.81
++ (84%) 28.59
+- (77%) 31.99
+/ (76%) 30.60
+0 (52%) 32.42
+1 (60%) 30.19
+2 (61%) 29.14
+3 (62%) 28.43
+4 (61%) 27.60
+5 (62%) 27.96
+6 (62%) 27.31
+7 (63%) 27.99
+8 (64%) 26.21
+9 (63%) 26.44
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%) 100.00
+5 ( 0%) 100.00
+6 ( 0%)  0.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 79.71
+1 (10%) 42.88
+2 ( 4%) 35.86
+3 ( 2%) 39.26
+4 ( 2%) 27.82
+5 ( 2%) 36.00
+6 ( 2%) 20.00
+7 ( 2%) 40.71
+8 ( 2%) 34.19
+9 ( 1%) 47.67
+result accuracy by generalization:
+1 (22.45%) 84.73
+2 (22.96%) 32.89
+3 (22.53%)  1.99
+4 (15.82%) 33.94
+5 (16.24%)  3.14
+error cases:
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=32.90)
+Epoch time: 1m 41s
+------------------------------
+Epoch 600/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.05, loss: 0.339 
+Epoch time: 1m 25s
+------------------------------
+Epoch 601/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.49, loss: 0.328 
+Epoch time: 1m 25s
+------------------------------
+Epoch 602/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.23, loss: 0.334 
+Epoch time: 1m 25s
+------------------------------
+Epoch 603/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.31, loss: 0.331 
+Epoch time: 1m 25s
+------------------------------
+Epoch 604/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.38, loss: 0.331 
+Epoch time: 1m 25s
+------------------------------
+Epoch 605/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.52, loss: 0.337 
+Epoch time: 1m 25s
+------------------------------
+Epoch 606/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.46, loss: 0.326 
+Epoch time: 1m 24s
+------------------------------
+Epoch 607/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.13, loss: 0.338 
+Epoch time: 1m 25s
+------------------------------
+Epoch 608/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.91, loss: 0.336 
+Epoch time: 1m 25s
+------------------------------
+Epoch 609/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.37, loss: 0.326 
+Epoch time: 1m 25s
+------------------------------
+Epoch 610/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.72, loss: 0.328 
+Epoch time: 1m 25s
+------------------------------
+Epoch 611/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.42, loss: 0.330 
+Epoch time: 1m 25s
+------------------------------
+Epoch 612/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.20, loss: 0.331 
+Epoch time: 1m 25s
+------------------------------
+Epoch 613/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.45, loss: 0.338 
+Epoch time: 1m 25s
+------------------------------
+Epoch 614/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.11, loss: 0.334 
+Epoch time: 1m 25s
+------------------------------
+Epoch 615/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.79, loss: 0.325 
+Epoch time: 1m 25s
+------------------------------
+Epoch 616/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.14, loss: 0.330 
+Epoch time: 1m 25s
+------------------------------
+Epoch 617/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.56, loss: 0.327 
+Epoch time: 1m 25s
+------------------------------
+Epoch 618/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.19, loss: 0.324 
+Epoch time: 1m 25s
+------------------------------
+Epoch 619/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.99, loss: 0.322 
+Epoch time: 1m 25s
+------------------------------
+Epoch 620/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.78, loss: 0.324 
+Epoch time: 1m 25s
+------------------------------
+Epoch 621/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.77, loss: 0.325 
+Epoch time: 1m 24s
+------------------------------
+Epoch 622/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.72, loss: 0.333 
+Epoch time: 1m 25s
+------------------------------
+Epoch 623/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.60, loss: 0.328 
+Epoch time: 1m 25s
+------------------------------
+Epoch 624/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.86, loss: 0.323 
+Epoch time: 1m 25s
+------------------------------
+Epoch 625/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.48, loss: 0.326 
+Epoch time: 1m 25s
+------------------------------
+Epoch 626/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.47, loss: 0.324 
+Epoch time: 1m 25s
+------------------------------
+Epoch 627/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.57, loss: 0.332 
+Epoch time: 1m 25s
+------------------------------
+Epoch 628/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.58, loss: 0.327 
+Epoch time: 1m 25s
+------------------------------
+Epoch 629/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.75, loss: 0.316 
+Epoch time: 1m 25s
+------------------------------
+Epoch 630/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.92, loss: 0.337 
+Epoch time: 1m 25s
+------------------------------
+Epoch 631/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.29, loss: 0.347 
+Epoch time: 1m 25s
+------------------------------
+Epoch 632/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 74.75, loss: 0.349 
+Epoch time: 1m 25s
+------------------------------
+Epoch 633/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.33, loss: 0.334 
+Epoch time: 1m 24s
+------------------------------
+Epoch 634/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.66, loss: 0.326 
+Epoch time: 1m 24s
+------------------------------
+Epoch 635/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.72, loss: 0.318 
+Epoch time: 1m 25s
+------------------------------
+Epoch 636/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.50, loss: 0.317 
+Epoch time: 1m 25s
+------------------------------
+Epoch 637/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.81, loss: 0.324 
+Epoch time: 1m 25s
+------------------------------
+Epoch 638/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.30, loss: 0.312 
+Epoch time: 1m 25s
+------------------------------
+Epoch 639/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.71, loss: 0.305 
+Epoch time: 1m 25s
+------------------------------
+Epoch 640/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.58, loss: 0.313 
+Epoch time: 1m 25s
+------------------------------
+Epoch 641/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.76, loss: 0.315 
+Epoch time: 1m 25s
+------------------------------
+Epoch 642/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.80, loss: 0.323 
+Epoch time: 1m 25s
+------------------------------
+Epoch 643/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.04, loss: 0.318 
+Epoch time: 1m 25s
+------------------------------
+Epoch 644/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.31, loss: 0.319 
+Epoch time: 1m 24s
+------------------------------
+Epoch 645/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.20, loss: 0.324 
+Epoch time: 1m 25s
+------------------------------
+Epoch 646/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.72, loss: 0.310 
+Epoch time: 1m 25s
+------------------------------
+Epoch 647/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.41, loss: 0.308 
+Epoch time: 1m 25s
+------------------------------
+Epoch 648/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.60, loss: 0.316 
+Epoch time: 1m 25s
+------------------------------
+Epoch 649/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.53, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 650/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.12, loss: 0.315 
+Epoch time: 1m 25s
+------------------------------
+Epoch 651/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.65, loss: 0.309 
+Epoch time: 1m 24s
+------------------------------
+Epoch 652/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.47, loss: 0.315 
+Epoch time: 1m 24s
+------------------------------
+Epoch 653/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.28, loss: 0.311 
+Epoch time: 1m 24s
+------------------------------
+Epoch 654/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.36, loss: 0.318 
+Epoch time: 1m 25s
+------------------------------
+Epoch 655/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.91, loss: 0.306 
+Epoch time: 1m 25s
+------------------------------
+Epoch 656/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.20, loss: 0.319 
+Epoch time: 1m 25s
+------------------------------
+Epoch 657/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.62, loss: 0.312 
+Epoch time: 1m 25s
+------------------------------
+Epoch 658/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.74, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 659/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.74, loss: 0.312 
+Epoch time: 1m 25s
+------------------------------
+Epoch 660/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.54, loss: 0.314 
+Epoch time: 1m 25s
+------------------------------
+Epoch 661/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.59, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 662/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.09, loss: 0.315 
+Epoch time: 1m 25s
+------------------------------
+Epoch 663/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.45, loss: 0.310 
+Epoch time: 1m 25s
+------------------------------
+Epoch 664/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.08, loss: 0.304 
+Epoch time: 1m 25s
+------------------------------
+Epoch 665/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.44, loss: 0.313 
+Epoch time: 1m 24s
+------------------------------
+Epoch 666/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.20, loss: 0.304 
+Epoch time: 1m 25s
+------------------------------
+Epoch 667/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.83, loss: 0.310 
+Epoch time: 1m 25s
+------------------------------
+Epoch 668/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.32, loss: 0.298 
+Epoch time: 1m 24s
+------------------------------
+Epoch 669/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.88, loss: 0.305 
+Epoch time: 1m 25s
+------------------------------
+Epoch 670/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.40, loss: 0.301 
+Epoch time: 1m 25s
+------------------------------
+Epoch 671/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.94, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 672/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.95, loss: 0.304 
+Epoch time: 1m 25s
+------------------------------
+Epoch 673/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.66, loss: 0.311 
+Epoch time: 1m 25s
+------------------------------
+Epoch 674/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.94, loss: 0.329 
+Epoch time: 1m 24s
+------------------------------
+Epoch 675/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 75.97, loss: 0.327 
+Epoch time: 1m 25s
+------------------------------
+Epoch 676/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.11, loss: 0.310 
+Epoch time: 1m 25s
+------------------------------
+Epoch 677/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.87, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 678/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.87, loss: 0.311 
+Epoch time: 1m 25s
+------------------------------
+Epoch 679/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.94, loss: 0.304 
+Epoch time: 1m 25s
+------------------------------
+Epoch 680/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.40, loss: 0.301 
+Epoch time: 1m 25s
+------------------------------
+Epoch 681/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.79, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 682/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.68, loss: 0.305 
+Epoch time: 1m 25s
+------------------------------
+Epoch 683/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.78, loss: 0.312 
+Epoch time: 1m 25s
+------------------------------
+Epoch 684/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.00, loss: 0.308 
+Epoch time: 1m 25s
+------------------------------
+Epoch 685/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.78, loss: 0.303 
+Epoch time: 1m 25s
+------------------------------
+Epoch 686/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.48, loss: 0.302 
+Epoch time: 1m 25s
+------------------------------
+Epoch 687/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.25, loss: 0.301 
+Epoch time: 1m 25s
+------------------------------
+Epoch 688/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.70, loss: 0.296 
+Epoch time: 1m 24s
+------------------------------
+Epoch 689/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.48, loss: 0.300 
+Epoch time: 1m 25s
+------------------------------
+Epoch 690/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.74, loss: 0.303 
+Epoch time: 1m 25s
+------------------------------
+Epoch 691/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.31, loss: 0.305 
+Epoch time: 1m 25s
+------------------------------
+Epoch 692/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.50, loss: 0.296 
+Epoch time: 1m 25s
+------------------------------
+Epoch 693/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.76, loss: 0.298 
+Epoch time: 1m 25s
+------------------------------
+Epoch 694/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.28, loss: 0.291 
+Epoch time: 1m 25s
+------------------------------
+Epoch 695/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.54, loss: 0.293 
+Epoch time: 1m 24s
+------------------------------
+Epoch 696/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.45, loss: 0.298 
+Epoch time: 1m 25s
+------------------------------
+Epoch 697/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.42, loss: 0.304 
+Epoch time: 1m 25s
+------------------------------
+Epoch 698/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.16, loss: 0.305 
+Epoch time: 1m 25s
+------------------------------
+Epoch 699/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.22, loss: 0.297 
+result accuracy by length:
+1 ( 2%) 90.00
+3 ( 2%) 88.00
+5 ( 2%) 48.06
+7 ( 4%) 42.79
+9 ( 4%) 44.22
+11 ( 3%) 38.64
+13 ( 4%) 42.59
+15 ( 4%) 41.09
+17 ( 4%) 34.95
+19 ( 4%) 42.16
+21 ( 4%) 36.87
+23 ( 4%) 37.07
+25 ( 4%) 32.50
+27 ( 4%) 40.39
+29 ( 3%) 36.65
+31 ( 3%) 30.95
+33 ( 2%) 19.29
+35 ( 2%) 13.01
+37 ( 2%) 21.37
+39 ( 3%) 15.79
+41 ( 3%) 17.45
+43 ( 2%) 13.77
+45 ( 2%) 15.18
+47 ( 2%) 18.18
+49 ( 2%) 13.38
+51 ( 2%) 21.21
+53 ( 2%) 18.66
+55 ( 2%) 10.08
+57 ( 2%) 18.88
+59 ( 2%) 16.82
+61 ( 1%) 20.31
+63 ( 0%) 17.14
+65 ( 0%) 33.33
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 28.98
+) (91%) 28.98
+* (87%) 27.32
++ (84%) 27.80
+- (77%) 31.26
+/ (76%) 29.61
+0 (52%) 31.41
+1 (60%) 29.05
+2 (61%) 27.87
+3 (62%) 28.13
+4 (61%) 26.33
+5 (62%) 27.05
+6 (62%) 26.66
+7 (63%) 27.35
+8 (64%) 25.57
+9 (63%) 25.35
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%)  0.00
+5 ( 0%) 100.00
+6 ( 0%) 100.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 75.62
+1 (10%) 39.33
+2 ( 4%) 37.37
+3 ( 2%) 40.74
+4 ( 2%) 18.80
+5 ( 2%) 35.00
+6 ( 2%) 30.43
+7 ( 2%) 43.36
+8 ( 2%) 33.33
+9 ( 1%) 48.84
+result accuracy by generalization:
+1 (22.45%) 85.00
+2 (22.96%) 31.29
+3 (22.53%)  2.63
+4 (15.82%) 31.23
+5 (16.24%)  2.51
+error cases:
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=32.20)
+Epoch time: 1m 41s
+------------------------------
+Epoch 700/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.69, loss: 0.297 
+Epoch time: 1m 24s
+------------------------------
+Epoch 701/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.40, loss: 0.299 
+Epoch time: 1m 24s
+------------------------------
+Epoch 702/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.42, loss: 0.292 
+Epoch time: 1m 25s
+------------------------------
+Epoch 703/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.32, loss: 0.303 
+Epoch time: 1m 25s
+------------------------------
+Epoch 704/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.95, loss: 0.290 
+Epoch time: 1m 25s
+------------------------------
+Epoch 705/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.25, loss: 0.312 
+Epoch time: 1m 25s
+------------------------------
+Epoch 706/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.15, loss: 0.309 
+Epoch time: 1m 25s
+------------------------------
+Epoch 707/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.80, loss: 0.312 
+Epoch time: 1m 24s
+------------------------------
+Epoch 708/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 76.81, loss: 0.301 
+Epoch time: 1m 25s
+------------------------------
+Epoch 709/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.27, loss: 0.303 
+Epoch time: 1m 24s
+------------------------------
+Epoch 710/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.48, loss: 0.301 
+Epoch time: 1m 25s
+------------------------------
+Epoch 711/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.77, loss: 0.287 
+Epoch time: 1m 25s
+------------------------------
+Epoch 712/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.07, loss: 0.302 
+Epoch time: 1m 24s
+------------------------------
+Epoch 713/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.11, loss: 0.298 
+Epoch time: 1m 24s
+------------------------------
+Epoch 714/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.38, loss: 0.289 
+Epoch time: 1m 25s
+------------------------------
+Epoch 715/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.11, loss: 0.291 
+Epoch time: 1m 25s
+------------------------------
+Epoch 716/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.89, loss: 0.292 
+Epoch time: 1m 25s
+------------------------------
+Epoch 717/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.54, loss: 0.282 
+Epoch time: 1m 25s
+------------------------------
+Epoch 718/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.11, loss: 0.290 
+Epoch time: 1m 25s
+------------------------------
+Epoch 719/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.37, loss: 0.295 
+Epoch time: 1m 25s
+------------------------------
+Epoch 720/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.85, loss: 0.286 
+Epoch time: 1m 25s
+------------------------------
+Epoch 721/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.43, loss: 0.286 
+Epoch time: 1m 24s
+------------------------------
+Epoch 722/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.28, loss: 0.287 
+Epoch time: 1m 25s
+------------------------------
+Epoch 723/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.49, loss: 0.288 
+Epoch time: 1m 25s
+------------------------------
+Epoch 724/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.81, loss: 0.295 
+Epoch time: 1m 25s
+------------------------------
+Epoch 725/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.70, loss: 0.286 
+Epoch time: 1m 25s
+------------------------------
+Epoch 726/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.40, loss: 0.284 
+Epoch time: 1m 25s
+------------------------------
+Epoch 727/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.89, loss: 0.290 
+Epoch time: 1m 25s
+------------------------------
+Epoch 728/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.20, loss: 0.298 
+Epoch time: 1m 25s
+------------------------------
+Epoch 729/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.07, loss: 0.294 
+Epoch time: 1m 25s
+------------------------------
+Epoch 730/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.07, loss: 0.313 
+Epoch time: 1m 25s
+------------------------------
+Epoch 731/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.29, loss: 0.289 
+Epoch time: 1m 25s
+------------------------------
+Epoch 732/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.53, loss: 0.290 
+Epoch time: 1m 24s
+------------------------------
+Epoch 733/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.24, loss: 0.288 
+Epoch time: 1m 25s
+------------------------------
+Epoch 734/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.66, loss: 0.282 
+Epoch time: 1m 25s
+------------------------------
+Epoch 735/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.51, loss: 0.286 
+Epoch time: 1m 25s
+------------------------------
+Epoch 736/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.02, loss: 0.292 
+Epoch time: 1m 25s
+------------------------------
+Epoch 737/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.15, loss: 0.296 
+Epoch time: 1m 25s
+------------------------------
+Epoch 738/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.92, loss: 0.298 
+Epoch time: 1m 25s
+------------------------------
+Epoch 739/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.67, loss: 0.291 
+Epoch time: 1m 25s
+------------------------------
+Epoch 740/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 77.95, loss: 0.290 
+Epoch time: 1m 25s
+------------------------------
+Epoch 741/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.56, loss: 0.289 
+Epoch time: 1m 24s
+------------------------------
+Epoch 742/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.05, loss: 0.278 
+Epoch time: 1m 25s
+------------------------------
+Epoch 743/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.76, loss: 0.280 
+Epoch time: 1m 25s
+------------------------------
+Epoch 744/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.76, loss: 0.282 
+Epoch time: 1m 25s
+------------------------------
+Epoch 745/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.70, loss: 0.282 
+Epoch time: 1m 25s
+------------------------------
+Epoch 746/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.59, loss: 0.284 
+Epoch time: 1m 25s
+------------------------------
+Epoch 747/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.95, loss: 0.278 
+Epoch time: 1m 25s
+------------------------------
+Epoch 748/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.23, loss: 0.285 
+Epoch time: 1m 25s
+------------------------------
+Epoch 749/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.36, loss: 0.289 
+Epoch time: 1m 25s
+------------------------------
+Epoch 750/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.53, loss: 0.281 
+Epoch time: 1m 25s
+------------------------------
+Epoch 751/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.99, loss: 0.280 
+Epoch time: 1m 25s
+------------------------------
+Epoch 752/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.36, loss: 0.273 
+Epoch time: 1m 25s
+------------------------------
+Epoch 753/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.44, loss: 0.287 
+Epoch time: 1m 25s
+------------------------------
+Epoch 754/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.20, loss: 0.295 
+Epoch time: 1m 25s
+------------------------------
+Epoch 755/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.04, loss: 0.278 
+Epoch time: 1m 25s
+------------------------------
+Epoch 756/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.71, loss: 0.279 
+Epoch time: 1m 24s
+------------------------------
+Epoch 757/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.94, loss: 0.282 
+Epoch time: 1m 24s
+------------------------------
+Epoch 758/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.91, loss: 0.275 
+Epoch time: 1m 25s
+------------------------------
+Epoch 759/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.32, loss: 0.273 
+Epoch time: 1m 25s
+------------------------------
+Epoch 760/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.02, loss: 0.281 
+Epoch time: 1m 25s
+------------------------------
+Epoch 761/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.11, loss: 0.286 
+Epoch time: 1m 24s
+------------------------------
+Epoch 762/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.67, loss: 0.281 
+Epoch time: 1m 25s
+------------------------------
+Epoch 763/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.90, loss: 0.287 
+Epoch time: 1m 25s
+------------------------------
+Epoch 764/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.14, loss: 0.268 
+Epoch time: 1m 25s
+------------------------------
+Epoch 765/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.13, loss: 0.280 
+Epoch time: 1m 25s
+------------------------------
+Epoch 766/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.28, loss: 0.270 
+Epoch time: 1m 25s
+------------------------------
+Epoch 767/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.10, loss: 0.271 
+Epoch time: 1m 25s
+------------------------------
+Epoch 768/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.99, loss: 0.272 
+Epoch time: 1m 25s
+------------------------------
+Epoch 769/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.32, loss: 0.269 
+Epoch time: 1m 25s
+------------------------------
+Epoch 770/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.98, loss: 0.279 
+Epoch time: 1m 25s
+------------------------------
+Epoch 771/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.82, loss: 0.265 
+Epoch time: 1m 25s
+------------------------------
+Epoch 772/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.68, loss: 0.271 
+Epoch time: 1m 25s
+------------------------------
+Epoch 773/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.71, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 774/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.15, loss: 0.274 
+Epoch time: 1m 24s
+------------------------------
+Epoch 775/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.71, loss: 0.265 
+Epoch time: 1m 25s
+------------------------------
+Epoch 776/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.48, loss: 0.268 
+Epoch time: 1m 25s
+------------------------------
+Epoch 777/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.58, loss: 0.267 
+Epoch time: 1m 25s
+------------------------------
+Epoch 778/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.88, loss: 0.264 
+Epoch time: 1m 25s
+------------------------------
+Epoch 779/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.88, loss: 0.272 
+Epoch time: 1m 25s
+------------------------------
+Epoch 780/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.05, loss: 0.276 
+Epoch time: 1m 25s
+------------------------------
+Epoch 781/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.03, loss: 0.270 
+Epoch time: 1m 26s
+------------------------------
+Epoch 782/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.99, loss: 0.261 
+Epoch time: 1m 25s
+------------------------------
+Epoch 783/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.17, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 784/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.63, loss: 0.270 
+Epoch time: 1m 25s
+------------------------------
+Epoch 785/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.55, loss: 0.273 
+Epoch time: 1m 25s
+------------------------------
+Epoch 786/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.98, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 787/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.49, loss: 0.273 
+Epoch time: 1m 25s
+------------------------------
+Epoch 788/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.45, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 789/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.13, loss: 0.264 
+Epoch time: 1m 25s
+------------------------------
+Epoch 790/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.55, loss: 0.271 
+Epoch time: 1m 25s
+------------------------------
+Epoch 791/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.77, loss: 0.280 
+Epoch time: 1m 25s
+------------------------------
+Epoch 792/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.86, loss: 0.271 
+Epoch time: 1m 25s
+------------------------------
+Epoch 793/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.81, loss: 0.274 
+Epoch time: 1m 25s
+------------------------------
+Epoch 794/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.42, loss: 0.274 
+Epoch time: 1m 25s
+------------------------------
+Epoch 795/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.97, loss: 0.263 
+Epoch time: 1m 25s
+------------------------------
+Epoch 796/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.74, loss: 0.265 
+Epoch time: 1m 25s
+------------------------------
+Epoch 797/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.16, loss: 0.267 
+Epoch time: 1m 24s
+------------------------------
+Epoch 798/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.01, loss: 0.271 
+Epoch time: 1m 25s
+------------------------------
+Epoch 799/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.60, loss: 0.267 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 87.00
+5 ( 2%) 48.06
+7 ( 4%) 42.36
+9 ( 4%) 46.73
+11 ( 3%) 40.91
+13 ( 4%) 42.59
+15 ( 4%) 40.10
+17 ( 4%) 36.41
+19 ( 4%) 42.16
+21 ( 4%) 37.88
+23 ( 4%) 36.59
+25 ( 4%) 33.50
+27 ( 4%) 40.39
+29 ( 3%) 37.70
+31 ( 3%) 31.55
+33 ( 2%) 17.14
+35 ( 2%) 18.49
+37 ( 2%) 20.51
+39 ( 3%) 14.47
+41 ( 3%) 15.44
+43 ( 2%) 11.59
+45 ( 2%) 12.50
+47 ( 2%) 18.94
+49 ( 2%) 15.49
+51 ( 2%) 23.48
+53 ( 2%) 18.66
+55 ( 2%) 10.92
+57 ( 2%) 18.88
+59 ( 2%) 17.76
+61 ( 1%) 23.44
+63 ( 0%) 28.57
+65 ( 0%) 33.33
+67 ( 0%)  0.00
+result accuracy by symbol:
+( (91%) 29.47
+) (91%) 29.47
+* (87%) 27.62
++ (84%) 28.13
+- (77%) 31.71
+/ (76%) 30.07
+0 (52%) 31.84
+1 (60%) 29.45
+2 (61%) 28.67
+3 (62%) 28.52
+4 (61%) 26.53
+5 (62%) 27.31
+6 (62%) 27.28
+7 (63%) 27.41
+8 (64%) 25.83
+9 (63%) 25.61
+result accuracy by digit:
+0 ( 0%) 90.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%)  0.00
+5 ( 0%) 100.00
+6 ( 0%) 100.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 77.43
+1 (10%) 40.45
+2 ( 4%) 35.35
+3 ( 2%) 42.96
+4 ( 2%) 21.05
+5 ( 2%) 38.00
+6 ( 2%) 32.17
+7 ( 2%) 39.82
+8 ( 2%) 33.33
+9 ( 1%) 51.16
+result accuracy by generalization:
+1 (22.45%) 85.18
+2 (22.96%) 33.16
+3 (22.53%)  2.08
+4 (15.82%) 30.97
+5 (16.24%)  3.14
+error cases:
+0 [-1] 0 1
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=32.61)
+Epoch time: 1m 41s
+------------------------------
+Epoch 800/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.94, loss: 0.265 
+Epoch time: 1m 25s
+------------------------------
+Epoch 801/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.68, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 802/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.12, loss: 0.276 
+Epoch time: 1m 25s
+------------------------------
+Epoch 803/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.95, loss: 0.268 
+Epoch time: 1m 25s
+------------------------------
+Epoch 804/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.70, loss: 0.263 
+Epoch time: 1m 25s
+------------------------------
+Epoch 805/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.94, loss: 0.265 
+Epoch time: 1m 25s
+------------------------------
+Epoch 806/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.93, loss: 0.263 
+Epoch time: 1m 25s
+------------------------------
+Epoch 807/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.23, loss: 0.261 
+Epoch time: 1m 25s
+------------------------------
+Epoch 808/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.22, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 809/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.98, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 810/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.79, loss: 0.263 
+Epoch time: 1m 25s
+------------------------------
+Epoch 811/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.52, loss: 0.256 
+Epoch time: 1m 25s
+------------------------------
+Epoch 812/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.96, loss: 0.259 
+Epoch time: 1m 25s
+------------------------------
+Epoch 813/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.84, loss: 0.267 
+Epoch time: 1m 25s
+------------------------------
+Epoch 814/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.07, loss: 0.260 
+Epoch time: 1m 25s
+------------------------------
+Epoch 815/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.84, loss: 0.262 
+Epoch time: 1m 25s
+------------------------------
+Epoch 816/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.84, loss: 0.278 
+Epoch time: 1m 25s
+------------------------------
+Epoch 817/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.39, loss: 0.271 
+Epoch time: 1m 25s
+------------------------------
+Epoch 818/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.80, loss: 0.257 
+Epoch time: 1m 25s
+------------------------------
+Epoch 819/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.90, loss: 0.275 
+Epoch time: 1m 25s
+------------------------------
+Epoch 820/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.40, loss: 0.265 
+Epoch time: 1m 25s
+------------------------------
+Epoch 821/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.17, loss: 0.293 
+Epoch time: 1m 25s
+------------------------------
+Epoch 822/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.66, loss: 0.270 
+Epoch time: 1m 25s
+------------------------------
+Epoch 823/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.72, loss: 0.268 
+Epoch time: 1m 24s
+------------------------------
+Epoch 824/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.98, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 825/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.11, loss: 0.269 
+Epoch time: 1m 25s
+------------------------------
+Epoch 826/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.23, loss: 0.267 
+Epoch time: 1m 25s
+------------------------------
+Epoch 827/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.35, loss: 0.259 
+Epoch time: 1m 25s
+------------------------------
+Epoch 828/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.62, loss: 0.263 
+Epoch time: 1m 25s
+------------------------------
+Epoch 829/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.15, loss: 0.274 
+Epoch time: 1m 25s
+------------------------------
+Epoch 830/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.18, loss: 0.260 
+Epoch time: 1m 25s
+------------------------------
+Epoch 831/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.33, loss: 0.256 
+Epoch time: 1m 25s
+------------------------------
+Epoch 832/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.12, loss: 0.262 
+Epoch time: 1m 25s
+------------------------------
+Epoch 833/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.61, loss: 0.261 
+Epoch time: 1m 25s
+------------------------------
+Epoch 834/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.86, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 835/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.67, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 836/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.35, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 837/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.84, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 838/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.29, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 839/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.45, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 840/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.38, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 841/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.40, loss: 0.261 
+Epoch time: 1m 25s
+------------------------------
+Epoch 842/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.22, loss: 0.263 
+Epoch time: 1m 25s
+------------------------------
+Epoch 843/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.58, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 844/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.61, loss: 0.256 
+Epoch time: 1m 25s
+------------------------------
+Epoch 845/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.41, loss: 0.257 
+Epoch time: 1m 24s
+------------------------------
+Epoch 846/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.20, loss: 0.255 
+Epoch time: 1m 25s
+------------------------------
+Epoch 847/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.82, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 848/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.09, loss: 0.260 
+Epoch time: 1m 25s
+------------------------------
+Epoch 849/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.80, loss: 0.251 
+Epoch time: 1m 25s
+------------------------------
+Epoch 850/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.71, loss: 0.255 
+Epoch time: 1m 25s
+------------------------------
+Epoch 851/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.80, loss: 0.255 
+Epoch time: 1m 25s
+------------------------------
+Epoch 852/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.62, loss: 0.254 
+Epoch time: 1m 24s
+------------------------------
+Epoch 853/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.73, loss: 0.245 
+Epoch time: 1m 25s
+------------------------------
+Epoch 854/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.03, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 855/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.67, loss: 0.253 
+Epoch time: 1m 25s
+------------------------------
+Epoch 856/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.58, loss: 0.254 
+Epoch time: 1m 24s
+------------------------------
+Epoch 857/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.10, loss: 0.249 
+Epoch time: 1m 24s
+------------------------------
+Epoch 858/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.93, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 859/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.64, loss: 0.251 
+Epoch time: 1m 25s
+------------------------------
+Epoch 860/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.05, loss: 0.250 
+Epoch time: 1m 25s
+------------------------------
+Epoch 861/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.88, loss: 0.250 
+Epoch time: 1m 25s
+------------------------------
+Epoch 862/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.19, loss: 0.244 
+Epoch time: 1m 25s
+------------------------------
+Epoch 863/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.60, loss: 0.247 
+Epoch time: 1m 25s
+------------------------------
+Epoch 864/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.02, loss: 0.249 
+Epoch time: 1m 25s
+------------------------------
+Epoch 865/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.20, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 866/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.44, loss: 0.255 
+Epoch time: 1m 25s
+------------------------------
+Epoch 867/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.12, loss: 0.244 
+Epoch time: 1m 25s
+------------------------------
+Epoch 868/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.47, loss: 0.252 
+Epoch time: 1m 25s
+------------------------------
+Epoch 869/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.75, loss: 0.264 
+Epoch time: 1m 25s
+------------------------------
+Epoch 870/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.44, loss: 0.253 
+Epoch time: 1m 25s
+------------------------------
+Epoch 871/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.82, loss: 0.259 
+Epoch time: 1m 25s
+------------------------------
+Epoch 872/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.63, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 873/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.59, loss: 0.256 
+Epoch time: 1m 25s
+------------------------------
+Epoch 874/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 79.24, loss: 0.278 
+Epoch time: 1m 25s
+------------------------------
+Epoch 875/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.37, loss: 0.267 
+Epoch time: 1m 25s
+------------------------------
+Epoch 876/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.82, loss: 0.257 
+Epoch time: 1m 25s
+------------------------------
+Epoch 877/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.98, loss: 0.248 
+Epoch time: 1m 25s
+------------------------------
+Epoch 878/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.96, loss: 0.251 
+Epoch time: 1m 25s
+------------------------------
+Epoch 879/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.18, loss: 0.250 
+Epoch time: 1m 25s
+------------------------------
+Epoch 880/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.67, loss: 0.259 
+Epoch time: 1m 25s
+------------------------------
+Epoch 881/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.70, loss: 0.254 
+Epoch time: 1m 25s
+------------------------------
+Epoch 882/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.63, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 883/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.97, loss: 0.252 
+Epoch time: 1m 25s
+------------------------------
+Epoch 884/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.80, loss: 0.253 
+Epoch time: 1m 25s
+------------------------------
+Epoch 885/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.28, loss: 0.245 
+Epoch time: 1m 25s
+------------------------------
+Epoch 886/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.31, loss: 0.239 
+Epoch time: 1m 25s
+------------------------------
+Epoch 887/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.58, loss: 0.261 
+Epoch time: 1m 25s
+------------------------------
+Epoch 888/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.16, loss: 0.266 
+Epoch time: 1m 25s
+------------------------------
+Epoch 889/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.70, loss: 0.256 
+Epoch time: 1m 24s
+------------------------------
+Epoch 890/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.35, loss: 0.253 
+Epoch time: 1m 24s
+------------------------------
+Epoch 891/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.04, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 892/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.75, loss: 0.252 
+Epoch time: 1m 25s
+------------------------------
+Epoch 893/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.59, loss: 0.252 
+Epoch time: 1m 25s
+------------------------------
+Epoch 894/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.97, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 895/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.51, loss: 0.247 
+Epoch time: 1m 25s
+------------------------------
+Epoch 896/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.97, loss: 0.238 
+Epoch time: 1m 25s
+------------------------------
+Epoch 897/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.58, loss: 0.248 
+Epoch time: 1m 25s
+------------------------------
+Epoch 898/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.55, loss: 0.245 
+Epoch time: 1m 25s
+------------------------------
+Epoch 899/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.10, loss: 0.242 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 91.00
+5 ( 2%) 47.29
+7 ( 4%) 43.67
+9 ( 4%) 48.24
+11 ( 3%) 42.05
+13 ( 4%) 43.52
+15 ( 4%) 43.07
+17 ( 4%) 38.35
+19 ( 4%) 40.20
+21 ( 4%) 36.36
+23 ( 4%) 36.10
+25 ( 4%) 37.50
+27 ( 4%) 40.39
+29 ( 3%) 36.13
+31 ( 3%) 28.57
+33 ( 2%) 15.71
+35 ( 2%) 19.18
+37 ( 2%) 20.51
+39 ( 3%) 14.47
+41 ( 3%) 16.11
+43 ( 2%) 15.22
+45 ( 2%) 15.18
+47 ( 2%) 20.45
+49 ( 2%) 16.90
+51 ( 2%) 23.48
+53 ( 2%) 20.90
+55 ( 2%) 13.45
+57 ( 2%) 18.88
+59 ( 2%) 18.69
+61 ( 1%) 18.75
+63 ( 0%) 25.71
+65 ( 0%) 22.22
+67 ( 0%)  0.00
+result accuracy by symbol:
+( (91%) 30.10
+) (91%) 30.10
+* (87%) 28.16
++ (84%) 28.71
+- (77%) 32.36
+/ (76%) 30.68
+0 (52%) 32.73
+1 (60%) 30.29
+2 (61%) 29.00
+3 (62%) 29.21
+4 (61%) 27.50
+5 (62%) 27.86
+6 (62%) 27.51
+7 (63%) 27.80
+8 (64%) 25.83
+9 (63%) 25.96
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%) 90.00
+5 ( 0%) 100.00
+6 ( 0%)  0.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 79.43
+1 (10%) 40.07
+2 ( 4%) 38.89
+3 ( 2%) 39.26
+4 ( 2%) 24.06
+5 ( 2%) 35.00
+6 ( 2%) 21.74
+7 ( 2%) 42.48
+8 ( 2%) 35.04
+9 ( 1%) 51.16
+result accuracy by generalization:
+1 (22.45%) 86.91
+2 (22.96%) 32.71
+3 (22.53%)  2.08
+4 (15.82%) 33.16
+5 (16.24%)  2.89
+error cases:
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+6 [-1] 6 4
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=33.20)
+Epoch time: 1m 41s
+------------------------------
+Epoch 900/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.45, loss: 0.245 
+Epoch time: 1m 24s
+------------------------------
+Epoch 901/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.68, loss: 0.249 
+Epoch time: 1m 24s
+------------------------------
+Epoch 902/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.36, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 903/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.61, loss: 0.240 
+Epoch time: 1m 25s
+------------------------------
+Epoch 904/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.37, loss: 0.243 
+Epoch time: 1m 25s
+------------------------------
+Epoch 905/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.93, loss: 0.244 
+Epoch time: 1m 25s
+------------------------------
+Epoch 906/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.77, loss: 0.240 
+Epoch time: 1m 25s
+------------------------------
+Epoch 907/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.38, loss: 0.241 
+Epoch time: 1m 25s
+------------------------------
+Epoch 908/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.52, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 909/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.14, loss: 0.238 
+Epoch time: 1m 24s
+------------------------------
+Epoch 910/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.58, loss: 0.243 
+Epoch time: 1m 25s
+------------------------------
+Epoch 911/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.55, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 912/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.74, loss: 0.237 
+Epoch time: 1m 25s
+------------------------------
+Epoch 913/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.98, loss: 0.259 
+Epoch time: 1m 25s
+------------------------------
+Epoch 914/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.95, loss: 0.249 
+Epoch time: 1m 24s
+------------------------------
+Epoch 915/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.55, loss: 0.237 
+Epoch time: 1m 24s
+------------------------------
+Epoch 916/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.99, loss: 0.249 
+Epoch time: 1m 25s
+------------------------------
+Epoch 917/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.89, loss: 0.236 
+Epoch time: 1m 25s
+------------------------------
+Epoch 918/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.64, loss: 0.243 
+Epoch time: 1m 25s
+------------------------------
+Epoch 919/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.19, loss: 0.241 
+Epoch time: 1m 25s
+------------------------------
+Epoch 920/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.70, loss: 0.236 
+Epoch time: 1m 25s
+------------------------------
+Epoch 921/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.62, loss: 0.244 
+Epoch time: 1m 25s
+------------------------------
+Epoch 922/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.78, loss: 0.242 
+Epoch time: 1m 25s
+------------------------------
+Epoch 923/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.74, loss: 0.240 
+Epoch time: 1m 25s
+------------------------------
+Epoch 924/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.81, loss: 0.232 
+Epoch time: 1m 25s
+------------------------------
+Epoch 925/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.46, loss: 0.243 
+Epoch time: 1m 25s
+------------------------------
+Epoch 926/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.08, loss: 0.247 
+Epoch time: 1m 25s
+------------------------------
+Epoch 927/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 78.62, loss: 0.319 
+Epoch time: 1m 25s
+------------------------------
+Epoch 928/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.80, loss: 0.253 
+Epoch time: 1m 25s
+------------------------------
+Epoch 929/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.94, loss: 0.251 
+Epoch time: 1m 25s
+------------------------------
+Epoch 930/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.91, loss: 0.234 
+Epoch time: 1m 25s
+------------------------------
+Epoch 931/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.16, loss: 0.235 
+Epoch time: 1m 24s
+------------------------------
+Epoch 932/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.24, loss: 0.247 
+Epoch time: 1m 25s
+------------------------------
+Epoch 933/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.72, loss: 0.239 
+Epoch time: 1m 25s
+------------------------------
+Epoch 934/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.17, loss: 0.240 
+Epoch time: 1m 25s
+------------------------------
+Epoch 935/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.72, loss: 0.240 
+Epoch time: 1m 25s
+------------------------------
+Epoch 936/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.82, loss: 0.238 
+Epoch time: 1m 25s
+------------------------------
+Epoch 937/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.40, loss: 0.231 
+Epoch time: 1m 25s
+------------------------------
+Epoch 938/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.03, loss: 0.236 
+Epoch time: 1m 25s
+------------------------------
+Epoch 939/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.06, loss: 0.238 
+Epoch time: 1m 25s
+------------------------------
+Epoch 940/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.85, loss: 0.234 
+Epoch time: 1m 25s
+------------------------------
+Epoch 941/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.10, loss: 0.236 
+Epoch time: 1m 25s
+------------------------------
+Epoch 942/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.62, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 943/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.93, loss: 0.244 
+Epoch time: 1m 25s
+------------------------------
+Epoch 944/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.81, loss: 0.256 
+Epoch time: 1m 25s
+------------------------------
+Epoch 945/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.80, loss: 0.242 
+Epoch time: 1m 25s
+------------------------------
+Epoch 946/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.13, loss: 0.248 
+Epoch time: 1m 25s
+------------------------------
+Epoch 947/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.04, loss: 0.240 
+Epoch time: 1m 25s
+------------------------------
+Epoch 948/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.38, loss: 0.253 
+Epoch time: 1m 25s
+------------------------------
+Epoch 949/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.30, loss: 0.247 
+Epoch time: 1m 25s
+------------------------------
+Epoch 950/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.68, loss: 0.246 
+Epoch time: 1m 25s
+------------------------------
+Epoch 951/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.15, loss: 0.233 
+Epoch time: 1m 25s
+------------------------------
+Epoch 952/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.13, loss: 0.244 
+Epoch time: 1m 25s
+------------------------------
+Epoch 953/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.00, loss: 0.243 
+Epoch time: 1m 25s
+------------------------------
+Epoch 954/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.55, loss: 0.229 
+Epoch time: 1m 25s
+------------------------------
+Epoch 955/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.97, loss: 0.229 
+Epoch time: 1m 25s
+------------------------------
+Epoch 956/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.22, loss: 0.234 
+Epoch time: 1m 25s
+------------------------------
+Epoch 957/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.10, loss: 0.234 
+Epoch time: 1m 25s
+------------------------------
+Epoch 958/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.07, loss: 0.258 
+Epoch time: 1m 25s
+------------------------------
+Epoch 959/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.53, loss: 0.227 
+Epoch time: 1m 24s
+------------------------------
+Epoch 960/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.59, loss: 0.243 
+Epoch time: 1m 24s
+------------------------------
+Epoch 961/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.18, loss: 0.247 
+Epoch time: 1m 25s
+------------------------------
+Epoch 962/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.70, loss: 0.241 
+Epoch time: 1m 25s
+------------------------------
+Epoch 963/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.41, loss: 0.231 
+Epoch time: 1m 25s
+------------------------------
+Epoch 964/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.57, loss: 0.234 
+Epoch time: 1m 25s
+------------------------------
+Epoch 965/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.90, loss: 0.234 
+Epoch time: 1m 24s
+------------------------------
+Epoch 966/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.24, loss: 0.235 
+Epoch time: 1m 25s
+------------------------------
+Epoch 967/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.06, loss: 0.233 
+Epoch time: 1m 25s
+------------------------------
+Epoch 968/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.56, loss: 0.236 
+Epoch time: 1m 24s
+------------------------------
+Epoch 969/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.81, loss: 0.235 
+Epoch time: 1m 25s
+------------------------------
+Epoch 970/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.93, loss: 0.233 
+Epoch time: 1m 25s
+------------------------------
+Epoch 971/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.08, loss: 0.237 
+Epoch time: 1m 25s
+------------------------------
+Epoch 972/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.85, loss: 0.233 
+Epoch time: 1m 25s
+------------------------------
+Epoch 973/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.95, loss: 0.230 
+Epoch time: 1m 24s
+------------------------------
+Epoch 974/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.06, loss: 0.232 
+Epoch time: 1m 25s
+------------------------------
+Epoch 975/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.55, loss: 0.226 
+Epoch time: 1m 25s
+------------------------------
+Epoch 976/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 80.61, loss: 0.261 
+Epoch time: 1m 25s
+------------------------------
+Epoch 977/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.08, loss: 0.237 
+Epoch time: 1m 25s
+------------------------------
+Epoch 978/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.31, loss: 0.229 
+Epoch time: 1m 25s
+------------------------------
+Epoch 979/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.63, loss: 0.239 
+Epoch time: 1m 25s
+------------------------------
+Epoch 980/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.67, loss: 0.229 
+Epoch time: 1m 25s
+------------------------------
+Epoch 981/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.24, loss: 0.238 
+Epoch time: 1m 25s
+------------------------------
+Epoch 982/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.88, loss: 0.226 
+Epoch time: 1m 24s
+------------------------------
+Epoch 983/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.65, loss: 0.226 
+Epoch time: 1m 25s
+------------------------------
+Epoch 984/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.96, loss: 0.241 
+Epoch time: 1m 25s
+------------------------------
+Epoch 985/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.82, loss: 0.224 
+Epoch time: 1m 25s
+------------------------------
+Epoch 986/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.38, loss: 0.237 
+Epoch time: 1m 25s
+------------------------------
+Epoch 987/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.71, loss: 0.228 
+Epoch time: 1m 25s
+------------------------------
+Epoch 988/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.93, loss: 0.226 
+Epoch time: 1m 25s
+------------------------------
+Epoch 989/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.07, loss: 0.238 
+Epoch time: 1m 25s
+------------------------------
+Epoch 990/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.92, loss: 0.237 
+Epoch time: 1m 24s
+------------------------------
+Epoch 991/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.93, loss: 0.232 
+Epoch time: 1m 25s
+------------------------------
+Epoch 992/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.20, loss: 0.237 
+Epoch time: 1m 25s
+------------------------------
+Epoch 993/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.88, loss: 0.227 
+Epoch time: 1m 25s
+------------------------------
+Epoch 994/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 83.06, loss: 0.221 
+Epoch time: 1m 24s
+------------------------------
+Epoch 995/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 83.05, loss: 0.231 
+Epoch time: 1m 24s
+------------------------------
+Epoch 996/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.88, loss: 0.231 
+Epoch time: 1m 25s
+------------------------------
+Epoch 997/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 81.99, loss: 0.239 
+Epoch time: 1m 25s
+------------------------------
+Epoch 998/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.77, loss: 0.228 
+Epoch time: 1m 25s
+------------------------------
+Epoch 999/999 (max_len=inf, data=11170, lr=0.001)
+Train acc: 82.74, loss: 0.226 
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 87.00
+5 ( 2%) 48.06
+7 ( 4%) 40.61
+9 ( 4%) 47.74
+11 ( 3%) 39.20
+13 ( 4%) 40.74
+15 ( 4%) 42.08
+17 ( 4%) 39.81
+19 ( 4%) 38.73
+21 ( 4%) 38.89
+23 ( 4%) 39.02
+25 ( 4%) 36.50
+27 ( 4%) 40.89
+29 ( 3%) 36.13
+31 ( 3%) 32.74
+33 ( 2%) 16.43
+35 ( 2%) 18.49
+37 ( 2%) 22.22
+39 ( 3%) 10.53
+41 ( 3%) 18.12
+43 ( 2%) 15.94
+45 ( 2%) 12.50
+47 ( 2%) 16.67
+49 ( 2%) 15.49
+51 ( 2%) 20.45
+53 ( 2%) 18.66
+55 ( 2%) 13.45
+57 ( 2%) 18.88
+59 ( 2%) 17.76
+61 ( 1%) 21.88
+63 ( 0%) 20.00
+65 ( 0%) 22.22
+67 ( 0%) 33.33
+result accuracy by symbol:
+( (91%) 29.65
+) (91%) 29.65
+* (87%) 27.71
++ (84%) 28.30
+- (77%) 31.71
+/ (76%) 30.33
+0 (52%) 31.72
+1 (60%) 29.55
+2 (61%) 28.50
+3 (62%) 28.82
+4 (61%) 26.93
+5 (62%) 27.44
+6 (62%) 27.44
+7 (63%) 27.32
+8 (64%) 26.08
+9 (63%) 25.86
+result accuracy by digit:
+0 ( 0%) 90.00
+1 ( 0%) 100.00
+2 ( 0%) 100.00
+3 ( 0%) 100.00
+4 ( 0%)  0.00
+5 ( 0%) 100.00
+6 ( 0%) 100.00
+7 ( 0%) 100.00
+8 ( 0%) 100.00
+9 ( 0%) 100.00
+result accuracy by result:
+0 (21%) 76.38
+1 (10%) 39.51
+2 ( 4%) 39.39
+3 ( 2%) 41.48
+4 ( 2%) 19.55
+5 ( 2%) 37.00
+6 ( 2%) 33.04
+7 ( 2%) 43.36
+8 ( 2%) 30.77
+9 ( 1%) 46.51
+result accuracy by generalization:
+1 (22.45%) 87.73
+2 (22.96%) 31.64
+3 (22.53%)  1.90
+4 (15.82%) 30.58
+5 (16.24%)  3.02
+error cases:
+0 [-1] 0 1
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 1
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+val (Perception Acc=0.00, Head Acc=0.00, Result Acc=32.71)
+Epoch time: 1m 41s
+------------------------------
+Evaluate on test set...
+result accuracy by length:
+1 ( 2%) 89.00
+3 ( 2%) 84.44
+5 ( 2%) 49.04
+7 ( 4%) 46.17
+9 ( 4%) 43.85
+11 ( 4%) 40.47
+13 ( 4%) 41.15
+15 ( 4%) 41.71
+17 ( 4%) 40.92
+19 ( 4%) 39.50
+21 ( 4%) 39.03
+23 ( 4%) 39.22
+25 ( 4%) 37.82
+27 ( 4%) 36.92
+29 ( 3%) 35.48
+31 ( 3%) 31.47
+33 ( 2%) 23.34
+35 ( 2%) 17.41
+37 ( 2%) 16.82
+39 ( 2%) 15.74
+41 ( 2%) 15.31
+43 ( 2%) 16.24
+45 ( 2%) 16.06
+47 ( 2%) 16.23
+49 ( 2%) 16.51
+51 ( 2%) 18.90
+53 ( 2%) 17.10
+55 ( 2%) 16.51
+57 ( 2%) 16.15
+59 ( 2%) 16.14
+61 ( 1%) 18.14
+63 ( 0%) 22.85
+65 ( 0%) 23.14
+67 ( 0%) 34.48
+69 ( 0%) 36.36
+71 ( 0%) 50.00
+result accuracy by symbol:
+( (91%) 29.69
+) (91%) 29.69
+* (87%) 27.66
++ (84%) 28.54
+- (78%) 31.49
+/ (77%) 30.58
+0 (51%) 31.69
+1 (60%) 29.39
+2 (61%) 28.55
+3 (62%) 28.45
+4 (62%) 27.03
+5 (62%) 27.62
+6 (62%) 27.03
+7 (63%) 27.06
+8 (63%) 26.88
+9 (63%) 26.72
+result accuracy by digit:
+0 ( 0%) 100.00
+1 ( 0%) 100.00
+2 ( 0%) 97.00
+3 ( 0%) 100.00
+4 ( 0%)  0.00
+5 ( 0%) 98.00
+6 ( 0%) 99.00
+7 ( 0%) 98.00
+8 ( 0%) 100.00
+9 ( 0%) 98.00
+result accuracy by result:
+0 (21%) 76.10
+1 (11%) 38.85
+2 ( 3%) 36.66
+3 ( 3%) 35.95
+4 ( 2%) 23.67
+5 ( 2%) 38.68
+6 ( 2%) 36.48
+7 ( 2%) 40.14
+8 ( 2%) 39.77
+9 ( 2%) 43.95
+result accuracy by generalization:
+1 (22.84%) 87.31
+2 (23.00%) 30.74
+3 (22.36%)  2.67
+4 (15.84%) 31.17
+5 (15.95%)  2.55
+error cases:
+7 [-1] 7 1
+7 [-1] 7 1
+6 [-1] 6 8
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+4 [-1] 4 6
+test (Perception Acc=0.00, Head Acc=0.00, Result Acc=32.95)
