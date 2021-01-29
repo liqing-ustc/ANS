@@ -185,7 +185,7 @@ def train(model, args, st_epoch=0):
                 break
         train_set.filter_by_len(max_len=max_len)
         train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
-                            shuffle=False, num_workers=4, collate_fn=HINT_collate)
+                            shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
     # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
