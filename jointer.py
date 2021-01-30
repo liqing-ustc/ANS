@@ -8,8 +8,32 @@ from collections import Counter, namedtuple
 from time import time
 import torch
 import random
+from heapq import heappush, heappop, heapify
 
 Parse = namedtuple('Parse', ['sentence', 'head'])
+
+class SentGenerator(object):
+    def __init__(self, probs):
+        probs = np.log(probs + 1e-12) 
+        self.probs = probs
+        self.max_probs = probs.max(1)
+        self.queue = [(-self.max_probs.sum(), [])]
+    
+    def next(self):
+        epsilon = np.log(1e-5)
+        while self.queue:
+            priority, sent = heappop(self.queue)
+            if len(sent) == len(self.probs):
+                return sent
+            next_pos = len(sent)
+            next_prob = self.probs[next_pos]
+            for i, p in enumerate(next_prob):
+                if p < epsilon:
+                    continue
+                new_state = (priority + self.max_probs[next_pos] - p, sent + [i])
+                heappush(self.queue, new_state)
+        
+        return None
 
 class Node:
     def __init__(self, symbol, smt):
@@ -211,7 +235,7 @@ class Jointer:
         self.perception.to(device)
         self.syntax.to(device)
     
-    def deduce(self, sample):
+    def deduce(self, sample, n_steps=1):
         config = self.config
         img_seq = sample['img_seq']
         lengths = sample['len']
@@ -219,7 +243,11 @@ class Jointer:
 
         if config.perception: # use gt perception
             sentences = sample['sentence']
-            sent_probs = [np.ones((l, len(SYMBOLS))) for l in lengths]
+            sent_probs = []
+            for sent, l in zip(sentences, lengths):
+                probs = np.zeros((l, len(SYMBOLS)))
+                probs[range(l), sent] = 1
+                sent_probs.append(probs)
         else:
             symbols , probs = self.perception(img_seq)
             symbols = symbols.detach().cpu().numpy()
@@ -233,20 +261,39 @@ class Jointer:
                 sent_probs.append(probs[current:current+l])
                 current += l
 
-        if config.syntax: # use gt parse
-            parses = []
-            for s, head in zip(sentences, sample['head']):
-                pt = syntax.PartialParse(s)
-                pt.head = head
-                parses.append(pt)
-        else:
-            parses = self.syntax(sentences)
-
         semantics = self.semantics()
-        
-        self.ASTs = [AST(pt, semantics, s_prob) for pt, s_prob in zip(parses, sent_probs)]
-        results = [x.res() for x in self.ASTs]
-        head = [pt.head for pt in parses]
+        self.ASTs = [None] * len(lengths)
+        sent_generators = [SentGenerator(probs) for probs in sent_probs]
+        unfinished = list(range(len(lengths)))
+        for t in range(n_steps):
+            sentences = [sent_generators[i].next() for i in unfinished]
+            not_none = [i for i, s in enumerate(sentences) if s is not None]
+            unfinished = [unfinished[i] for i in not_none]
+            sentences = [sentences[i] for i in not_none]
+            if config.syntax: # use gt parse
+                parses = []
+                for i, s in zip(unfinished, sentences):
+                    head = sample['head'][i]
+                    pt = syntax.PartialParse(s)
+                    pt.head = head
+                    parses.append(pt)
+            else:
+                parses = self.syntax(sentences)
+            
+            tmp = []
+            for i, pt in zip(unfinished, parses):
+                ast = AST(pt, semantics, sent_probs[i])
+                if ast.res() is None:
+                    tmp.append(i)
+                if self.ASTs[i] is None or ast.res() is not None:
+                    self.ASTs[i] = ast
+            unfinished = tmp
+            if not unfinished:
+                break
+
+        results = [ast.res() for ast in self.ASTs]
+        head = [ast.pt.head for ast in self.ASTs]
+        sentences = [ast.pt.sentence for ast in self.ASTs]
         return results, sentences, head
 
     def abduce(self, gt_values, batch_img_paths):

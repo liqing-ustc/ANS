@@ -50,7 +50,7 @@ def draw_parse(sentence, head):
     tree = build_tree(root)
     return tree
 
-def evaluate(model, dataloader):
+def evaluate(model, dataloader, n_steps=1):
     model.eval() 
     res_all = []
     res_pred_all = []
@@ -67,7 +67,7 @@ def evaluate(model, dataloader):
             expr = sample['expr']
             dep = sample['head']
 
-            res_preds, expr_preds, dep_preds = model.deduce(sample)
+            res_preds, expr_preds, dep_preds = model.deduce(sample, n_steps=n_steps)
             
             res_pred_all.append(res_preds)
             res_all.append(res)
@@ -185,8 +185,8 @@ def train(model, args, st_epoch=0):
                             shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ###########evaluate init model###########
-    # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
     #########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -232,12 +232,16 @@ def train(model, args, st_epoch=0):
         print('Epoch time: {:.0f}m {:.0f}s'.format(
             time_elapsed // 60, time_elapsed % 60))
 
+    n_steps = 100
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader, n_steps)
+    print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
+
     # Test
     print('-' * 30)
     print('Evaluate on test set...')
     eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
-    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader, n_steps)
     print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('test', 100*perception_acc, 100*head_acc, 100*result_acc))
     return
 
