@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
-    parser.add_argument('--epochs_eval', type=int, default=5, help='how many epochs per evaluation')
+    parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
     args = parser.parse_args()
     return args
 
