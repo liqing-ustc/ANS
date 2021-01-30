@@ -158,10 +158,10 @@ def evaluate(model, dataloader):
 
 def train(model, args, st_epoch=0):
     best_acc = 0.0
-    batch_size = 128
+    batch_size = 32
     train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
-    eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=32,
+    eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
     max_len = float("inf")
@@ -235,7 +235,7 @@ def train(model, args, st_epoch=0):
     # Test
     print('-' * 30)
     print('Evaluate on test set...')
-    eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=64,
+    eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
     print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('test', 100*perception_acc, 100*head_acc, 100*result_acc))
