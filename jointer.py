@@ -7,19 +7,26 @@ from utils import SYMBOLS, DEVICE
 from collections import Counter, namedtuple
 from time import time
 import torch
+from torch.distributions.categorical import Categorical
 import random
 from heapq import heappush, heappop, heapify
 
 Parse = namedtuple('Parse', ['sentence', 'head'])
 
 class SentGenerator(object):
-    def __init__(self, probs):
+    def __init__(self, probs, training=False):
         probs = np.log(probs + 1e-12) 
         self.probs = probs
         self.max_probs = probs.max(1)
         self.queue = [(-self.max_probs.sum(), [])]
+        self.training = training
     
     def next(self):
+        if self.training:
+            m = Categorical(logits=torch.from_numpy(self.probs))
+            sent = list(m.sample().numpy())
+            return sent
+
         epsilon = np.log(1e-5)
         while self.queue:
             priority, sent = heappop(self.queue)
@@ -263,7 +270,7 @@ class Jointer:
 
         semantics = self.semantics()
         self.ASTs = [None] * len(lengths)
-        sent_generators = [SentGenerator(probs) for probs in sent_probs]
+        sent_generators = [SentGenerator(probs, self.perception.training) for probs in sent_probs]
         unfinished = list(range(len(lengths)))
         for t in range(n_steps):
             sentences = [sent_generators[i].next() for i in unfinished]
