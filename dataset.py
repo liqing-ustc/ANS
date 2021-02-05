@@ -98,8 +98,14 @@ class HINT(Dataset):
 
     def filter_by_len(self, min_len=None, max_len=None):
         if min_len is None: min_len = -1
-        if max_len is None: max_len = 1e7
+        if max_len is None: max_len = float('inf')
         self.valid_ids = [i for i, x in enumerate(self.dataset) if x['len'] <= max_len and x['len'] >= min_len]
+    
+    def filter_by_eval(self, eval_idx=None):
+        if eval_idx is None:
+            self.valid_ids = list(range(len(self.dataset)))
+        else:
+            self.valid_ids = self.cond2ids[eval_idx]
 
     def all_symbols(self, max_len=float('inf')):
         dataset = [sample for sample in self.dataset if len(sample['expr']) <= max_len]
