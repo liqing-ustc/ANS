@@ -23,7 +23,7 @@ from dreamcoder.frontier import Frontier, FrontierEntry
 from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
 
-from utils import SYMBOLS
+from utils import SYMBOLS, NULL
 
 class ProgramWrapper(object):
     def __init__(self, prog):
@@ -38,12 +38,15 @@ class ProgramWrapper(object):
     
     def __call__(self, *inputs):
         if len(inputs) != self.arity or None in inputs:
-            raise TypeError
+            return None
         if inputs in self.cache:
             return self.cache[inputs]
-        fn = self.fn
-        for x in inputs:
-            fn = fn(x)
+        try:
+            fn = self.fn
+            for x in inputs:
+                fn = fn(x)
+        except RecursionError as e:
+            fn = None
         self.cache[inputs] = fn
         return fn
 
@@ -81,12 +84,26 @@ class ProgramWrapper(object):
             ys.append(y)
         return ys
 
-def compute_likelihood(program=None, examples=None):
+    def solve(self, i, inputs, output_list):
+        if len(inputs) != self.arity:
+            return []
+        def equal(a, b, pos):
+            for j in range(len(a)):
+                if j == pos:
+                    continue
+                if a[j] != b[j]:
+                    return False
+            return True
+
+        candidates = []
+        for xs, y in self.cache.items():
+            if y in output_list and equal(xs, inputs, i):
+                candidates.append(xs[i])
+        return candidates
+
+def compute_likelihood(program, examples=None):
     if examples is None:
         return 0., None
-    elif program is None:
-        res = [True if len(xs) == 0 and y is None else False for xs, y in examples ]
-        return np.mean(res), np.array(res)
     else:
         pred = program.evaluate([e[0] for e in examples], store_y=False)
         gt = np.array([e[1] for e in examples])
@@ -97,7 +114,7 @@ class Semantics(object):
     def __init__(self, idx, program=None, fewshot=False, learnable=True):
         self.idx = idx
         self.examples = []
-        self.program = program
+        self.program = program or (lambda: NULL)
         self.arity = None
         self.solved = False
         self.likelihood = 0.
@@ -165,6 +182,9 @@ class Semantics(object):
             examples = wrong_examples + right_examples
             examples = random.sample(examples, k=max_examples)
         return Task(str(self.idx), task_type, examples)
+
+    def solve(self, i, inputs, output_list):
+        return self.program.solve(i, inputs, output_list)
 
     def clear(self):
         self.examples = []

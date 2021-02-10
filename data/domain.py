@@ -18,17 +18,37 @@ class Program():
         self.arity = len(signature(fn).parameters) if fn is not None else 0
         self.likelihood = 1.0
         self.priority = 1.0
+        self.cache = {} # used for fast computation
 
     def __call__(self, *inputs):
         if len(inputs) != self.arity or None in inputs:
-            raise TypeError
+            return None
         res = self.fn(*inputs)
+        self.cache[inputs] = res
         return res
+
+    def solve(self, i, inputs, output_list):
+        if len(inputs) != self.arity:
+            return []
+        
+        def equal(a, b, pos):
+            for j in range(len(a)):
+                if j == pos:
+                    continue
+                if a[j] != b[j]:
+                    return False
+            return True
+
+        candidates = []
+        for xs, y in self.cache.items():
+            if y in output_list and equal(xs, inputs, i):
+                candidates.append(xs[i])
+        return candidates
 
 functions = [
     lambda: 0, lambda: 1, lambda: 2, lambda: 3, lambda: 4, lambda: 5, lambda: 6, lambda: 7, lambda: 8, lambda: 9,
     lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: math.ceil(x/y) if y != 0 else None, 
-    lambda: None, lambda: None,
+    lambda: NULL, lambda: NULL,
 ]
 
 PROGRAMS = [Program(f) for f in functions] 
