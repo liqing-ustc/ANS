@@ -10,6 +10,8 @@ SYMBOLS = DIGITS + OPERATORS + PARENTHESES
 SYM2ID = lambda x: SYMBOLS.index(x)
 ID2SYM = lambda x: SYMBOLS[x]
 
+NULL_VALUE = -1
+
 import math
 from inspect import signature
 class Program():
@@ -17,7 +19,6 @@ class Program():
         self.fn = fn
         self.arity = len(signature(fn).parameters) if fn is not None else 0
         self.likelihood = 1.0
-        self.priority = 1.0
         self.cache = {} # used for fast computation
 
     def __call__(self, *inputs):
@@ -26,6 +27,16 @@ class Program():
         res = self.fn(*inputs)
         self.cache[inputs] = res
         return res
+
+    def evaluate(self, examples, store_y=True): 
+        ys = []
+        for exp in examples:
+            try:
+                y = self(*exp)
+            except (TypeError, RecursionError) as e:
+                y = None
+            ys.append(y)
+        return ys
 
     def solve(self, i, inputs, output_list):
         if len(inputs) != self.arity:
@@ -48,7 +59,7 @@ class Program():
 functions = [
     lambda: 0, lambda: 1, lambda: 2, lambda: 3, lambda: 4, lambda: 5, lambda: 6, lambda: 7, lambda: 8, lambda: 9,
     lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: math.ceil(x/y) if y != 0 else None, 
-    lambda: NULL, lambda: NULL,
+    lambda: NULL_VALUE, lambda: NULL_VALUE,
 ]
 
 PROGRAMS = [Program(f) for f in functions] 

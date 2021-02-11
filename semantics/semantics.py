@@ -23,7 +23,7 @@ from dreamcoder.frontier import Frontier, FrontierEntry
 from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
 
-from utils import SYMBOLS, NULL
+from utils import SYMBOLS, NULL_VALUE, SYM2PROG
 
 class ProgramWrapper(object):
     def __init__(self, prog):
@@ -101,6 +101,27 @@ class ProgramWrapper(object):
                 candidates.append(xs[i])
         return candidates
 
+class NULLProgram(object):
+    def __init__(self):
+        self.arity = 0
+        self.fn = lambda: NULL_VALUE
+        self.cache = {}
+
+    def __call__(self, *inputs):
+        if len(inputs) != self.arity or None in inputs:
+            return None
+        return self.fn()
+    
+    def evaluate(self, examples, **kwargs): 
+        ys = [self(*e) for e in examples]
+        return ys
+
+    def __str__(self):
+        return "NULL"
+
+    def solve(self, *args):
+        return []
+
 def compute_likelihood(program, examples=None):
     if examples is None:
         return 0., None
@@ -114,7 +135,7 @@ class Semantics(object):
     def __init__(self, idx, program=None, fewshot=False, learnable=True):
         self.idx = idx
         self.examples = []
-        self.program = program or (lambda: NULL)
+        self.program = program or NULLProgram()
         self.arity = None
         self.solved = False
         self.likelihood = 0.
@@ -126,12 +147,12 @@ class Semantics(object):
             self.clear()
             return
 
-        if None in [x[1] for x in examples]:
+        if NULL_VALUE in [x[1] for x in examples]:
             counts = Counter([x[1] for x in examples])
-            if counts[None] / len(examples) >= 0.8:
-                self.program = None
+            if counts[NULL_VALUE] / len(examples) >= 0.8:
+                self.program = NULLProgram()
             else:
-                examples = [x for x in examples if x[1] is not None]
+                examples = [x for x in examples if x[1] != NULL_VALUE]
         
         arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
         examples = [x[:2] for x in examples if len(x[0]) == arity] 
@@ -141,6 +162,10 @@ class Semantics(object):
         self.likelihood, self.res = compute_likelihood(self.program, self.examples)
         self.check_solved()
 
+        gt_program = SYM2PROG[SYMBOLS[self.idx]]
+        acc = compute_likelihood(gt_program, self.examples)[0]
+        print("Examples accuracy: Symbol-%02d: %.2f"%(self.idx, acc*100))
+
     def update_program(self, entry):
         program = ProgramWrapper(entry.program)
         likelihood = compute_likelihood(program, self.examples)[0]
@@ -149,6 +174,7 @@ class Semantics(object):
             self.program = program
             self.likelihood = likelihood
             self.check_solved()
+        # self.program.cache.update({xs:y for xs, y in self.examples})
     
     def check_solved(self):
         if self.arity == 0 and self.likelihood > 0. and self.program is not None:
@@ -163,8 +189,9 @@ class Semantics(object):
             self.solved = False
 
     def __call__(self, *inputs):
-        if self.program is None and len(inputs) == 0:
+        if isinstance(self.program, NULLProgram) and len(inputs) > 0:
             return None
+        inputs = [x for x in inputs if x != NULL_VALUE]
         return self.program(*inputs)
 
     def make_task(self):
@@ -188,14 +215,14 @@ class Semantics(object):
 
     def clear(self):
         self.examples = []
-        self.program = None
+        self.program = NULLProgram()
         self.arity = None
         self.solved = False
         self.likelihood = 0.
     
     def save(self):
         model = {'idx': self.idx, 'solved': self.solved, 'likelihood': self.likelihood, 'arity': self.arity}
-        model['program'] = None if self.program is None else self.program.prog
+        model['program'] = None if isinstance(self.program, NULLProgram) else self.program.prog
         return model
 
     def load(self, model):
@@ -203,7 +230,7 @@ class Semantics(object):
         self.solved = model['solved']
         self.likelihood = model['likelihood']
         self.arity = model['arity']
-        self.program = None if model['program'] is None else ProgramWrapper(model['program'])
+        self.program = NULLProgram() if model['program'] is None else ProgramWrapper(model['program'])
 
 class DreamCoder(object):
     def __init__(self):

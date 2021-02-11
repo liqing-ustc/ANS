@@ -1,9 +1,10 @@
+from numpy.core.records import array
 import perception, syntax, semantics
 import numpy as np
 from copy import deepcopy
 import sys
 from func_timeout import func_timeout, FunctionTimedOut
-from utils import SYMBOLS, DEVICE, NULL
+from utils import SYMBOLS, DEVICE, NULL_VALUE
 from collections import Counter, namedtuple
 from time import time
 import torch
@@ -55,7 +56,7 @@ class Node:
         self.symbol = symbol
         self.smt = smt
         self.children = []
-        self.prob = prob
+        self.sym_prob = prob
         self._res = None
         self._res_computed = False
 
@@ -63,10 +64,10 @@ class Node:
         if self._res_computed:
             return self._res
 
-        self._res = self.smt(*[x for x in self.inputs() if x != NULL])
+        self._res = self.smt(*self.inputs())
         if isinstance(self._res, int) and self._res > sys.maxsize:
             self._res = None
-        self.prob += sum([x.prob for x in self.children])
+        self.prob = self.sym_prob + np.log(self.smt.likelihood) + sum([x.prob for x in self.children])
         self._res_computed = True
         return self._res
 
@@ -81,12 +82,6 @@ class Node:
         self.prob = node.prob
         self._res = node._res
         self._res_computed = node._res_computed
-
-    def children_res_valid(self):
-        for ch in self.children:
-            if ch.res() is None: 
-                return False
-        return True
 
 class AST: # Abstract Syntax Tree
     def __init__(self, pt, semantics, sent_probs=None):
@@ -139,10 +134,10 @@ class AST: # Abstract Syntax Tree
             changes = []
             if module == 'perception':
                 changes.extend(self.abduce_perception(node, target))
-            # if module == 'syntax':
-            #     changes.extend(self.abduce_syntax(node, target))
-            # if module == 'semantics':
-            #     changes.extend(self.abduce_semantics(node, target))
+            if module == 'syntax':
+                changes.extend(self.abduce_syntax(node, target))
+            if module == 'semantics':
+                changes.extend(self.abduce_semantics(node, target))
             
             changes.extend(self.top_down(node, target))
 
@@ -171,14 +166,14 @@ class AST: # Abstract Syntax Tree
         changes = []
         inputs = node.inputs()
         for pos, ch in enumerate(node.children):
-            inputs_valid = [x for i, x in enumerate(inputs) if x != NULL or i == pos]
-            pos -= inputs[:pos].count(NULL)
+            inputs_valid = [x for i, x in enumerate(inputs) if x != NULL_VALUE or i == pos]
+            pos -= inputs[:pos].count(NULL_VALUE)
             ch_target = []
-            if len(ch.children) == 0 and ch.res() != NULL: # when ch has no children, test if its output can be NULL
+            if len(ch.children) == 0 and ch.res() != NULL_VALUE: # when ch has no children, test if its output can be NULL_VALUE
                 new_inputs = inputs_valid[:]
                 del new_inputs[pos]
                 if node.smt(*new_inputs) in target:
-                    ch_target.append(NULL)
+                    ch_target.append(NULL_VALUE)
             ch_target.extend(node.smt.solve(pos, inputs_valid, target))
             if ch_target:
                 priority = ch.prob - np.log(1. - np.exp(ch.prob))
@@ -198,6 +193,21 @@ class AST: # Abstract Syntax Tree
             changes.append(PrioritizedItem(priority, (new_node, target)))
         return changes
 
+    def abduce_syntax(self, node, target):
+        return []
+
+    def abduce_semantics(self, node, target):
+        inputs = node.inputs()
+        if NULL_VALUE in target and len(inputs) > 0:
+            return []
+        if len(inputs) > 0 and (None in inputs or (np.array(inputs) == NULL_VALUE).all()):
+            return []
+
+        new_node = Node(0,0,0)
+        new_node.copy(node)
+        new_node._res = random.choice(target)
+        priority = np.log(node.smt.likelihood) - np.log(1 - node.smt.likelihood)
+        return [PrioritizedItem(priority, (new_node, target))]
 
     # def abduce(self, y, module=None):
     #     if self._res is not None and self._res == y:
@@ -395,7 +405,7 @@ class Jointer:
             tmp = []
             for i, pt in zip(unfinished, parses):
                 ast = AST(pt, semantics, sent_probs[i])
-                if ast.res() is None:
+                if ast.res() is None or ast.res() == NULL_VALUE:
                     tmp.append(i)
                 if self.ASTs[i] is None or ast.res() is not None:
                     self.ASTs[i] = ast
@@ -452,7 +462,7 @@ class Jointer:
             dataset = [[] for _ in range(len(self.semantics.semantics))]
             for ast in self.buffer:
                 for node in ast.nodes:
-                    xs = tuple([x.res() for x in node.children if x.res() is not None])
+                    xs = tuple([x.res() for x in node.children if x.res() != NULL_VALUE])
                     y = node.res()
                     dataset[node.symbol].append((xs, y))
             self.semantics.learn(dataset)
