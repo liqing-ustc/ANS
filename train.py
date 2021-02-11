@@ -168,8 +168,7 @@ def train(model, args, st_epoch=0):
     if args.curriculum:
         curriculum_strategy = dict([
             # (0, 7)
-            (0, 1),
-            (1, 3),
+            (0, 3),
             (20, 7),
             (40, 11),
             (60, 15),
