@@ -451,12 +451,13 @@ class Jointer:
             print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'syntax':
-            dataset = [x.pt for x in self.buffer]
-            n_iters = int(100)
-            print("Learn syntax with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
-            st = time()
-            self.syntax.learn(dataset, n_iters=n_iters)
-            print("take %d sec."%(time()-st))
+            dataset = [x.pt for x in self.buffer if len(x.pt.sentence) > 1]
+            if len(dataset) >= 100:
+                n_iters = int(100)
+                print("Learn syntax with %d samples for %d iterations, "%(len(dataset), n_iters), end='', flush=True)
+                st = time()
+                self.syntax.learn(dataset, n_iters=n_iters)
+                print("take %d sec."%(time()-st))
 
         elif self.learned_module == 'semantics':
             dataset = [[] for _ in range(len(self.semantics.semantics))]
