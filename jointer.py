@@ -118,7 +118,6 @@ class AST: # Abstract Syntax Tree
         change = PrioritizedItem(0., (self.root_node, [y]))
         queue.put(change)
         find_fix = False
-        abduced = []
         while not queue.empty():
             change = queue.get()
             prob = change.priority
@@ -127,9 +126,9 @@ class AST: # Abstract Syntax Tree
                 find_fix = True
                 break
             
-            if node.index in abduced:
+            if node not in self.nodes:
+                # this node is generated when abducing, no need to abduce it.
                 continue
-            abduced.append(node.index)
 
             changes = []
             if module == 'perception':
@@ -145,6 +144,11 @@ class AST: # Abstract Syntax Tree
                 queue.put(x)
         
         if find_fix:
+            if module == 'syntax':
+                if hasattr(node, 'head'):
+                    self.pt.head = node.head
+                return self
+
             original_node = self.nodes[node.index]
             original_node.copy(node)
             
@@ -194,7 +198,61 @@ class AST: # Abstract Syntax Tree
         return changes
 
     def abduce_syntax(self, node, target):
-        return []
+        arcs = self.pt.dependencies
+        def get_lc(k):
+            return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] < k])
+
+        def get_rc(k):
+            return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
+
+        changes = []
+        for ch in node.children:
+            # rotate the arc between node and ch, and create new head
+            h = node.index
+            t = ch.index
+            for arc in arcs:
+                if arc[0] == h and arc[1] == t:
+                    p = arc[2]
+                    break
+            head = self.pt.head[:]
+
+            head[t] = head[h]
+            head[h] = t 
+
+            children = get_rc(h) if h < t else get_lc(h)
+            for j in children[:children.index(t)]:
+                head[j] = t
+
+            children = get_lc(t) if h < t else get_rc(t)
+            for j in children:
+                head[j] = h
+            
+            # create a new head node from ch and a tail node from the original node
+            # update their children according to the new head
+            head_node = Node(0,0,0)
+            head_node.copy(ch)
+            head_node._res_computed = False
+            head_node.children = []
+            head_node.head = head # store the head
+
+            tail_node = Node(0,0,0)
+            tail_node.copy(node)
+            tail_node._res_computed = False
+            tail_node.children = []
+            for t, h in enumerate(head):
+                if h == tail_node.index:
+                    assert t != head_node.index
+                    tail_node.children.append(self.nodes[t])
+                elif h == head_node.index:
+                    if t == tail_node.index:
+                        head_node.children.append(tail_node)
+                    else:
+                        head_node.children.append(self.nodes[t])
+
+            priority = np.log(p) - np.log(1 - p)
+            changes.append(PrioritizedItem(priority, (head_node, target)))
+
+        return changes
 
     def abduce_semantics(self, node, target):
         inputs = node.inputs()
