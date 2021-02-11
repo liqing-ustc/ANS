@@ -99,15 +99,6 @@ class AST: # Abstract Syntax Tree
         self.nodes = nodes
 
         self.root_node.res() 
-        # try:
-        #     # TODO: set a timeout for the execution
-        #     # self._res = func_timeout(timeout=0.01, func=root_node.res)
-        #     self._res = self.root_node.res() 
-        # except (IndexError, TypeError, ZeroDivisionError, ValueError, RecursionError, FunctionTimedOut) as e:
-        #     # Must be extremely careful about these errors
-        #     # if isinstance(e, FunctionTimedOut):
-        #     #     print(e)
-        #     self._res = None
 
     def res(self): return self.root_node.res()
 
@@ -133,8 +124,8 @@ class AST: # Abstract Syntax Tree
             changes = []
             if module == 'perception':
                 changes.extend(self.abduce_perception(node, target))
-            if module == 'syntax':
-                changes.extend(self.abduce_syntax(node, target))
+            # if module == 'syntax':
+            #     changes.extend(self.abduce_syntax(node, target))
             if module == 'semantics':
                 changes.extend(self.abduce_semantics(node, target))
             
@@ -266,89 +257,6 @@ class AST: # Abstract Syntax Tree
         new_node._res = random.choice(target)
         priority = np.log(node.smt.likelihood) - np.log(1 - node.smt.likelihood)
         return [PrioritizedItem(priority, (new_node, target))]
-
-    # def abduce(self, y, module=None):
-    #     if self._res is not None and self._res == y:
-    #         return self
-        
-    #     if module == 'semantics':
-    #         et = self.abduce_semantics(y)
-    #         if et is not None:
-    #             return et
-    #     elif module == 'perception':
-    #         et = self.abduce_perception(y)
-    #         if et is not None:
-    #             return et
-    #     # elif module == 'syntax':
-    #     #     et = self.abduce_syntax(y)
-    #     #     if et is not None:
-    #     #         return et
-        
-    #     return None
-
-        
-    # def abduce_semantics(self, y):
-    #     # abduce over semantics
-    #     # Currently, if the root node's children are valid, we directly change the result to y
-    #     # In future, we can consider to search the execution tree in a top-down manner
-    #     if self.root_node is not None and self.root_node.children_res_valid():
-    #         self._res = y
-    #         self.root_node._res = y
-    #         return self
-    #     return None
-
-    # def abduce_perception(self, y):
-    #     # abduce over sentence
-    #     epsilon = -1
-    #     sent_pos_list = np.argsort([self.sent_probs[i, s] for i, s in enumerate(self.pt.sentence)])
-    #     for sent_pos in sent_pos_list:
-    #         s_prob = self.sent_probs[sent_pos]
-    #         if s_prob[self.pt.sentence[sent_pos]] >= 1 - epsilon:
-    #             break
-    #         for sym in np.argsort(s_prob)[::-1]:
-    #             if s_prob[sym] < epsilon:
-    #                 break
-    #             sentence = deepcopy(self.pt.sentence)
-    #             sentence[sent_pos] = sym
-    #             et = AST(Parse(sentence, self.pt.head), self.semantics)
-    #             if et.res() is not None and et.res() == y:
-    #                 return et
-    #     return None
-
-    # def abduce_syntax(self, y):
-    #     # abduce syntax by rotating the tree w.r.t the root node
-    #     arcs = self.pt.dependencies
-    #     def get_lc(k):
-    #         return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] < k])
-
-    #     def get_rc(k):
-    #         return sorted([arc[1] for arc in arcs if arc[0] == k and arc[1] > k], reverse=True)
-
-    #     epsilon = 0
-    #     for arc in sorted(arcs, key=lambda x: x[2]):
-    #         h, t, p = arc
-    #         if p >= 1 - epsilon:
-    #             break
-    #         head = deepcopy(self.pt.head)
-
-    #         head[t] = head[h]
-    #         head[h] = t 
-
-    #         children = get_rc(h) if h < t else get_lc(h)
-    #         for j in children[:children.index(t)]:
-    #             head[j] = t
-
-    #         children = get_lc(t) if h < t else get_rc(t)
-    #         for j in children:
-    #             head[j] = h
-
-    #         et = AST(Parse(self.pt.sentence, head), self.semantics)
-    #         if et.res() is not None and et.res() == y:
-    #             return et
-
-
-    #     return None
-
     
 class Jointer:
     def __init__(self, config=None):
