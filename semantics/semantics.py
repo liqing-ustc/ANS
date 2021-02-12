@@ -233,7 +233,7 @@ class Semantics(object):
         self.program = NULLProgram() if model['program'] is None else ProgramWrapper(model['program'])
 
 class DreamCoder(object):
-    def __init__(self):
+    def __init__(self, config=None):
         args = commandlineArguments(
             enumerationTimeout=200, activation='tanh', iterations=1, recognitionTimeout=3600,
             a=3, maximumFrontier=5, topK=2, pseudoCounts=30.0,
@@ -268,6 +268,8 @@ class DreamCoder(object):
         args.pop("split")
         
         self.primitives = McCarthyPrimitives()
+        if config.no_Y:
+            self.primitives = [x for x in self.primitives if 'fix' not in x.name]
         baseGrammar = Grammar.uniform(self.primitives)
         self.grammar = baseGrammar
         self.train_args = args

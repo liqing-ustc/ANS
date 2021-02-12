@@ -19,5 +19,5 @@ def build(config=None):
     if config.semantics:
         model = SemanticsGT()
     else:
-        model = DreamCoder()
+        model = DreamCoder(config)
     return model

@@ -34,6 +34,7 @@ def parse_args():
     parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
     parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
     parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
+    parser.add_argument('--no_Y', action="store_true", help='whether to use the recursion primitive (Y-combinator) in dreamcoder')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
     parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
