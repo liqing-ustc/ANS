@@ -61,19 +61,37 @@ class RNNModel(nn.Module):
         dropout = config.dropout
 
         self.dec_hid_dim = hid_dim * 2
-        self.encoder = nn.GRU(emb_dim, hid_dim, enc_layers, dropout=dropout, bidirectional=True)
-        self.decoder = nn.GRU(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
+        if config.seq2seq == 'LSTM':
+            self.encoder = nn.LSTM(emb_dim, hid_dim, enc_layers, dropout=dropout, bidirectional=True)
+            self.decoder = nn.LSTM(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
+        elif config.seq2seq == 'GRU':
+            self.encoder = nn.GRU(emb_dim, hid_dim, enc_layers, dropout=dropout, bidirectional=True)
+            self.decoder = nn.GRU(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
+        else:
+            pass
 
         self.embedding_out = nn.Embedding(len(RES_VOCAB), config.emb_dim)
         self.classifier_out = nn.Linear(self.dec_hid_dim, len(RES_VOCAB))
 
     def forward(self, src, tgt, src_len=None, tgt_len=None):
-        _, hidden = self.encoder(src)
-        hidden = hidden.view(-1, 2, *hidden.shape[1:])
-        hidden = hidden[-1]
-        hidden = hidden.transpose(0, 1)
-        hidden = hidden.contiguous().view(hidden.shape[0], -1)
-        hidden = torch.stack([hidden] * self.config.dec_layers)
+        if self.config.seq2seq == 'GRU':
+            _, hidden = self.encoder(src)
+            hidden = hidden.view(-1, 2, *hidden.shape[1:])[-1].transpose(0, 1)
+            hidden = hidden.contiguous().view(hidden.shape[0], -1)
+            hidden = torch.stack([hidden] * self.config.dec_layers)
+        elif self.config.seq2seq == 'LSTM':
+            _, (h, c) = self.encoder(src)
+            h = h.view(-1, 2, *h.shape[1:])[-1].transpose(0, 1)
+            h = h.contiguous().view(h.shape[0], -1)
+            h = torch.stack([h] * self.config.dec_layers)
+
+            c = c.view(-1, 2, *c.shape[1:])[-1].transpose(0, 1)
+            c = c.contiguous().view(c.shape[0], -1)
+            c = torch.stack([c] * self.config.dec_layers)
+
+            hidden = (h, c)
+
+
 
         if self.training:
             tgt = self.embedding_out(tgt)
@@ -116,7 +134,7 @@ class SinePositionalEncoding(nn.Module):
     """
 
     def __init__(self, d_model, dropout=0.1, max_len=5000):
-        super(PositionalEncoding, self).__init__()
+        super(SinePositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
         pe = torch.zeros(max_len, d_model)
@@ -238,7 +256,7 @@ class NeuralArithmetic(nn.Module):
         self.config = config
 
         self.embedding_in = EmbeddingIn(config)
-        if config.seq2seq == 'RNN':
+        if config.seq2seq in ['GRU', 'LSTM']:
             self.seq2seq = RNNModel(config)
         elif config.seq2seq == 'TRAN':
             self.seq2seq = TransformerModel(config)

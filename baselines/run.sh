@@ -8,9 +8,9 @@
 # export DEC_LAYERS=1
 # python train.py --curriculum --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS >outputs/enc_${ENC_LAYERS}_dec_${DEC_LAYERS}.log
 
-export ENC_LAYERS=3
-export DEC_LAYERS=1
-python train.py --curriculum --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS --epochs=200 >outputs/enc_${ENC_LAYERS}_dec_${DEC_LAYERS}.log
+# export ENC_LAYERS=3
+# export DEC_LAYERS=1
+# python train.py --curriculum --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS --epochs=200 >outputs/enc_${ENC_LAYERS}_dec_${DEC_LAYERS}.log
 
 # export ENC_LAYERS=3
 # export DEC_LAYERS=3
@@ -28,6 +28,13 @@ python train.py --curriculum --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS -
 # export DEC_LAYERS=1
 # python train.py --curriculum --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS >outputs/enc_${ENC_LAYERS}_dec_${DEC_LAYERS}.log
 
+# LSTM with symbol input
+export MODEL=LSTM ENC_LAYERS=3 DEC_LAYERS=1
+python train.py --seq2seq=${MODEL} --perception --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS >outputs/${MODEL}_symbol_enc_${ENC_LAYERS}_dec_${DEC_LAYERS}.log
+
+# LSTM with image input
+export MODEL=LSTM ENC_LAYERS=3 DEC_LAYERS=1
+python train.py --seq2seq=${MODEL} --curriculum --enc_layers=$ENC_LAYERS --dec_layers=$DEC_LAYERS >outputs/${MODEL}_enc_${ENC_LAYERS}_dec_${DEC_LAYERS}.log
 
 # # Tranformer with symbol input
 # export MODEL=TRAN ENC_LAYERS=1 DEC_LAYERS=1 HEAD=1
