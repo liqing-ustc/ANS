@@ -1,5 +1,5 @@
 """
-Adapted from https://github.com/yikangshen/Ordered-Neurons/blob/master/ON_LSTM.py
+copied from https://github.com/yikangshen/Ordered-Neurons/blob/master/ON_LSTM.py
 """
 
 import torch.nn.functional as F
@@ -51,7 +51,7 @@ class LinearDropConnect(nn.Linear):
                 dtype=torch.uint8
             )
             mask.bernoulli_(self.dropout)
-            self._weight = self.weight.masked_fill(mask, 0.)
+            self._weight = self.weight.masked_fill(mask.to(torch.bool), 0.)
 
     def forward(self, input, sample_mask=False):
         if self.training:
@@ -106,10 +106,10 @@ class ONLSTMCell(nn.Module):
         cingate = cingate[:, :, None]
         cforgetgate = cforgetgate[:, :, None]
 
-        ingate = F.sigmoid(ingate)
-        forgetgate = F.sigmoid(forgetgate)
-        cell = F.tanh(cell)
-        outgate = F.sigmoid(outgate)
+        ingate = torch.sigmoid(ingate)
+        forgetgate = torch.sigmoid(forgetgate)
+        cell = torch.tanh(cell)
+        outgate = torch.sigmoid(outgate)
 
         # cy = cforgetgate * forgetgate * cx + cingate * ingate * cell
 
@@ -118,8 +118,8 @@ class ONLSTMCell(nn.Module):
         ingate = ingate * overlap + (cingate - overlap)
         cy = forgetgate * cx + ingate * cell
 
-        # hy = outgate * F.tanh(self.c_norm(cy))
-        hy = outgate * F.tanh(cy)
+        # hy = outgate * torch.tanh(self.c_norm(cy))
+        hy = outgate * torch.tanh(cy)
         return hy.view(-1, self.hidden_size), cy, (distance_cforget, distance_cin)
 
     def init_hidden(self, bsz):

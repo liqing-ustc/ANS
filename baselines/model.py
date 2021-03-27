@@ -14,6 +14,8 @@ import sys
 sys.path.append("..")
 from perception import resnet_scan
 from baseline_utils import SYMBOLS, INP_VOCAB, RES_VOCAB, DEVICE, NULL, END, RES_MAX_LEN
+from on_lstm import ONLSTMStack
+from ordered_memory import OrderedMemory
 
 class EmbeddingIn(nn.Module):
     def __init__(self, config):
@@ -60,12 +62,21 @@ class RNNModel(nn.Module):
         dec_layers = config.dec_layers
         dropout = config.dropout
 
-        self.dec_hid_dim = hid_dim * 2
         if config.seq2seq == 'LSTM':
+            self.dec_hid_dim = hid_dim * 2
             self.encoder = nn.LSTM(emb_dim, hid_dim, enc_layers, dropout=dropout, bidirectional=True)
             self.decoder = nn.LSTM(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
         elif config.seq2seq == 'GRU':
+            self.dec_hid_dim = hid_dim * 2
             self.encoder = nn.GRU(emb_dim, hid_dim, enc_layers, dropout=dropout, bidirectional=True)
+            self.decoder = nn.GRU(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
+        elif config.seq2seq == 'ON':
+            self.dec_hid_dim = hid_dim
+            self.encoder = ONLSTMStack([emb_dim] + [hid_dim] * enc_layers, chunk_size=8, dropconnect=dropout, dropout=dropout)
+            self.decoder = nn.LSTM(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
+        elif config.seq2seq == 'OM':
+            self.dec_hid_dim = hid_dim
+            self.encoder = OrderedMemory(emb_dim, hid_dim, nslot=21, bidirection=False)
             self.decoder = nn.GRU(emb_dim, self.dec_hid_dim, dec_layers, dropout=dropout, bidirectional=False)
         else:
             pass
@@ -91,7 +102,20 @@ class RNNModel(nn.Module):
 
             hidden = (h, c)
 
+        elif self.config.seq2seq == 'ON':
+            h, c = self.encoder(src)[1][-1]
+            h = torch.stack([h] * self.config.dec_layers)
 
+            c = c.contiguous().view(c.shape[0], -1)
+            c = torch.stack([c] * self.config.dec_layers)
+
+            hidden = (h, c)
+
+        elif self.config.seq2seq == 'OM':
+            mask = torch.from_numpy(create_padding_mask(src_len)).to(DEVICE).transpose(0,1).contiguous()
+            h = self.encoder(src, mask, output_last=True)
+            h = torch.stack([h] * self.config.dec_layers)
+            hidden = h
 
         if self.training:
             tgt = self.embedding_out(tgt)
@@ -256,7 +280,7 @@ class NeuralArithmetic(nn.Module):
         self.config = config
 
         self.embedding_in = EmbeddingIn(config)
-        if config.seq2seq in ['GRU', 'LSTM']:
+        if config.seq2seq in ['GRU', 'LSTM', 'ON', 'OM']:
             self.seq2seq = RNNModel(config)
         elif config.seq2seq == 'TRAN':
             self.seq2seq = TransformerModel(config)
