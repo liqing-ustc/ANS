@@ -4,7 +4,7 @@ import numpy as np
 from copy import deepcopy
 import sys
 from func_timeout import func_timeout, FunctionTimedOut
-from utils import SYMBOLS, DEVICE, NULL_VALUE
+from utils import SYMBOLS, DEVICE, EMPTY_VALUE, MISSING_VALUE
 from collections import Counter, namedtuple
 from time import time
 import torch
@@ -57,17 +57,18 @@ class Node:
         self.smt = smt
         self.children = []
         self.sym_prob = prob
-        self._res = None
+        self._res = MISSING_VALUE
         self._res_computed = False
 
     def res(self):
         if self._res_computed:
             return self._res
 
-        self._res = self.smt(*self.inputs())
-        if isinstance(self._res, int) and self._res > sys.maxsize:
-            self._res = None
+        res = self.smt(self.inputs())
+        if isinstance(res, int) and res > sys.maxsize:
+            res = MISSING_VALUE
         self.prob = self.sym_prob + np.log(self.smt.likelihood) + sum([x.prob for x in self.children])
+        self._res = res
         self._res_computed = True
         return self._res
 
@@ -161,14 +162,14 @@ class AST: # Abstract Syntax Tree
         changes = []
         inputs = node.inputs()
         for pos, ch in enumerate(node.children):
-            inputs_valid = [x for i, x in enumerate(inputs) if x != NULL_VALUE or i == pos]
-            pos -= inputs[:pos].count(NULL_VALUE)
+            inputs_valid = [x for i, x in enumerate(inputs) if x != EMPTY_VALUE or i == pos]
+            pos -= inputs[:pos].count(EMPTY_VALUE)
             ch_target = []
-            if len(ch.children) == 0 and ch.res() != NULL_VALUE: # when ch has no children, test if its output can be NULL_VALUE
+            if len(ch.children) == 0 and ch.res() != EMPTY_VALUE: # when ch has no children, test if its output can be EMPTY_VALUE
                 new_inputs = inputs_valid[:]
                 del new_inputs[pos]
-                if node.smt(*new_inputs) in target:
-                    ch_target.append(NULL_VALUE)
+                if node.smt(new_inputs) in target:
+                    ch_target.append(EMPTY_VALUE)
             ch_target.extend(node.smt.solve(pos, inputs_valid, target))
             if ch_target:
                 priority = ch.prob - np.log(1. - np.exp(ch.prob))
@@ -247,9 +248,9 @@ class AST: # Abstract Syntax Tree
 
     def abduce_semantics(self, node, target):
         inputs = node.inputs()
-        if NULL_VALUE in target and len(inputs) > 0:
+        if EMPTY_VALUE in target and len(inputs) > 0:
             return []
-        if len(inputs) > 0 and (None in inputs or (np.array(inputs) == NULL_VALUE).all()):
+        if len(inputs) > 0 and (MISSING_VALUE in inputs or (np.array(inputs) == EMPTY_VALUE).all()):
             return []
 
         new_node = Node(0,0,0)
@@ -270,7 +271,7 @@ class Jointer:
         self.epoch = 0
         self.learning_schedule = ['semantics'] * (0 if config.semantics else 1) \
                                + ['perception'] * (0 if config.perception else 1) \
-                               + ['syntax'] * (0 if config.syntax else 10) \
+                               + ['syntax'] * (0 if config.syntax else 1) \
 
     @property
     def learned_module(self):
@@ -371,9 +372,9 @@ class Jointer:
             tmp = []
             for i, pt in zip(unfinished, parses):
                 ast = AST(pt, semantics, sent_probs[i])
-                if ast.res() is None or ast.res() == NULL_VALUE:
+                if ast.res() is MISSING_VALUE or ast.res() is EMPTY_VALUE:
                     tmp.append(i)
-                if self.ASTs[i] is None or ast.res() is not None:
+                if self.ASTs[i] is None or ast.res() is not MISSING_VALUE:
                     self.ASTs[i] = ast
             unfinished = tmp
             if not unfinished:
@@ -429,7 +430,7 @@ class Jointer:
             dataset = [[] for _ in range(len(self.semantics.semantics))]
             for ast in self.buffer:
                 for node in ast.nodes:
-                    xs = tuple([x.res() for x in node.children if x.res() != NULL_VALUE])
+                    xs = tuple([x.res() for x in node.children if x.res() != EMPTY_VALUE])
                     y = node.res()
                     dataset[node.symbol].append((xs, y))
             self.semantics.learn(dataset)

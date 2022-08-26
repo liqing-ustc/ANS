@@ -23,7 +23,7 @@ from dreamcoder.frontier import Frontier, FrontierEntry
 from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
 
-from utils import SYMBOLS, NULL_VALUE, SYM2PROG
+from utils import SYMBOLS, EMPTY_VALUE, MISSING_VALUE, SYM2PROG
 
 class ProgramWrapper(object):
     def __init__(self, prog):
@@ -37,8 +37,8 @@ class ProgramWrapper(object):
         self.cache = {} # used for fast computation
     
     def __call__(self, *inputs):
-        if len(inputs) != self.arity or None in inputs:
-            return None
+        if len(inputs) != self.arity or MISSING_VALUE in inputs:
+            return MISSING_VALUE
         if inputs in self.cache:
             return self.cache[inputs]
         try:
@@ -46,7 +46,7 @@ class ProgramWrapper(object):
             for x in inputs:
                 fn = fn(x)
         except RecursionError as e:
-            fn = None
+            fn = MISSING_VALUE
         self.cache[inputs] = fn
         return fn
 
@@ -80,7 +80,7 @@ class ProgramWrapper(object):
             try:
                 y = self(*exp)
             except (TypeError, RecursionError) as e:
-                y = None
+                y = MISSING_VALUE
             ys.append(y)
         return ys
 
@@ -104,12 +104,12 @@ class ProgramWrapper(object):
 class NULLProgram(object):
     def __init__(self):
         self.arity = 0
-        self.fn = lambda: NULL_VALUE
+        self.fn = lambda: EMPTY_VALUE
         self.cache = {}
 
     def __call__(self, *inputs):
-        if len(inputs) != self.arity or None in inputs:
-            return None
+        if len(inputs) != 0:
+            return MISSING_VALUE
         return self.fn()
     
     def evaluate(self, examples, **kwargs): 
@@ -136,35 +136,45 @@ class Semantics(object):
         self.idx = idx
         self.examples = []
         self.program = program or NULLProgram()
-        self.arity = None
+        self.arity = 2 if self.idx >= 10 and self.idx < 14 else 0
         self.solved = False
         self.likelihood = 0.
         self.fewshot = fewshot
-        self.learnable = learnable
+        self.learnable = False if self.idx in [14, 15] else learnable # do not learn parentheses
+        self.cache = {}
 
     def update_examples(self, examples):
         if len(examples) < 10 and not self.fewshot:
             self.clear()
             return
 
-        if NULL_VALUE in [x[1] for x in examples]:
-            counts = Counter([x[1] for x in examples])
-            if counts[NULL_VALUE] / len(examples) >= 0.8:
-                self.program = NULLProgram()
-            else:
-                examples = [x for x in examples if x[1] != NULL_VALUE]
+        examples = [x[:2] for x in examples if len(x[0]) == self.arity] 
+        for x, ys in self.cache.items():
+            for y in ys:
+                ys[y] *= 0.5
         
-        arity = Counter([len(x[0]) for x in examples]).most_common(1)[0][0]
-        examples = [x[:2] for x in examples if len(x[0]) == arity] 
+        for x, y in examples:
+            if x not in self.cache:
+                self.cache[x] = {}
+            if y not in self.cache[x]:
+                self.cache[x][y] = 0.
+            self.cache[x][y] += 1
 
-        self.arity = arity
-        self.examples = examples
+        
+        conf_examples = []
+        conf_thres = 5
+        for x, ys in self.cache.items():
+            y, conf = max(ys.items(), key=lambda k: k[1])
+            if conf >= conf_thres:
+                conf_examples.append((x, y))
+        self.examples = conf_examples
+
         self.likelihood, self.res = compute_likelihood(self.program, self.examples)
         self.check_solved()
 
         gt_program = SYM2PROG[SYMBOLS[self.idx]]
         acc = compute_likelihood(gt_program, self.examples)[0]
-        print("Examples accuracy: Symbol-%02d: %.2f"%(self.idx, acc*100))
+        print("Symbol-%02d: arity: %d, examples: %d, accuracy: %.2f"%(self.idx, self.arity, len(self.examples), acc*100))
 
     def update_program(self, entry):
         program = ProgramWrapper(entry.program)
@@ -179,27 +189,42 @@ class Semantics(object):
     def check_solved(self):
         if self.arity == 0 and self.likelihood > 0. and self.program is not None:
             self.solved = True
-        elif self.arity > 0 and self.likelihood >= 0.9 and len(set(self.examples)) >= 80 and '#' not in str(self.program): # for + -
+        elif self.arity > 0 and self.likelihood >= 0.8 and '#' not in str(self.program): # for + -
             self.solved = True
-        elif self.arity > 0 and self.likelihood >= 0.95 and len(set(self.examples)) >= 80 and '#' in str(self.program):
+        elif self.arity > 0 and self.likelihood >= 0.95 and '#' in str(self.program):
             self.solved = True
         elif self.fewshot and self.likelihood >= 0.95 and len(set(self.examples)) >= 10:
             self.solved = True
         else:
             self.solved = False
 
-    def __call__(self, *inputs):
-        if isinstance(self.program, NULLProgram) and len(inputs) > 0:
-            return None
-        inputs = [x for x in inputs if x != NULL_VALUE]
-        return self.program(*inputs)
+    def __call__(self, inputs):
+        if self.idx in [14, 15]: 
+            return EMPTY_VALUE if len(inputs) == 0 else MISSING_VALUE # parentheses
+
+        inputs = [x for x in inputs if x != EMPTY_VALUE]
+        inputs = tuple(inputs)
+        if self.likelihood > 0.8:
+            if isinstance(self.program, NULLProgram) and len(inputs) > 0:
+                return MISSING_VALUE
+            inputs = [x for x in inputs if x != EMPTY_VALUE]
+            return self.program(*inputs)
+        elif inputs in self.cache:
+            ys = self.cache[inputs]
+            candidates = [y[0] for y in ys.items()]
+            p = [y[1] for y in ys.items()]
+            p = np.array(p) / sum(p)
+            output = int(np.random.choice(candidates, p=p))
+            return output
+
+        return MISSING_VALUE
 
     def make_task(self):
-        min_examples = 30 if self.arity is not None and self.arity > 0 else 10
+        min_examples = 10 if self.arity is not None and self.arity > 0 else 0
         min_examples = min_examples if not self.fewshot else 0
         max_examples = 100
         examples = self.examples
-        if len(examples) < min_examples or self.solved or None in [x[1] for x in examples]:
+        if len(examples) < min_examples or self.solved or not self.learnable:
             return None
         task_type = arrow(*([tint]*(self.arity + 1)))
         if len(examples) > max_examples:
@@ -211,12 +236,29 @@ class Semantics(object):
         return Task(str(self.idx), task_type, examples)
 
     def solve(self, i, inputs, output_list):
-        return self.program.solve(i, inputs, output_list)
+        if len(inputs) != self.arity:
+            return []
+
+        def equal(a, b, pos):
+            if len(a) != len(b):
+                return False
+            for j in range(len(a)):
+                if j == pos:
+                    continue
+                if a[j] != b[j]:
+                    return False
+            return True
+
+        candidates = []
+        for xs, y in self.cache.items():
+            y = sorted(y.items(), key = lambda p: p[1], reverse=True)[0][0]
+            if y in output_list and equal(xs, inputs, i):
+                candidates.append(xs[i])
+        return candidates
 
     def clear(self):
         self.examples = []
         self.program = NULLProgram()
-        self.arity = None
         self.solved = False
         self.likelihood = 0.
     
@@ -273,9 +315,10 @@ class DreamCoder(object):
         baseGrammar = Grammar.uniform(self.primitives)
         self.grammar = baseGrammar
         self.train_args = args
-        self.semantics = [Semantics(i) for i in range(len(SYMBOLS))] 
+        self.semantics = [Semantics(i) for i in range(len(SYMBOLS))]
         self.allFrontiers = None
         self.helmholtzFrontiers = None
+        self.learn_count = 0
 
     def __call__(self):
         return self.semantics
@@ -323,19 +366,22 @@ class DreamCoder(object):
         self.allFrontiers = allFrontiers
 
     def learn(self, dataset):
+        self.learn_count += 1
+        learning_interval = 10
         tasks = []
         max_arity = 0
         for smt, exps in zip(self.semantics, dataset):
             if not smt.learnable:
                 continue
             smt.update_examples(exps)
-            t = smt.make_task()
-            if t is not None:
-                tasks.append(t)
-                max_arity = max(smt.arity, max_arity)
+            if self.learn_count % learning_interval == 0:
+                t = smt.make_task()
+                if t is not None:
+                    tasks.append(t)
+                    max_arity = max(smt.arity, max_arity)
         self.train_args['enumerationTimeout'] = 5 if max_arity == 0 else 300
         # self.train_args['iterations'] = 1 if max_arity == 0 else 3
-        n_solved = len(['' for t in self.semantics if t.solved])
+        n_solved = len(['' for t in self.semantics if t.solved or not t.learnable])
         print("Semantics: %d/%d/%d (total/solved/learn)."%(len(self.semantics), n_solved, len(tasks)))
         if len(tasks) == 0:
             self._print_semantics()

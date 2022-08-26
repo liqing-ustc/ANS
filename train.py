@@ -1,4 +1,4 @@
-from utils import DEVICE, SYMBOLS, ID2SYM, SYM2ID
+from utils import DEVICE, SYMBOLS, ID2SYM, SYM2ID, MISSING_VALUE
 import time
 from tqdm import tqdm
 from collections import Counter
@@ -80,7 +80,7 @@ def evaluate(model, dataloader, n_steps=1):
     res_pred_all = np.concatenate(res_pred_all, axis=0)
     res_all = np.concatenate(res_all, axis=0)
     result_acc = (res_pred_all == res_all).mean()
-    print("Percentage of None result: %.2f"%(np.mean(res_pred_all == None) * 100))
+    print("Percentage of missing result: %.2f"%(np.mean(res_pred_all == MISSING_VALUE) * 100))
     
 
     pred = [y for x in expr_pred_all for y in x]
