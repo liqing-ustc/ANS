@@ -17,10 +17,11 @@ from dreamcoder.grammar import Grammar
 from dreamcoder.task import Task
 from dreamcoder.type import Context, arrow, tbool, tlist, tint, t0, UnificationFailure
 from dreamcoder.recognition import RecurrentFeatureExtractor
-from dreamcoder.program import Program, Invented
+from dreamcoder.program import Program, Invented, Primitive
 from dreamcoder.frontier import Frontier, FrontierEntry
 
 from dreamcoder.domains.hint.hintPrimitives import McCarthyPrimitives
+from dreamcoder.domains.hint import hintPrimitives
 from dreamcoder.domains.hint.main import main, list_options, LearnedFeatureExtractor
 
 from utils import SYMBOLS, EMPTY_VALUE, MISSING_VALUE, SYM2PROG
@@ -46,6 +47,7 @@ class ProgramWrapper(object):
             for x in inputs:
                 fn = fn(x)
         except RecursionError as e:
+            print(e)
             fn = MISSING_VALUE
         self.cache[inputs] = fn
         return fn
@@ -80,6 +82,7 @@ class ProgramWrapper(object):
             try:
                 y = self(*exp)
             except (TypeError, RecursionError) as e:
+                print(e)
                 y = MISSING_VALUE
             ys.append(y)
         return ys
@@ -138,9 +141,9 @@ class Semantics(object):
         self.program = program or NULLProgram()
         self.arity = 2 if self.idx >= 10 and self.idx < 14 else 0
         self.solved = False
-        self.likelihood = 0.
         self.fewshot = fewshot
         self.learnable = False if self.idx in [14, 15] else learnable # do not learn parentheses
+        self.likelihood = 0. if self.learnable else 1.
         self.cache = {}
 
     def update_examples(self, examples):
@@ -165,16 +168,17 @@ class Semantics(object):
         conf_thres = 5
         for x, ys in self.cache.items():
             y, conf = max(ys.items(), key=lambda k: k[1])
-            if conf >= conf_thres:
+            if conf >= conf_thres and (conf / sum(ys.values())) > 0.5: # the most confident y occupies 80% of all possible prediction
                 conf_examples.append((x, y))
         self.examples = conf_examples
 
-        self.likelihood, self.res = compute_likelihood(self.program, self.examples)
+        self.likelihood, self.res = compute_likelihood(self.program, conf_examples)
         self.check_solved()
 
         gt_program = SYM2PROG[SYMBOLS[self.idx]]
-        acc = compute_likelihood(gt_program, self.examples)[0]
-        print("Symbol-%02d: arity: %d, examples: %d, accuracy: %.2f"%(self.idx, self.arity, len(self.examples), acc*100))
+        acc = compute_likelihood(gt_program, examples)[0]
+        acc_conf = compute_likelihood(gt_program, conf_examples)[0]
+        print(f"Symbol-{self.idx:02d}: arity: {self.arity}, examples (conf): {len(examples)} ({len(conf_examples)}), accuracy (conf): {acc*100:.2f} ({acc_conf*100:.2f})")
 
     def update_program(self, entry):
         program = ProgramWrapper(entry.program)
@@ -187,7 +191,9 @@ class Semantics(object):
         # self.program.cache.update({xs:y for xs, y in self.examples})
     
     def check_solved(self):
-        if self.arity == 0 and self.likelihood > 0. and self.program is not None:
+        if self.program is None:
+            self.solved = False
+        elif self.arity == 0 and self.likelihood > 0.:
             self.solved = True
         elif self.arity > 0 and self.likelihood >= 0.8 and '#' not in str(self.program): # for + -
             self.solved = True
@@ -379,6 +385,8 @@ class DreamCoder(object):
                 if t is not None:
                     tasks.append(t)
                     max_arity = max(smt.arity, max_arity)
+        if not tasks: 
+            return
         self.train_args['enumerationTimeout'] = 5 if max_arity == 0 else 300
         # self.train_args['iterations'] = 1 if max_arity == 0 else 3
         n_solved = len(['' for t in self.semantics if t.solved or not t.learnable])
@@ -417,13 +425,24 @@ class DreamCoder(object):
         # self.grammar = result.grammars[-1]
 
     def update_grammar(self):
-        programs = [Invented(smt.program.prog) for smt in self.semantics 
-            if smt.learnable and smt.solved and smt.program is not None and smt.program.arity > 0 and '#' not in str(smt.program)]
-            # if '#' in the program, the program uses a invented primitive, it is very likely to have a high computation cost.
-            # Therefore we don't add this program into primitives, since it might slow the enumeration a lot.
-            # it might be resolved by increasing the enumeration time
-        new_grammar = Grammar.uniform(self.primitives + programs)
-        # self.train_args['enumerationTimeout'] += 100 * len(programs)
+        new_primitives = []
+        for smt in self.semantics:
+            if '#' in str(smt.program) or '+' in str(smt.program) or '-' in str(smt.program):
+                # if '#+-' in the program, the program uses a invented primitive, it is very likely to have a high computation cost.
+                # Therefore we don't add this program into primitives, since it might slow the enumeration a lot.
+                # it might be resolved by increasing the enumeration time
+                continue
+            if smt.learnable and smt.solved and smt.arity == 2:
+                add = ProgramWrapper(hintPrimitives.add)
+                minus0 = ProgramWrapper(hintPrimitives.minus0)
+                if np.all([add(*x) == smt.program(*x) for x, y in smt.examples]):
+                    new_primitives.append(hintPrimitives.add)
+                elif np.all([minus0(*x) == smt.program(*x) for x, y in smt.examples]):
+                    new_primitives.append(hintPrimitives.minus0)
+                else:
+                    new_primitives.append(Invented(smt.program.prog))
+
+        new_grammar = Grammar.uniform(self.primitives + new_primitives)
         if new_grammar != self.grammar:
             self.grammar = new_grammar
             self.helmholtzFrontiers = None

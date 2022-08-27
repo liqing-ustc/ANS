@@ -28,4 +28,13 @@ print(pg(0, 2))
 pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 0 (#(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $0 $1 (incr ($2 $1 (decr0 $0)))))))))) $1 ($2 (decr0 $0) $1)))))))))")
 pg = ProgramWrapper(pg)
 print(pg(0, 2))
+
+pg = Program.parse("(lambda (lambda (fix2 $1 $0 (lambda (lambda (lambda (if0 $1 $1 (incr ($2 (-0 $1 $0) $0)))))))))")
+pg = ProgramWrapper(pg)
+print(pg(0, 2))
+print(pg(0, 19))
+print(pg(3, 2))
+print(pg(5, 2))
+
+
 pass

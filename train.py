@@ -1,7 +1,7 @@
 from utils import DEVICE, SYMBOLS, ID2SYM, SYM2ID, MISSING_VALUE
 import time
-from tqdm import tqdm
-from collections import Counter
+from tqdm import tqdm, trange
+from collections import Counter, OrderedDict
 
 from sklearn.metrics import classification_report, confusion_matrix
 import pandas as pd
@@ -17,28 +17,39 @@ import numpy as np
 import random
 torch.multiprocessing.set_sharing_strategy('file_system')
 
+import wandb
 import argparse
 import sys
+import os
 
 def parse_args():
     parser = argparse.ArgumentParser('Give Me A HINT')
-    parser.add_argument('--excludes', type=str, default='!', help='symbols to be excluded from the dataset')
-    parser.add_argument('--fewshot', type=int, default=-1, help="fewshot concept index. -1 means no fewshot concept.")
+    parser.add_argument('--wandb', type=str, default='ANS', help='the project name for wandb.')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
-    parser.add_argument('--perception-pretrain', type=str, help='initialize the perception from pretrained models.',
+    parser.add_argument('--perception_pretrain', type=str, help='initialize the perception from pretrained models.',
                         default='data/perception-pretrain/model.pth.tar_78.2_match')
-    parser.add_argument('--output-dir', type=str, default='outputs/', help='output directory for storing checkpoints')
+    parser.add_argument('--output_dir', type=str, default='outputs/', help='output directory for storing checkpoints')
+    parser.add_argument('--save_model', default='1', choices=['0', '1'])
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
+
+    parser.add_argument('--train_size', type=float, default=None, help="what perceptage of train data is used.")
+    parser.add_argument('--max_op_train', type=int, default=None, help="The maximum number of ops in train.")
+    parser.add_argument('--main_dataset_ratio', type=float, default=0, 
+            help="The percentage of data from the main training set to avoid forgetting in few-shot learning.")
+    parser.add_argument('--fewshot', default=None, choices=list('xyabcd'), help='fewshot concept.')
 
     parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
     parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
     parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
-    parser.add_argument('--curriculum', action="store_true", help='whether to use the pre-defined curriculum')
+    parser.add_argument('--curriculum', default='1', choices=['0', '1'], help='whether to use the pre-defined curriculum')
     parser.add_argument('--no_Y', action="store_true", help='whether to use the recursion primitive (Y-combinator) in dreamcoder')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
     parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
+
     args = parser.parse_args()
+    args.save_model = args.save_model == '1'
+    args.curriculum = args.curriculum == '1'
     return args
 
 from nltk.tree import Tree
@@ -51,7 +62,7 @@ def draw_parse(sentence, head):
     tree = build_tree(root)
     return tree
 
-def evaluate(model, dataloader, n_steps=1):
+def evaluate(model, dataloader, n_steps=1, log_prefix='val'):
     model.eval() 
     res_all = []
     res_pred_all = []
@@ -61,6 +72,8 @@ def evaluate(model, dataloader, n_steps=1):
 
     dep_all = []
     dep_pred_all = []
+
+    metrics = OrderedDict()
 
     with torch.no_grad():
         for sample in tqdm(dataloader):
@@ -86,7 +99,6 @@ def evaluate(model, dataloader, n_steps=1):
     pred = [y for x in expr_pred_all for y in x]
     gt = [SYM2ID(y) for x in expr_all for y in x]
     assert len(gt) == len(pred)
-    mask = np.array([0 if x == SYM2ID('(') or x == SYM2ID(')')  else 1 for x in gt], dtype=bool)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
     report = classification_report(gt, pred, target_names=SYMBOLS)
@@ -101,50 +113,25 @@ def evaluate(model, dataloader, n_steps=1):
 
     pred = [y for x in dep_pred_all for y in x]
     gt = [y for x in dep_all for y in x]
+    mask = np.array([0 if x == SYM2ID('(') or x == SYM2ID(')')  else 1 for x in gt], dtype=bool)
     head_acc = np.mean(np.array(pred)[mask] == np.array(gt)[mask])
 
-    print("result accuracy by length:")
-    for k in sorted(dataloader.dataset.len2ids.keys()):
-        ids = dataloader.dataset.len2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
-    
-    print("result accuracy by symbol:")
-    for k in sorted(dataloader.dataset.sym2ids.keys()):
-        ids = dataloader.dataset.sym2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+    tracked_attrs = ['length', 'symbol', 'digit', 'result', 'eval', 'tree_depth', 'ps_depth']
+    for attr in tracked_attrs:
+        # print(f"result accuracy by {attr}:")
+        attr2ids = getattr(dataloader.dataset, f'{attr}2ids')
+        for k, ids in sorted(attr2ids.items()):
+            res = res_all[ids]
+            res_pred = res_pred_all[ids]
+            res_acc = (res == res_pred).mean() if ids else 0.
+            k = 'div' if k == '/' else k
+            metrics[f'result_acc/{attr}/{k}'] = res_acc
+            # print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
 
-    print("result accuracy by digit:")
-    for k in sorted(dataloader.dataset.digit2ids.keys()):
-        ids = dataloader.dataset.digit2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
-
-    print("result accuracy by result:")
-    for k in sorted(dataloader.dataset.res2ids.keys())[:10]:
-        ids = dataloader.dataset.res2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        res_acc = (res == res_pred).mean()
-        print(k, "(%2d%%)"%(100*len(ids)//len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
-
-    print("result accuracy by generalization:")
-    for k in sorted(dataloader.dataset.cond2ids.keys()):
-        ids = dataloader.dataset.cond2ids[k]
-        res = res_all[ids]
-        res_pred = res_pred_all[ids]
-        if len(ids) == 0:
-            res_acc = 0.
-        else:
-            res_acc = (res == res_pred).mean()
-        print(k, "(%.2f%%)"%(100*len(ids)/len(dataloader.dataset)), "%5.2f"%(100 * res_acc))
+    metrics['result_acc/avg'] = result_acc
+    metrics['perception_acc/avg'] = perception_acc
+    metrics['head_acc/avg'] = head_acc
+    wandb.log({f'{log_prefix}/{k}': v for k, v in metrics.items()})
     
     print("error cases:")
     errors = np.arange(len(res_all))[res_all != res_pred_all]
@@ -161,7 +148,7 @@ def train(model, args, st_epoch=0):
     best_acc = 0.0
     batch_size = 32
     train_dataloader = torch.utils.data.DataLoader(args.train_set, batch_size=batch_size,
-                         shuffle=False, num_workers=4, collate_fn=HINT_collate)
+                         shuffle=True, num_workers=4, collate_fn=HINT_collate)
     eval_dataloader = torch.utils.data.DataLoader(args.val_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     
@@ -184,17 +171,17 @@ def train(model, args, st_epoch=0):
         train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
                             shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
-    ###########evaluate init model###########
+    ##########evaluate init model###########
     # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('val', 100*perception_acc, 100*head_acc, 100*result_acc))
-    #########################################
+    # print('Iter {}: {} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format(0, 'val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    ########################################
 
     for epoch in range(st_epoch, args.epochs):
         if args.curriculum and epoch in curriculum_strategy:
             max_len = curriculum_strategy[epoch]
             train_set.filter_by_len(max_len=max_len)
             train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
-                                shuffle=False, num_workers=4, collate_fn=HINT_collate)
+                                shuffle=True, num_workers=4, collate_fn=HINT_collate)
             if len(train_dataloader) == 0:
                 continue
 
@@ -205,16 +192,41 @@ def train(model, args, st_epoch=0):
         for _ in range(len(model.learning_schedule)):
             with torch.no_grad():
                 model.train()
-                train_acc = []
+                train_result_acc = []
+                train_perception_acc = []
+                train_head_acc = []
+                n_samples = 0
                 for sample in tqdm(train_dataloader):
                     res = sample['res'].numpy()
-                    res_pred = model.deduce(sample)[0]
+                    res_pred, sent_pred, head_pred = model.deduce(sample)
                     model.abduce(res, sample['img_paths'])
                     acc = np.mean(np.array(res_pred) == res)
-                    train_acc.append(acc)
-                train_acc = np.mean(train_acc)
-                abduce_acc = len(model.buffer) / len(train_set)
-                print("Train acc: %.2f (abduce %.2f)"%(train_acc * 100, abduce_acc * 100))
+                    train_result_acc.append(acc)
+
+                    sent_pred = [y for x in sent_pred for y in x]
+                    sent = [y for x in sample['sentence'] for y in x]
+                    acc = np.mean(np.array(sent_pred) == np.array(sent))
+                    train_perception_acc.append(acc)
+
+                    head_pred = [y for x in head_pred for y in x]
+                    head = [y for x in sample['head'] for y in x]
+                    acc = np.mean(np.array(head_pred) == np.array(head))
+                    train_head_acc.append(acc)
+
+                    n_samples += res.shape[0]
+                    if len(model.buffer) > 1e4:
+                        # get enough examples to learn
+                        break
+
+                train_result_acc = np.mean(train_result_acc)
+                train_perception_acc = np.mean(train_perception_acc)
+                train_head_acc = np.mean(train_head_acc)
+                abduce_acc = len(model.buffer) / n_samples
+            
+            wandb.log({'train/result_acc': train_result_acc, 
+                       'train/perception_acc': train_perception_acc, 
+                       'train/head_acc': train_head_acc, 
+                        f'train/abduce_acc/{model.learned_module}': abduce_acc})
             
             model.learn()
             model.epoch += 1
@@ -225,8 +237,9 @@ def train(model, args, st_epoch=0):
             if result_acc > best_acc:
                 best_acc = result_acc
 
-            model_path = args.output_dir + "model_%03d.p"%(epoch + 1)
-            model.save(model_path, epoch=epoch+1)
+            if args.save_model:
+                model_path = os.path.join(args.ckpt_dir, "model_%03d.p"%(epoch + 1))
+                model.save(model_path, epoch=epoch+1)
                 
         time_elapsed = time.time() - since
         print('Epoch time: {:.0f}m {:.0f}s'.format(
@@ -241,7 +254,7 @@ def train(model, args, st_epoch=0):
     print('Evaluate on test set...')
     eval_dataloader = torch.utils.data.DataLoader(args.test_set, batch_size=batch_size,
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
-    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader, n_steps)
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader, n_steps, log_prefix='test')
     print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('test', 100*perception_acc, 100*head_acc, 100*result_acc))
     return
 
@@ -250,6 +263,11 @@ def train(model, args, st_epoch=0):
 if __name__ == "__main__":
     args = parse_args()
     sys.argv = sys.argv[:1]
+    wandb.init(project=args.wandb, dir=args.output_dir, config=vars(args))
+    ckpt_dir = os.path.join(wandb.run.dir, '../ckpt')
+    os.makedirs(ckpt_dir)
+    args.ckpt_dir = ckpt_dir
+    print(args)
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -259,13 +277,13 @@ if __name__ == "__main__":
     model = Jointer(args)
     model.to(DEVICE)
 
-    if args.fewshot != -1:
+    if args.fewshot:
         pretrained = 'bak/model_100.p'
         model.load(pretrained)
     
         train_set = HINT('train')
         train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=32,
-                            shuffle=False, num_workers=4, collate_fn=HINT_collate)
+                            shuffle=True, num_workers=4, collate_fn=HINT_collate)
         model.eval() 
         model.buffer_augment = []
         with torch.no_grad():
@@ -285,14 +303,15 @@ if __name__ == "__main__":
         model.extend()
         model.to(DEVICE)
 
-    # train_set = HINT('train', numSamples=5000)
-    train_set = HINT('train', fewshot=args.fewshot)
-    val_set = HINT('val', fewshot=args.fewshot)
-    # test_set = HINT('val')
-    test_set = HINT('test', fewshot=args.fewshot)
+    args.input = 'symbol' if args.perception else 'image'
+    train_set = HINT('train', input=args.input, fewshot=args.fewshot, 
+                    n_sample=args.train_size, max_op=args.max_op_train,
+                    main_dataset_ratio=args.main_dataset_ratio)
+    val_set = HINT('val', input=args.input, fewshot=args.fewshot)
+    test_set = HINT('test', input=args.input, fewshot=args.fewshot)
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
-    if args.fewshot == -1 and args.perception_pretrain and not args.perception:
+    if not args.fewshot and args.perception_pretrain and not args.perception:
         model.perception.load({'model': torch.load(args.perception_pretrain)})
         model.perception.selflabel(train_set.all_symbols())
 
@@ -305,7 +324,7 @@ if __name__ == "__main__":
 
     print(args)
     model.print()
-
+    wandb.log({'train_examples': len(train_set)})
 
     args.train_set = train_set
     args.val_set = val_set

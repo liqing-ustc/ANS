@@ -1,4 +1,5 @@
-from utils import SYM2ID, ROOT_DIR, IMG_DIR, NULL, IMG_TRANSFORM, pad_image
+from utils import SYM2ID, ROOT_DIR, IMG_DIR, NULL, IMG_TRANSFORM, pad_image, IMG_SIZE, render_img
+from utils import OPERATORS, FEWSHOT_OPERATORS
 from copy import deepcopy
 import random
 import json
@@ -9,89 +10,253 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 from torchvision import transforms
 
+op_list =  OPERATORS + FEWSHOT_OPERATORS
+def expr2n_op(expr):
+    return len([1 for x in expr if x in op_list])
+
 class HINT(Dataset):
-    def __init__(self, split='train', exclude_symbols=None, max_len=None, numSamples=None, fewshot=-1):
+    def __init__(self, split, input, fewshot=None, n_sample=None, max_op=None, main_dataset_ratio=0.):
         super(HINT, self).__init__()
         
         assert split in ['train', 'val', 'test']
         self.split = split
-        self.dataset = json.load(open(ROOT_DIR + ('fewshot_%d_'%fewshot if fewshot !=-1 else '') + 'expr_%s.json'%split))
-        if numSamples:
-            random.shuffle(self.dataset)
-            self.dataset = self.dataset[:numSamples]
-        
-        if exclude_symbols is not None:
-            exclude_symbols = set(exclude_symbols)
-            self.dataset = [x for x in self.dataset if len(set(x['expr']) & exclude_symbols) == 0]
+        self.input = input
+        self.fewshot = fewshot
 
-        if max_len is not None:
-            self.dataset = [x for x in self.dataset if len(x['expr']) <= max_len]
+        if fewshot:
+            dataset = json.load(open(ROOT_DIR + 'fewshot_dataset.json'))
+            dataset = dataset[fewshot]
+            dataset = dataset[split]
+            self.main_dataset_ratio = main_dataset_ratio
+            if split == 'train' and main_dataset_ratio > 0:
+                self.main_dataset = json.load(open(ROOT_DIR + 'expr_%s.json'%split))
+        else:
+            dataset = json.load(open(ROOT_DIR + 'expr_%s.json'%split))
+
+        if n_sample:
+            if n_sample <= 1: # it is percentage
+                n_sample = int(len(dataset) * n_sample)
+            random.shuffle(dataset)
+            dataset = dataset[:n_sample]
+            print(f'{split}: randomly select {n_sample} samples.')
             
-        for x in self.dataset:
+        if isinstance(max_op, int):
+            dataset = [x for x in dataset if expr2n_op(x['expr']) <= max_op]
+            print(f'{split}: filter {len(dataset)} samples with no more than {max_op} operators.')
+
+        for x in dataset:
             x['len'] = len(x['expr'])
         
+        self.dataset = dataset
         self.img_transform = IMG_TRANSFORM
-        self.valid_ids = list(range(len(self.dataset)))
+        self.valid_ids = list(range(len(dataset)))
 
-        # dataset statistics, used to filter samples
-        len2ids = {}
-        for i, x in enumerate(self.dataset):
-            l = len(x['img_paths'])
-            if l not in len2ids:
-                len2ids[l] = []
-            len2ids[l].append(i)
-        self.len2ids = len2ids
+    @property
+    def max_dep2ids(self):
+        """max dependency distance."""
+        if hasattr(self, '_max_dep2ids'):
+            return self._max_dep2ids
+        else:
+            def compute_max_dep(heads):
+                return max([0] + [abs(i-h) for i, h in enumerate(heads) if h != -1])
 
-        sym2ids = {}
-        for i, x in enumerate(self.dataset):
-            for s in list(set(x['expr'])):
-                if s not in sym2ids:
-                    sym2ids[s] = []
-                sym2ids[s].append(i)
-        self.sym2ids = sym2ids
+            def sample2key(sample):
+                return compute_max_dep(sample['head'])
 
-        res2ids = {}
-        for i, x in enumerate(self.dataset):
-            l = x['res']
-            if l not in res2ids:
-                res2ids[l] = []
-            res2ids[l].append(i)
-        self.res2ids = res2ids
-
-        digit2ids = {}
-        for i, x in enumerate(self.dataset):
-            if len(x['expr']) == 1:
-                s = x['expr'][0]
-                if s not in digit2ids:
-                    digit2ids[s] = []
-                digit2ids[s].append(i)
-        self.digit2ids = digit2ids
-
-        if split in ['val', 'test']:
-            cond2ids = {i: [] for i in range(1, 6)}
+            mapping = {}
             for i, x in enumerate(self.dataset):
-                cond2ids[x['eval']].append(i)
-            self.cond2ids = cond2ids
+                k = sample2key(x)
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._max_dep2ids = mapping
+            return mapping
+
+    @property
+    def ps_depth2ids(self):
+        """parenthesis depth."""
+        if hasattr(self, '_ps_depth2ids'):
+            return self._ps_depth2ids
+        else:
+            lps = '('
+            rps = ')'
+            def compute_ps_depth(expr):
+                depth = 0
+                max_depth = 0
+                for x in expr:
+                    if x == lps:
+                        c = 1
+                    elif x == rps:
+                        c = -1
+                    else:
+                        c = 0
+                    depth += c
+                    if depth > max_depth:
+                        max_depth = depth
+                return max_depth
+
+            def sample2key(sample):
+                return compute_ps_depth(sample['expr'])
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k = sample2key(x)
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._ps_depth2ids = mapping
+            return mapping
+
+
+    @property
+    def tree_depth2ids(self):
+        if hasattr(self, '_tree_depth2ids'):
+            return self._tree_depth2ids
+        else:
+            from functools import lru_cache
+            def compute_tree_depth(head):
+                @lru_cache()
+                def depth(i):
+                    """The depth of node i."""
+                    if head[i] == -1:
+                        return 1
+                    return depth(head[i]) + 1
+                
+                return max(depth(i) for i in range(len(head)))
+
+            def sample2key(sample):
+                return compute_tree_depth(sample['head'])
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k = sample2key(x)
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._tree_depth2ids = mapping
+            return mapping
+    
+    @property
+    def eval2ids(self):
+        if hasattr(self, '_eval2ids'):
+            return self._eval2ids
+        else:
+            def sample2key(sample):
+                return sample['eval']
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k = sample2key(x)
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._eval2ids = mapping
+            return mapping
+
+    @property
+    def digit2ids(self):
+        if hasattr(self, '_digit2ids'):
+            return self._digit2ids
+        else:
+            def sample2key(sample):
+                if len(sample['expr']) == 1:
+                    return sample['expr'][0]
+                return None
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k = sample2key(x)
+                if not k:
+                    continue
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._digit2ids = mapping
+            return mapping
+
+    @property
+    def result2ids(self):
+        if hasattr(self, '_result2ids'):
+            return self._result2ids
+        else:
+            def sample2key(sample):
+                r = sample['res']
+                if r < 10:
+                    return r
+                r = (r // 10) * 10
+                r = min(r, 100)
+                return r
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k = sample2key(x)
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._result2ids = mapping
+            return mapping
+
+    @property
+    def length2ids(self):
+        if hasattr(self, '_length2ids'):
+            return self._length2ids
+        else:
+            def sample2key(sample):
+                return len(sample['img_paths'])
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k = sample2key(x)
+                if k not in mapping:
+                    mapping[k] = []
+                mapping[k].append(i)
+            self._length2ids = mapping
+            return mapping
+
+    @property
+    def symbol2ids(self):
+        if hasattr(self, '_symbol2ids'):
+            return self._symbol2ids
+        else:
+            def sample2key(sample):
+                return list(set(sample['expr']))
+
+            mapping = {}
+            for i, x in enumerate(self.dataset):
+                k_list = sample2key(x)
+                for k in k_list:
+                    if k not in mapping:
+                        mapping[k] = []
+                    mapping[k].append(i)
+            self._symbol2ids = mapping
+            return mapping
 
     def __getitem__(self, index):
-        index = self.valid_ids[index]
-        sample = deepcopy(self.dataset[index])
-        img_seq = []
-        for img_path in sample['img_paths']:
-            img = Image.open(IMG_DIR+img_path).convert('L')
-            img = ImageOps.invert(img)
-            img = pad_image(img, 60)
-            img = transforms.functional.resize(img, 40)
-            img = self.img_transform(img)
-            img_seq.append(img)
+        if self.fewshot and self.split == 'train' and random.random() < self.main_dataset_ratio:
+            # use sample from main dataset to avoid forgetting
+            sample = random.choice(self.main_dataset)
+            sample = deepcopy(sample)
+        else:
+            index = self.valid_ids[index]
+            sample = deepcopy(self.dataset[index])
+        if self.input == 'image':
+            img_seq = []
+            for img_path in sample['img_paths']:
+                img = Image.open(IMG_DIR+img_path).convert('L')
+                img = ImageOps.invert(img)
+                img = pad_image(img, 60)
+                img = transforms.functional.resize(img, 40)
+                img = self.img_transform(img)
+                img_seq.append(img)
+
+            sample['img_seq'] = img_seq
+            sample['len'] = len(img_seq)
         # del sample['img_paths']
         sample['expr'] = ''.join(sample['expr'])
         
         sentence = [SYM2ID(sym) for sym in sample['expr']]
-        sample['img_seq'] = img_seq
         sample['sentence'] = sentence
         return sample
-            
     
     def __len__(self):
         return len(self.valid_ids)
@@ -101,14 +266,10 @@ class HINT(Dataset):
         if max_len is None: max_len = float('inf')
         self.valid_ids = [i for i, x in enumerate(self.dataset) if x['len'] <= max_len and x['len'] >= min_len]
     
-    def filter_by_eval(self, eval_idx=None):
-        if eval_idx is None:
-            self.valid_ids = list(range(len(self.dataset)))
-        else:
-            self.valid_ids = self.cond2ids[eval_idx]
 
     def all_symbols(self, max_len=float('inf')):
-        dataset = [sample for sample in self.dataset if len(sample['expr']) <= max_len]
+        dataset = random.sample(self.dataset, min(int(1e4), len(self.dataset)))
+        dataset = [sample for sample in dataset if len(sample['expr']) <= max_len]
         symbol_set = [(x,SYM2ID(y)) for sample in dataset for x, y in zip(sample['img_paths'], sample['expr'])]
         return sorted(list(symbol_set))
 
@@ -119,8 +280,9 @@ def HINT_collate(batch):
     head_list = []
     res_all_list = []
     for sample in batch:
-        img_seq_list.extend(sample['img_seq'])
-        del sample['img_seq']
+        if 'img_seq' in sample:
+            img_seq_list.extend(sample['img_seq'])
+            del sample['img_seq']
 
         img_paths_list.append(sample['img_paths'])
         del sample['img_paths']
@@ -135,7 +297,8 @@ def HINT_collate(batch):
         del sample['res_all']
         
     batch = default_collate(batch)
-    batch['img_seq'] = torch.stack(img_seq_list)
+    if img_seq_list:
+        batch['img_seq'] = torch.stack(img_seq_list)
     batch['img_paths'] = img_paths_list
     batch['sentence'] = sentence_list
     batch['head'] = head_list

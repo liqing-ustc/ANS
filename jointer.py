@@ -67,7 +67,7 @@ class Node:
         res = self.smt(self.inputs())
         if isinstance(res, int) and res > sys.maxsize:
             res = MISSING_VALUE
-        self.prob = self.sym_prob + np.log(self.smt.likelihood) + sum([x.prob for x in self.children])
+        self.prob = self.sym_prob + np.log(max(self.smt.likelihood, 1e-7)) + sum([x.prob for x in self.children])
         self._res = res
         self._res_computed = True
         return self._res
@@ -256,7 +256,7 @@ class AST: # Abstract Syntax Tree
         new_node = Node(0,0,0)
         new_node.copy(node)
         new_node._res = random.choice(target)
-        priority = np.log(node.smt.likelihood) - np.log(1 - node.smt.likelihood)
+        priority = np.log(max(node.smt.likelihood, 1e-7)) - np.log(max(1 - node.smt.likelihood, 1e-7))
         return [PrioritizedItem(priority, (new_node, target))]
     
 class Jointer:
@@ -326,9 +326,7 @@ class Jointer:
     
     def deduce(self, sample, n_steps=1):
         config = self.config
-        img_seq = sample['img_seq']
         lengths = sample['len']
-        img_seq = img_seq.to(DEVICE)
 
         if config.perception: # use gt perception
             sentences = sample['sentence']
@@ -338,6 +336,8 @@ class Jointer:
                 probs[range(l), sent] = 1
                 sent_probs.append(probs)
         else:
+            img_seq = sample['img_seq']
+            img_seq = img_seq.to(DEVICE)
             symbols , probs = self.perception(img_seq)
             symbols = symbols.detach().cpu().numpy()
             probs = probs.detach().cpu().numpy()
@@ -406,7 +406,7 @@ class Jointer:
         pred_heads = Counter([tuple(ast.pt.head) for ast in self.buffer])
         print("Head: ", sorted(pred_heads.most_common(10), key=lambda x: len(x[0])))
 
-        if self.config.fewshot != -1:
+        if self.config.fewshot:
             self.buffer = self.buffer + random.sample(self.buffer_augment, k=1000)
 
         if self.learned_module == 'perception':
