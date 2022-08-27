@@ -459,7 +459,7 @@ class DreamCoder(object):
         for task in tasks:
             print("Symbol-%02d (%s), Samples: %3d, "%(int(task.name), task.request, len(task.examples)), Counter(task.examples).most_common(10))
 
-        json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
+        # json.dump([t.examples for t in tasks], open('outputs/tasks.json', 'w'))
 
     def _removeEquivalentSemantics(self, examples=None):
         if examples is not None:
