@@ -23,7 +23,7 @@ Parse = namedtuple('Parse', ['sentence', 'head'])
 
 class SentGenerator(object):
     def __init__(self, probs, training=False):
-        probs = np.log(probs + 1e-12) 
+        probs = np.log(np.maximum(probs, 1e-7))
         self.probs = probs
         self.max_probs = probs.max(1)
         self.queue = [(-self.max_probs.sum(), [])]
@@ -88,7 +88,7 @@ class AST: # Abstract Syntax Tree
     def __init__(self, pt, semantics, sent_probs=None):
         self.pt = pt
         self.semantics = semantics
-        self.sent_probs = np.log(sent_probs)
+        self.sent_probs = np.log(np.maximum(sent_probs, 1e-7))
 
         nodes = [Node(i, s, semantics[s], self.sent_probs[i][s]) for i, s in enumerate(pt.sentence)]
 
@@ -172,7 +172,7 @@ class AST: # Abstract Syntax Tree
                     ch_target.append(EMPTY_VALUE)
             ch_target.extend(node.smt.solve(pos, inputs_valid, target))
             if ch_target:
-                priority = ch.prob - np.log(1. - np.exp(ch.prob))
+                priority = ch.prob - np.log(np.maximum(1. - np.exp(ch.prob), 1e-7))
                 changes.append(PrioritizedItem(priority, (ch, ch_target)))
         return changes
 
@@ -241,7 +241,7 @@ class AST: # Abstract Syntax Tree
                     else:
                         head_node.children.append(self.nodes[t])
 
-            priority = np.log(p) - np.log(1 - p)
+            priority = np.log(np.maximum(p, 1e-7)) - np.log(np.maximum(1 - p, 1e-7))
             changes.append(PrioritizedItem(priority, (head_node, target)))
 
         return changes

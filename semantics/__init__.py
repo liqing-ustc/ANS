@@ -3,7 +3,7 @@ from .semantics import DreamCoder, Semantics
 
 class SemanticsGT():
     def __init__(self):
-        self.semantics = [Semantics(i, SYM2PROG[s]) for i, s in enumerate(SYMBOLS)]
+        self.semantics = [Semantics(i, SYM2PROG[s], learnable=False) for i, s in enumerate(SYMBOLS)]
 
     def __call__(self):
         return self.semantics

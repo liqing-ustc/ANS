@@ -98,6 +98,7 @@ def evaluate(model, dataloader, n_steps=1, log_prefix='val'):
 
     pred = [y for x in expr_pred_all for y in x]
     gt = [SYM2ID(y) for x in expr_all for y in x]
+    mask = np.array([0 if x == SYM2ID('(') or x == SYM2ID(')')  else 1 for x in gt], dtype=bool)
     assert len(gt) == len(pred)
     perception_acc = np.mean([x == y for x,y in zip(pred, gt)])
 
@@ -113,7 +114,6 @@ def evaluate(model, dataloader, n_steps=1, log_prefix='val'):
 
     pred = [y for x in dep_pred_all for y in x]
     gt = [y for x in dep_all for y in x]
-    mask = np.array([0 if x == SYM2ID('(') or x == SYM2ID(')')  else 1 for x in gt], dtype=bool)
     head_acc = np.mean(np.array(pred)[mask] == np.array(gt)[mask])
 
     tracked_attrs = ['length', 'symbol', 'digit', 'result', 'eval', 'tree_depth', 'ps_depth']
@@ -210,7 +210,8 @@ def train(model, args, st_epoch=0):
 
                     head_pred = [y for x in head_pred for y in x]
                     head = [y for x in sample['head'] for y in x]
-                    acc = np.mean(np.array(head_pred) == np.array(head))
+                    mask = np.array([0 if x == SYM2ID('(') or x == SYM2ID(')')  else 1 for x in sent], dtype=bool)
+                    acc = np.mean(np.array(head_pred)[mask] == np.array(head)[mask])
                     train_head_acc.append(acc)
 
                     n_samples += res.shape[0]
@@ -256,6 +257,9 @@ def train(model, args, st_epoch=0):
                          shuffle=False, num_workers=4, collate_fn=HINT_collate)
     perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader, n_steps, log_prefix='test')
     print('{} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format('test', 100*perception_acc, 100*head_acc, 100*result_acc))
+
+    print('Final model:')
+    model.print()
     return
 
 

@@ -47,7 +47,7 @@ class ProgramWrapper(object):
             for x in inputs:
                 fn = fn(x)
         except RecursionError as e:
-            print(e)
+            print(repr(e))
             fn = MISSING_VALUE
         self.cache[inputs] = fn
         return fn
@@ -82,7 +82,7 @@ class ProgramWrapper(object):
             try:
                 y = self(*exp)
             except (TypeError, RecursionError) as e:
-                print(e)
+                print(repr(e))
                 y = MISSING_VALUE
             ys.append(y)
         return ys
@@ -193,11 +193,7 @@ class Semantics(object):
     def check_solved(self):
         if self.program is None:
             self.solved = False
-        elif self.arity == 0 and self.likelihood > 0.:
-            self.solved = True
-        elif self.arity > 0 and self.likelihood >= 0.8 and '#' not in str(self.program): # for + -
-            self.solved = True
-        elif self.arity > 0 and self.likelihood >= 0.95 and '#' in str(self.program):
+        elif self.likelihood >= 0.95:
             self.solved = True
         elif self.fewshot and self.likelihood >= 0.95 and len(set(self.examples)) >= 10:
             self.solved = True
