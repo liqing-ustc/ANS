@@ -26,8 +26,8 @@ class Program():
         self.cache = {} # used for fast computation
 
     def __call__(self, *inputs):
-        if len(inputs) != self.arity or None in inputs:
-            return None
+        if len(inputs) != self.arity or MISSING_VALUE in inputs:
+            return MISSING_VALUE
         res = self.fn(*inputs)
         self.cache[inputs] = res
         return res
@@ -38,7 +38,7 @@ class Program():
             try:
                 y = self(*exp)
             except (TypeError, RecursionError) as e:
-                y = None
+                y = MISSING_VALUE
             ys.append(y)
         return ys
 
@@ -62,7 +62,7 @@ class Program():
 
 functions = [
     lambda: 0, lambda: 1, lambda: 2, lambda: 3, lambda: 4, lambda: 5, lambda: 6, lambda: 7, lambda: 8, lambda: 9,
-    lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: math.ceil(x/y) if y != 0 else None, 
+    lambda x,y: x+y, lambda x,y: max(0, x-y), lambda x,y: x*y, lambda x,y: math.ceil(x/y) if y != 0 else MISSING_VALUE, 
     lambda: EMPTY_VALUE, lambda: EMPTY_VALUE,
 ]
 
