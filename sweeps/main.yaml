@@ -7,6 +7,12 @@ metric:
 parameters:
   save_model:
     value: 1
+  perception:
+    value: 0 
+  syntax:
+    value: 0 
+  semantics:
+    value: 0
   epochs:
     value: 100
   epochs_eval:

@@ -38,11 +38,11 @@ def parse_args():
             help="The percentage of data from the main training set to avoid forgetting in few-shot learning.")
     parser.add_argument('--fewshot', default=None, choices=list('xyabcd'), help='fewshot concept.')
 
-    parser.add_argument('--perception', action="store_true", help='whether to provide perfect perception, i.e., no need to learn')
-    parser.add_argument('--syntax', action="store_true", help='whether to provide perfect syntax, i.e., no need to learn')
-    parser.add_argument('--semantics', action="store_true", help='whether to provide perfect semantics, i.e., no need to learn')
+    parser.add_argument('--perception', default='0', choices=['0', '1'], help='whether to provide perfect perception, i.e., no need to learn')
+    parser.add_argument('--syntax', default='0', choices=['0', '1'], help='whether to provide perfect syntax, i.e., no need to learn')
+    parser.add_argument('--semantics', default='0', choices=['0', '1'], help='whether to provide perfect semantics, i.e., no need to learn')
     parser.add_argument('--curriculum', default='1', choices=['0', '1'], help='whether to use the pre-defined curriculum')
-    parser.add_argument('--no_Y', action="store_true", help='whether to use the recursion primitive (Y-combinator) in dreamcoder')
+    parser.add_argument('--Y_combinator', default='1', choices=['0', '1'], help='whether to use the recursion primitive (Y-combinator) in dreamcoder')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs for training')
     parser.add_argument('--epochs_eval', type=int, default=10, help='how many epochs per evaluation')
@@ -50,6 +50,10 @@ def parse_args():
     args = parser.parse_args()
     args.save_model = args.save_model == '1'
     args.curriculum = args.curriculum == '1'
+    args.perception = args.perception == '1'
+    args.syntax = args.syntax == '1'
+    args.semantics = args.semantics == '1'
+    args.Y_combinator = args.Y_combinator == '1'
     return args
 
 from nltk.tree import Tree

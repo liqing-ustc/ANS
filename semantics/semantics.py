@@ -312,7 +312,7 @@ class DreamCoder(object):
         args.pop("split")
         
         self.primitives = McCarthyPrimitives()
-        if config.no_Y:
+        if not config.Y_combinator:
             self.primitives = [x for x in self.primitives if 'fix' not in x.name]
         baseGrammar = Grammar.uniform(self.primitives)
         self.grammar = baseGrammar
