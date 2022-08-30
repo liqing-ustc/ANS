@@ -1,6 +1,3 @@
-data/symbol_images/
-data/symbol_images
-data/*.json
 *__pycache__*
 .vscode/
 .ipynb_checkpoints/
@@ -11,3 +8,4 @@ log.txt
 tmp/
 bak/
 wandb/
+data/

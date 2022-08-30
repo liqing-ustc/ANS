@@ -1,10 +1,10 @@
-from data.domain import *
+from domain import *
 import torch
 import numpy as np
 np.set_printoptions(precision=2, suppress=True)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-ROOT_DIR = '/home/qingli/Desktop/Closed-Loop-Learning/HINT/data/'
+ROOT_DIR = './data/HINT/'
 IMG_DIR = ROOT_DIR + 'symbol_images/'
 IMG_SIZE = 32
 

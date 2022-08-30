@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument('--wandb', type=str, default='ANS', help='the project name for wandb.')
     parser.add_argument('--resume', type=str, default=None, help='Resumes training from checkpoint.')
     parser.add_argument('--perception_pretrain', type=str, help='initialize the perception from pretrained models.',
-                        default='data/perception-pretrain/model.pth.tar_78.2_match')
+                        default='perception/pretrained_model/model_78.2.pth.tar')
     parser.add_argument('--output_dir', type=str, default='outputs/', help='output directory for storing checkpoints')
     parser.add_argument('--save_model', default='1', choices=['0', '1'])
     parser.add_argument('--seed', type=int, default=0, help="Random seed.")
