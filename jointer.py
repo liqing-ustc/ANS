@@ -338,7 +338,7 @@ class Jointer:
         else:
             img_seq = sample['img_seq']
             img_seq = img_seq.to(DEVICE)
-            symbols , probs = self.perception(img_seq)
+            symbols , probs = self.perception(img_seq, lengths)
             symbols = symbols.detach().cpu().numpy()
             probs = probs.detach().cpu().numpy()
 
@@ -410,7 +410,7 @@ class Jointer:
             self.buffer = self.buffer + random.sample(self.buffer_augment, k=1000)
 
         if self.learned_module == 'perception':
-            dataset = [(img, label) for x in self.buffer for img, label in zip(x.img_paths, x.pt.sentence)]
+            dataset = [(x.img_paths, x.pt.sentence) for x in self.buffer]
             n_iters = int(100)
             print("Learn perception with %d samples for %d iterations, "%(len(self.buffer), n_iters), end='', flush=True)
             st = time()

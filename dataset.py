@@ -267,11 +267,10 @@ class HINT(Dataset):
         self.valid_ids = [i for i, x in enumerate(self.dataset) if x['len'] <= max_len and x['len'] >= min_len]
     
 
-    def all_symbols(self, max_len=float('inf')):
+    def all_exprs(self, max_len=float('inf')):
         dataset = random.sample(self.dataset, min(int(1e4), len(self.dataset)))
         dataset = [sample for sample in dataset if len(sample['expr']) <= max_len]
-        symbol_set = [(x,SYM2ID(y)) for sample in dataset for x, y in zip(sample['img_paths'], sample['expr'])]
-        return sorted(list(symbol_set))
+        return dataset
 
 def HINT_collate(batch):
     img_seq_list = []

@@ -176,8 +176,8 @@ def train(model, args, st_epoch=0):
                             shuffle=True, num_workers=4, collate_fn=HINT_collate)
     
     ##########evaluate init model###########
-    # perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
-    # print('Iter {}: {} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format(0, 'val', 100*perception_acc, 100*head_acc, 100*result_acc))
+    perception_acc, head_acc, result_acc = evaluate(model, eval_dataloader)
+    print('Iter {}: {} (Perception Acc={:.2f}, Head Acc={:.2f}, Result Acc={:.2f})'.format(0, 'val', 100*perception_acc, 100*head_acc, 100*result_acc))
     ########################################
 
     for epoch in range(st_epoch, args.epochs):
@@ -320,8 +320,8 @@ if __name__ == "__main__":
     print('train:', len(train_set), 'val:', len(val_set), 'test:', len(test_set))
 
     if not args.fewshot and args.perception_pretrain and not args.perception:
-        model.perception.load({'model': torch.load(args.perception_pretrain)})
-        model.perception.selflabel(train_set.all_symbols())
+        model.perception.load({'model': torch.load(args.perception_pretrain)}, image_encoder_only=True)
+        model.perception.selflabel(train_set.all_exprs())
 
     st_epoch = 0
     if args.resume:
